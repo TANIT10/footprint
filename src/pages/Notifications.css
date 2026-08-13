@@ -1,0 +1,494 @@
+.notifications-page {
+  width: 100%;
+  min-height: 100dvh;
+
+  background-color: #ffffff;
+  color: #191919;
+}
+
+.notifications-page,
+.notifications-page * {
+  box-sizing: border-box;
+}
+
+.notifications-inner {
+  position: relative;
+
+  width: 100%;
+  min-height: 100dvh;
+
+  margin: 0 auto;
+
+  overflow-x: hidden;
+  background-color: #ffffff;
+}
+
+/* 상단 영역 */
+.notifications-header {
+  position: relative;
+
+  width: 100%;
+  height: 130px;
+
+  border-bottom: 3px solid #b98b67;
+}
+
+/* 뒤로가기 */
+.notifications-back-button {
+  position: absolute;
+
+  top: 61px;
+  left: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 42px;
+  height: 42px;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  background-color: transparent;
+  color: #191919;
+
+  cursor: pointer;
+}
+
+.notifications-back-button svg {
+  width: 27px;
+  height: 27px;
+
+  stroke-width: 2;
+}
+
+/* 제목 */
+.notifications-title {
+  position: absolute;
+
+  top: 67px;
+  left: 50%;
+
+  margin: 0;
+
+  color: #191919;
+
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.4;
+
+  transform: translateX(-50%);
+}
+
+/* 전체 읽음 */
+.notifications-read-all-button {
+  position: absolute;
+
+  top: 66px;
+  right: 17px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 4px;
+
+  min-height: 36px;
+  padding: 0 4px;
+
+  border: 0;
+
+  background-color: transparent;
+  color: #8a6b54;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.notifications-read-all-button svg {
+  width: 17px;
+  height: 17px;
+
+  stroke-width: 2;
+}
+
+/* 알림 목록 영역 */
+.notifications-content {
+  width: 100%;
+  min-width: 0;
+}
+
+.notification-list {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+}
+
+/* 알림 한 개 */
+.notification-item {
+  position: relative;
+
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) 58px;
+  align-items: center;
+
+  gap: 9px;
+
+  width: 100%;
+  min-height: 104px;
+
+  padding: 16px 17px;
+
+  border: 0;
+  border-bottom: 1px solid #e8e2dd;
+
+  color: #26211e;
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+/* 읽지 않은 알림 */
+.notification-item.unread {
+  background-color: #fff8f1;
+}
+
+/* 읽은 알림 */
+.notification-item.read {
+  background-color: #ffffff;
+}
+
+.notification-item:active {
+  background-color: #f7f2ee;
+
+  transform: scale(0.995);
+}
+
+/* 알림 종류 아이콘의 원형 배경 */
+.notification-type-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 50px;
+  height: 50px;
+
+  border-radius: 50%;
+}
+
+/* AI 발견 */
+.notification-type-icon.ai_match {
+  background-color: #efe1d5;
+}
+
+/* 댓글 */
+.notification-type-icon.comment {
+  background-color: #e9f2ec;
+  color: #52755d;
+}
+
+/* 공지 */
+.notification-type-icon.notice {
+  background-color: #fff0d4;
+  color: #e28a23;
+}
+
+/* 상태 변경 */
+.notification-type-icon.status_change {
+  background-color: #e8eff7;
+  color: #52779c;
+}
+
+/* lucide 아이콘 공통 크기 */
+.notification-type-icon svg {
+  width: 25px;
+  height: 25px;
+
+  stroke-width: 2;
+}
+
+/* AI 발견 발자국 */
+.notification-type-paw {
+  display: block;
+
+  width: 36px;
+  height: 36px;
+
+  object-fit: contain;
+  transform: scale(1.7);
+}
+
+/* 제목·설명·시간 */
+.notification-information {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.notification-item-title {
+  overflow: hidden;
+
+  color: #211d1a;
+
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.4;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notification-message {
+  display: -webkit-box;
+  overflow: hidden;
+
+  margin-top: 3px;
+
+  color: #57504b;
+
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+
+  overflow-wrap: anywhere;
+
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.notification-time {
+  margin-top: 7px;
+
+  color: #a29a94;
+
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* 오른쪽 알림 종류 */
+.notification-side {
+  display: flex;
+  align-self: stretch;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-direction: column;
+
+  padding: 2px 0;
+}
+
+.notification-unread-dot {
+  width: 8px;
+  height: 8px;
+
+  border-radius: 50%;
+
+  background-color: #b98b67;
+}
+
+.notification-label {
+  color: #8b817a;
+
+  font-size: 11px;
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* 알림이 없을 때 */
+.notifications-empty {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  width: 100%;
+  min-height: calc(100dvh - 130px);
+
+  padding: 105px 25px 25px;
+
+  text-align: center;
+}
+
+.notifications-empty p {
+  margin: 0;
+
+  color: #3f3935;
+
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.notifications-empty > span {
+  margin-top: 8px;
+
+  color: #9a918b;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.notifications-empty-image {
+  width: min(82%, 350px);
+  height: auto;
+
+  margin-top: auto;
+
+  object-fit: contain;
+}
+
+/* PC 화면 */
+@media screen and (min-width: 801px) {
+  .notifications-inner {
+    max-width: 1126px;
+  }
+
+  .notifications-header {
+    height: 155px;
+  }
+
+  .notifications-back-button {
+    top: 53px;
+    left: 68px;
+
+    width: 48px;
+    height: 48px;
+  }
+
+  .notifications-back-button svg {
+    width: 31px;
+    height: 31px;
+  }
+
+  .notifications-title {
+    top: 59px;
+
+    font-size: 24px;
+  }
+
+  .notifications-read-all-button {
+    top: 57px;
+    right: 72px;
+
+    font-size: 14px;
+  }
+
+  .notifications-read-all-button svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .notifications-content {
+    width: 680px;
+
+    margin: 0 auto;
+
+    border-right: 1px solid #eee9e5;
+    border-left: 1px solid #eee9e5;
+  }
+
+  .notification-item {
+    grid-template-columns: 64px minmax(0, 1fr) 75px;
+
+    min-height: 120px;
+
+    gap: 14px;
+
+    padding: 19px 24px;
+  }
+
+  .notification-type-icon {
+    width: 58px;
+    height: 58px;
+  }
+
+  .notification-type-icon svg {
+    width: 29px;
+    height: 29px;
+  }
+
+  .notification-type-paw {
+    width: 42px;
+    height: 42px;
+  }
+
+  .notification-item-title {
+    font-size: 16px;
+  }
+
+  .notification-message {
+    font-size: 14px;
+  }
+
+  .notification-time,
+  .notification-label {
+    font-size: 12px;
+  }
+
+  .notifications-empty {
+    min-height: calc(100dvh - 155px);
+
+    padding-top: 120px;
+  }
+
+  .notifications-empty-image {
+    width: 350px;
+  }
+}
+
+/* 폭이 좁은 휴대폰 */
+@media screen and (max-width: 380px) {
+  .notifications-read-all-button span {
+    display: none;
+  }
+
+  .notifications-read-all-button {
+    right: 19px;
+
+    width: 36px;
+
+    justify-content: center;
+  }
+
+  .notifications-read-all-button svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  .notification-item {
+    grid-template-columns: 48px minmax(0, 1fr) 50px;
+
+    gap: 7px;
+
+    padding: 14px 13px;
+  }
+
+  .notification-type-icon {
+    width: 45px;
+    height: 45px;
+  }
+
+  .notification-type-paw {
+    width: 33px;
+    height: 33px;
+  }
+
+  .notification-item-title {
+    font-size: 13px;
+  }
+
+  .notification-message {
+    font-size: 12px;
+  }
+
+  .notification-label {
+    font-size: 10px;
+  }
+}

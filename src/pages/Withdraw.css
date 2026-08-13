@@ -1,0 +1,320 @@
+.withdraw-page {
+  width: 100%;
+  min-height: 100dvh;
+
+  background-color: #ffffff;
+  color: #191919;
+}
+
+.withdraw-page,
+.withdraw-page * {
+  box-sizing: border-box;
+}
+
+.withdraw-inner {
+  width: 100%;
+  min-height: 100dvh;
+
+  margin: 0 auto;
+
+  background-color: #ffffff;
+}
+
+/* 상단 영역 */
+.withdraw-header {
+  position: relative;
+
+  width: 100%;
+  height: 130px;
+
+  border-bottom: 3px solid #b98b67;
+}
+
+.withdraw-back-button {
+  position: absolute;
+
+  top: 61px;
+  left: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 42px;
+  height: 42px;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  background-color: transparent;
+  color: #191919;
+
+  cursor: pointer;
+}
+
+.withdraw-back-button svg {
+  width: 27px;
+  height: 27px;
+
+  stroke-width: 2;
+}
+
+.withdraw-title {
+  position: absolute;
+
+  top: 67px;
+  left: 50%;
+
+  margin: 0;
+
+  color: #191919;
+
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.4;
+
+  white-space: nowrap;
+
+  transform: translateX(-50%);
+}
+
+/* 본문 */
+.withdraw-content {
+  width: 100%;
+
+  padding: 32px 20px 40px;
+}
+
+.withdraw-warning {
+  padding: 24px 20px;
+
+  border: 1px solid #eadfd7;
+  border-radius: 16px;
+
+  background-color: #faf6f2;
+
+  text-align: center;
+}
+
+.withdraw-warning-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 52px;
+  height: 52px;
+
+  margin: 0 auto 14px;
+
+  border-radius: 50%;
+
+  background-color: #b98b67;
+  color: #ffffff;
+}
+
+.withdraw-warning-icon svg {
+  width: 27px;
+  height: 27px;
+}
+
+.withdraw-warning h2 {
+  margin: 0 0 14px;
+
+  color: #302822;
+
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.withdraw-warning p {
+  margin: 6px 0 0;
+
+  color: #746a63;
+
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.withdraw-form {
+  display: flex;
+  flex-direction: column;
+
+  margin-top: 30px;
+}
+
+.withdraw-form label {
+  margin: 0 0 9px;
+
+  color: #302822;
+
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.withdraw-password-box {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  height: 50px;
+
+  margin-bottom: 26px;
+
+  border: 1px solid #ddd5cf;
+  border-radius: 10px;
+
+  background-color: #ffffff;
+}
+
+.withdraw-password-box:focus-within {
+  border-color: #b98b67;
+}
+
+.withdraw-password-box input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+
+  padding: 0 14px;
+
+  border: 0;
+  outline: 0;
+
+  background-color: transparent;
+  color: #27211d;
+
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.withdraw-password-box button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  height: 48px;
+
+  padding: 0;
+
+  border: 0;
+
+  background-color: transparent;
+  color: #8d837c;
+
+  cursor: pointer;
+}
+
+.withdraw-password-box button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.withdraw-confirmation-guide {
+  margin: -2px 0 10px;
+
+  color: #746a63;
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.withdraw-confirmation-guide strong {
+  color: #9c5f50;
+}
+
+.withdraw-confirmation-input {
+  width: 100%;
+  height: 50px;
+
+  padding: 0 14px;
+
+  border: 1px solid #ddd5cf;
+  border-radius: 10px;
+  outline: 0;
+
+  background-color: #ffffff;
+  color: #27211d;
+
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.withdraw-confirmation-input:focus {
+  border-color: #b98b67;
+}
+
+.withdraw-message {
+  margin: 12px 2px 0;
+
+  color: #b14f42;
+
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.withdraw-submit-button {
+  width: 100%;
+  height: 52px;
+
+  margin-top: 28px;
+
+  border: 0;
+  border-radius: 10px;
+
+  background-color: #9c5f50;
+  color: #ffffff;
+
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+
+  cursor: pointer;
+}
+
+.withdraw-submit-button:disabled {
+  opacity: 0.4;
+
+  cursor: default;
+}
+
+/* PC 화면 */
+@media screen and (min-width: 801px) {
+  .withdraw-inner {
+    max-width: 1126px;
+  }
+
+  .withdraw-header {
+    height: 155px;
+  }
+
+  .withdraw-back-button {
+    top: 53px;
+    left: 68px;
+
+    width: 48px;
+    height: 48px;
+  }
+
+  .withdraw-back-button svg {
+    width: 31px;
+    height: 31px;
+  }
+
+  .withdraw-title {
+    top: 59px;
+
+    font-size: 24px;
+  }
+
+  .withdraw-content {
+    width: 600px;
+
+    margin: 0 auto;
+    padding: 42px 0 60px;
+  }
+}

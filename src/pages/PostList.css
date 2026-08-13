@@ -1,0 +1,676 @@
+/* 게시글 목록 화면 */
+.post-list-page {
+  position: relative;
+
+  width: 100%;
+  height: 100dvh;
+  min-width: 0;
+
+  margin: 0;
+  padding: 0;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  background-color: #ffffff;
+
+  overscroll-behavior-x: none;
+  scroll-behavior: smooth;
+}
+
+/* 게시글 페이지 내부 */
+.post-list-inner {
+  position: relative;
+
+  width: 100%;
+  min-height: 100%;
+
+  margin: 0;
+}
+
+/*
+ * 로고와 알림 영역 전체 고정
+ * 게시글을 스크롤해도 이 영역은 상단에 유지
+ */
+.post-list-header {
+  position: sticky;
+
+  top: 0;
+  left: 0;
+  z-index: 200;
+
+  width: 100%;
+  height: 145px;
+
+  border-bottom: 1px solid #f1eeec;
+
+  background-color: #ffffff;
+
+  box-shadow:
+    0 3px 10px
+    rgba(0, 0, 0, 0.035);
+}
+
+/* 상단 로고 */
+.post-list-logo {
+  position: absolute;
+
+  top: 61px;
+  left: 22px;
+
+  display: block;
+
+  width: 190px;
+  height: auto;
+}
+
+/* 알림 버튼 */
+.notification-button {
+  position: absolute;
+
+  top: 53px;
+  right: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  height: 48px;
+
+  padding: 0;
+
+  overflow: visible;
+
+  border: 0;
+
+  background-color: transparent;
+
+  cursor: pointer;
+}
+
+/* 알림 이미지 */
+.notification-icon {
+  position: relative;
+  z-index: 1;
+
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+}
+
+/* 읽지 않은 알림 표시 */
+.notification-badge {
+  position: absolute;
+
+  top: 3px;
+  right: 3px;
+  z-index: 2;
+
+  width: 11px;
+  height: 11px;
+
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+
+  background-color: #b98b67;
+
+  pointer-events: none;
+}
+
+/* 게시글 목록 전체 영역 */
+.post-list-content {
+  width: 100%;
+  min-width: 0;
+
+  margin: 0;
+  padding: 18px 16px 190px;
+
+  box-sizing: border-box;
+}
+
+/* 게시글을 한 줄에 두 개씩 배치 */
+.post-grid {
+  display: grid;
+
+  width: 100%;
+  min-width: 0;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  column-gap: 12px;
+  row-gap: 18px;
+}
+
+/* 게시글 카드 */
+.post-card {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  min-width: 0;
+
+  padding: 0;
+
+  overflow: hidden;
+
+  border: 3px solid #e2e2e2;
+  border-radius: 15px;
+
+  background-color: #ffffff;
+  color: #111111;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  box-sizing: border-box;
+
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+/* 카드를 눌렀을 때 */
+.post-card:active {
+  transform: scale(0.985);
+}
+
+/* 카드 위쪽 상태 이미지 영역 */
+.post-card-status {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  width: 100%;
+  height: 52px;
+
+  padding: 4px 9px;
+
+  background-color: #ffffff;
+
+  box-sizing: border-box;
+}
+
+/* 발자국과 글씨가 합쳐진 상태 이미지 */
+.post-status-image {
+  display: block;
+
+  width: 76%;
+  height: 100%;
+
+  object-fit: contain;
+  object-position: left center;
+}
+
+/* 귀가 완료 상태 이미지 */
+.returned-status-image {
+  width: 90%;
+}
+
+/* 봤어요 상태 이미지 */
+.sighted-status-image {
+  width: 71%;
+}
+
+/* 정사각형 대표 사진 영역 */
+.post-card-image-box {
+  position: relative;
+
+  width: calc(100% - 16px);
+  aspect-ratio: 1 / 1;
+
+  margin: 0 8px;
+
+  overflow: hidden;
+
+  border-radius: 7px;
+
+  background-color: #f2f2f2;
+
+  box-sizing: border-box;
+}
+
+/* 대표 사진 */
+.post-card-image {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+/* 사진이 없을 때 */
+.post-card-no-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 100%;
+
+  color: #999999;
+
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* 카드 아래쪽 정보 영역 */
+.post-card-information {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  min-height: 96px;
+
+  padding: 11px 11px 12px;
+
+  background-color: #ffffff;
+
+  box-sizing: border-box;
+}
+
+/* 품종 */
+.post-card-breed {
+  display: block;
+
+  width: 100%;
+
+  color: #222222;
+
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.35;
+
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+  white-space: normal;
+}
+
+/* 장소 */
+.post-card-location {
+  width: 100%;
+
+  margin: 5px 0 0;
+
+  color: #555555;
+
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+  white-space: normal;
+}
+
+/* 날짜 */
+.post-card-date {
+  display: block;
+
+  width: 100%;
+
+  margin-top: 6px;
+
+  color: #929292;
+
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.3;
+
+  white-space: normal;
+}
+
+/* 게시글이 없을 때 */
+.post-list-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  min-height: 360px;
+
+  padding: 40px 20px;
+
+  text-align: center;
+}
+
+.post-list-empty p {
+  margin: 0;
+
+  color: #444444;
+
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.post-list-empty span {
+  margin-top: 9px;
+
+  color: #999999;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* 페이지 번호 영역 */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+
+  width: 100%;
+
+  margin: 36px 0 0;
+
+  gap: 12px;
+}
+
+/* 페이지 번호 버튼 */
+.pagination button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 30px;
+  height: 32px;
+
+  padding: 0 6px;
+
+  border: 0;
+  border-radius: 50%;
+
+  background-color: transparent;
+  color: #555555;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+/* 현재 페이지 번호 */
+.pagination button.active-page {
+  background-color: #b98b67;
+  color: #ffffff;
+
+  font-weight: 800;
+
+  text-decoration: none;
+}
+
+/* 내 페이지·글쓰기 고정 메뉴 */
+.post-side-menu {
+  position: fixed;
+
+  right: 12px;
+  bottom: calc(
+    24px + env(safe-area-inset-bottom)
+  );
+  z-index: 300;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: 64px;
+
+  gap: 10px;
+}
+
+/* 원형 버튼 공통 디자인 */
+.side-menu-button {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+
+  padding: 0;
+
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+
+  background-color: #b98b67;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.1;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 4px 10px
+    rgba(0, 0, 0, 0.22);
+}
+
+/* 글쓰기 버튼 */
+.write-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+/* 글쓰기 버튼 발자국 */
+.paw-icon {
+  width: 47px;
+  height: 47px;
+
+  object-fit: contain;
+
+  filter:
+    brightness(0)
+    invert(1);
+}
+
+/* 글쓰기 글자 */
+.write-button span {
+  color: #ffffff;
+
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+
+  transform: translateY(-9px);
+}
+
+/* 화면이 매우 좁은 휴대폰일 때 */
+@media screen and (max-width: 359px) {
+  .post-list-logo {
+    left: 18px;
+
+    width: 175px;
+  }
+
+  .notification-button {
+    right: 16px;
+  }
+
+  .post-list-content {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .post-grid {
+    column-gap: 8px;
+    row-gap: 14px;
+  }
+
+  .post-card {
+    border-width: 2px;
+    border-radius: 13px;
+  }
+
+  .post-card-status {
+    height: 46px;
+
+    padding: 4px 7px;
+  }
+
+  .post-card-information {
+    min-height: 90px;
+
+    padding: 9px 9px 10px;
+  }
+
+  .post-card-breed {
+    font-size: 13px;
+  }
+
+  .post-side-menu {
+    right: 8px;
+
+    width: 58px;
+  }
+
+  .side-menu-button {
+    width: 58px;
+    height: 58px;
+    flex-basis: 58px;
+
+    font-size: 12px;
+  }
+}
+
+/* PC 화면 */
+@media screen and (min-width: 801px) {
+  .post-list-inner {
+    max-width: 1126px;
+    min-height: 100%;
+
+    margin: 0 auto;
+  }
+
+  .post-list-header {
+    height: 190px;
+  }
+
+  .post-list-logo {
+    top: 34px;
+    left: 68px;
+
+    width: 250px;
+  }
+
+  .notification-button {
+    top: 42px;
+    right: 72px;
+
+    width: 70px;
+    height: 70px;
+  }
+
+  .notification-badge {
+    top: 5px;
+    right: 5px;
+
+    width: 15px;
+    height: 15px;
+
+    border-width: 3px;
+  }
+
+  .post-list-content {
+    width: 640px;
+
+    margin: 0 auto;
+    padding: 28px 0 190px;
+  }
+
+  .post-grid {
+    grid-template-columns:
+      repeat(2, 270px);
+
+    justify-content: center;
+
+    column-gap: 34px;
+    row-gap: 38px;
+  }
+
+  .post-card {
+    width: 270px;
+
+    border: 3px solid #e2e2e2;
+    border-radius: 22px;
+  }
+
+  .post-card:hover {
+    transform: translateY(-3px);
+
+    box-shadow:
+      0 6px 16px
+      rgba(0, 0, 0, 0.08);
+  }
+
+  .post-card-status {
+    height: 72px;
+
+    padding: 6px 14px;
+  }
+
+  .post-status-image {
+    width: 70%;
+    height: 100%;
+
+    object-position: left center;
+  }
+
+  .returned-status-image {
+    width: 86%;
+  }
+
+  .sighted-status-image {
+    width: 70%;
+  }
+
+  .post-card-information {
+    min-height: 125px;
+
+    padding: 14px 17px 16px;
+  }
+
+  .post-card-breed {
+    font-size: 19px;
+    line-height: 1.35;
+  }
+
+  .post-card-location {
+    margin-top: 7px;
+
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .post-card-date {
+    margin-top: 8px;
+
+    font-size: 13px;
+  }
+
+  .pagination {
+    margin-top: 42px;
+  }
+
+  .post-side-menu {
+    right: 24px;
+    bottom: 36px;
+
+    width: 68px;
+
+    gap: 12px;
+  }
+
+  .side-menu-button {
+    width: 68px;
+    height: 68px;
+    flex-basis: 68px;
+
+    font-size: 14px;
+  }
+}

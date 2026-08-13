@@ -1,0 +1,282 @@
+.my-posts-page {
+  width: 100%;
+  min-height: 100dvh;
+
+  background-color: #ffffff;
+  color: #191919;
+}
+
+.my-posts-page,
+.my-posts-page * {
+  box-sizing: border-box;
+}
+
+.my-posts-inner {
+  position: relative;
+
+  width: 100%;
+  min-height: 100dvh;
+
+  margin: 0 auto;
+
+  overflow-x: hidden;
+  background-color: #ffffff;
+}
+
+/* 상단 영역 */
+.my-posts-header {
+  position: relative;
+
+  width: 100%;
+  height: 155px;
+}
+
+/* 게시글 상세 화면과 같은 뒤로가기 버튼 */
+.my-posts-back-button {
+  position: absolute;
+
+  top: 62px;
+  left: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 42px;
+  height: 42px;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  background-color: transparent;
+  color: #191919;
+
+  cursor: pointer;
+}
+
+.my-posts-back-button svg {
+  width: 27px;
+  height: 27px;
+
+  stroke-width: 2;
+}
+
+/* 페이지 제목 */
+.my-posts-title {
+  position: absolute;
+
+  top: 69px;
+  left: 50%;
+
+  width: calc(100% - 150px);
+
+  margin: 0;
+
+  color: #191919;
+
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1.4;
+  text-align: center;
+
+  transform: translateX(-50%);
+}
+
+
+/* 게시글 영역 */
+.my-posts-content {
+  width: 100%;
+  min-width: 0;
+
+  margin: 0;
+  padding: 0 18px 45px;
+}
+
+/* 게시글 카드와 메뉴 버튼을 함께 감싸는 영역 */
+.my-post-card-wrapper {
+  position: relative;
+
+  width: 100%;
+  min-width: 0;
+}
+
+/* 기존 게시글 카드가 wrapper 안을 가득 채우도록 설정 */
+.my-post-card-wrapper .post-card {
+  height: 100%;
+}
+
+/* 카드 오른쪽 위 점 세 개 버튼 */
+.my-post-menu-button {
+  position: absolute;
+
+  top: 7px;
+  right: 6px;
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 34px;
+  height: 34px;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #555555;
+
+  cursor: pointer;
+}
+
+.my-post-menu-button:active {
+  background-color: #eeeeee;
+}
+
+.my-post-menu-button svg {
+  width: 21px;
+  height: 21px;
+}
+
+/* 작성한 게시글이 없을 때 */
+.my-posts-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  min-height: 330px;
+
+  padding: 30px 20px;
+
+  text-align: center;
+}
+
+.my-posts-empty p {
+  margin: 0;
+
+  color: #444444;
+
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.my-posts-empty span {
+  margin-top: 9px;
+
+  color: #999999;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* 수정·삭제 메뉴의 반투명 배경 */
+.my-post-menu-background {
+  position: fixed;
+
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  padding: 18px;
+
+  background-color: rgba(0, 0, 0, 0.38);
+}
+
+/* 아래에서 나타나는 관리 메뉴 */
+.my-post-action-sheet {
+  display: flex;
+  flex-direction: column;
+
+  gap: 1px;
+
+  width: 100%;
+  max-width: 430px;
+
+  overflow: hidden;
+
+  border-radius: 18px;
+  background-color: #dddddd;
+}
+
+.my-post-action-sheet button {
+  width: 100%;
+  min-height: 58px;
+
+  border: 0;
+
+  background-color: #ffffff;
+  color: #191919;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.my-post-action-sheet .my-post-delete-button {
+  color: #e04444;
+}
+
+.my-post-action-sheet .my-post-cancel-button {
+  margin-top: 7px;
+
+  color: #777777;
+}
+
+/* PC 화면 */
+@media screen and (min-width: 801px) {
+  .my-posts-inner {
+    max-width: 1126px;
+  }
+
+  .my-posts-header {
+    height: 190px;
+  }
+
+  .my-posts-back-button {
+    top: 55px;
+    left: 68px;
+
+    width: 48px;
+    height: 48px;
+  }
+
+  .my-posts-back-button svg {
+    width: 31px;
+    height: 31px;
+  }
+
+  .my-posts-title {
+    top: 61px;
+
+    font-size: 23px;
+  }
+
+  .my-posts-content {
+    width: 640px;
+
+    margin: 0 auto;
+    padding: 0 0 60px;
+  }
+
+  .my-post-menu-button {
+    top: 12px;
+    right: 10px;
+
+    width: 38px;
+    height: 38px;
+  }
+
+  .my-post-menu-button svg {
+    width: 24px;
+    height: 24px;
+  }
+}

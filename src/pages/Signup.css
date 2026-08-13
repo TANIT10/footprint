@@ -1,0 +1,267 @@
+* {
+  box-sizing: border-box;
+}
+
+.signup-page {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  justify-content: center;
+
+  background-color: white;
+}
+
+.signup-container {
+  width: 100%;
+  max-width: 390px;
+  min-height: 844px;
+
+  padding: 80px 30px 50px;
+}
+
+/* 회원가입 제목 */
+
+.signup-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 45px;
+
+  /* 중요 */
+  width: fit-content;
+}
+
+.signup-title h1 {
+  margin: 0;
+
+  font-size: 30px;
+  font-weight: bold;
+
+  color: #111;
+
+  /* 글씨와 로고를 붙임 */
+  margin-right: -20px;
+
+  position: relative;
+  z-index: 2;
+}
+
+.signup-title img {
+  width: 100px;
+  height: 100px;
+
+  object-fit: contain;
+
+  margin: 0;
+
+  position: relative;
+  z-index: 1;
+}
+
+/* 입력 영역 */
+
+.signup-field {
+  width: 100%;
+
+  margin-bottom: 27px;
+}
+
+.signup-field label {
+  display: block;
+
+  width: 100%;
+
+  margin-left: 0;
+  margin-bottom: 9px;
+
+  text-align: left;
+
+  font-size: 16px;
+  font-weight: bold;
+
+  color: #111;
+}
+
+/* 입력창 */
+
+.signup-field input {
+  width: 100%;
+  height: 38px;
+
+  padding: 8px;
+
+  border: none;
+  border-radius: 5px;
+
+  outline: none;
+
+  background-color: #f1f1f1;
+
+  font-size: 16px;
+
+  color: #000;
+}
+
+/* 아이디 + 중복확인 */
+
+.id-input-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.id-input-row input {
+  flex: 1;
+}
+
+.check-button {
+  width: 45px;
+  height: 38px;
+
+  padding: 0;
+
+  border: none;
+  border-radius: 5px;
+
+  background-color: #d9d9d9;
+
+  color: #111;
+
+  font-size: 12px;
+  font-weight: bold;
+
+  line-height: 14px;
+
+  cursor: pointer;
+}
+
+/* 완료 버튼 */
+
+.complete-button {
+  display: block;
+
+  width: 148px;
+  height: 38px;
+
+  margin: 54px auto 0;
+
+  border: none;
+  border-radius: 4px;
+
+  background-color: #b58864;
+
+  color: white;
+
+  font-size: 15px;
+  font-weight: bold;
+
+  cursor: pointer;
+}
+
+/* 로그인으로 돌아가기 */
+
+.back-login-button {
+  display: block;
+
+  margin: 15px auto 0;
+
+  border: none;
+
+  background: transparent;
+
+  color: #999;
+
+  font-size: 14px;
+
+  cursor: pointer;
+}
+
+.label-row {
+  display: flex;
+  align-items: baseline;
+
+  width: auto;
+  margin-bottom: 9px;
+}
+
+.label-row label {
+  display: inline-block;
+
+  margin: 0;
+
+  font-size: 16px;
+  font-weight: bold;
+  color: #111;
+
+  white-space: nowrap;
+}
+
+.label-row span {
+  display: inline-block;
+
+  margin-left: 5px;
+
+  font-size: 12px;
+  font-weight: normal;
+  color: #bdbdbd;
+
+  white-space: nowrap;
+}
+
+.password-input-box {
+  position: relative;
+
+  width: 100%;
+}
+
+.password-input-box input {
+  width: 100%;
+  padding-right: 45px;
+}
+
+.password-eye {
+  position: absolute;
+
+  right: 10px;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 28px;
+  height: 28px;
+
+  padding: 0;
+
+  border: none;
+  background: transparent;
+
+  color: #999;
+
+  cursor: pointer;
+}
+
+.password-eye:hover {
+  color: #666;
+}
+
+.input-message {
+  margin: 6px 0 0 2px;
+
+  font-size: 12px;
+
+  color: #999;
+}
+
+.signup-message {
+  margin: 10px 0 0;
+
+  text-align: center;
+
+  font-size: 13px;
+
+  color: #999;
+}
