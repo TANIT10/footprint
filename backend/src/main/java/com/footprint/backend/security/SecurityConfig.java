@@ -16,32 +16,58 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationFilter
+            jwtAuthenticationFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    public SecurityConfig(
+            JwtAuthenticationFilter
+                    jwtAuthenticationFilter) {
+
+        this.jwtAuthenticationFilter =
+                jwtAuthenticationFilter;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http) throws Exception {
 
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .cors(cors ->
+                cors.configurationSource(
+                    corsConfigurationSource()
+                )
+            )
 
             .csrf(csrf -> csrf.disable())
 
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(
+                    SessionCreationPolicy.STATELESS
+                )
             )
 
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers(
+                    HttpMethod.OPTIONS,
+                    "/**"
+                ).permitAll()
+
                 .requestMatchers(
                     "/api/users/signup",
-                	"/api/users/login",
-                	"/api/users/check-username",
+                    "/api/users/login",
+                    "/api/users/check-username",
                     "/api/users/check-nickname"
                 ).permitAll()
+
+                .requestMatchers(
+                    HttpMethod.GET,
+                    "/uploads/**"
+                ).permitAll()
+
+                .requestMatchers(
+                    "/api/admin/**"
+                ).hasRole("ADMIN")
+
                 .anyRequest().authenticated()
             )
 
@@ -54,15 +80,17 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource
+            corsConfigurationSource() {
 
-        CorsConfiguration configuration = new CorsConfiguration();
+        CorsConfiguration configuration =
+                new CorsConfiguration();
 
         configuration.setAllowedOrigins(List.of(
             "http://localhost:5173",
             "http://localhost:5174"
         ));
-        
+
         configuration.setAllowedMethods(List.of(
             "GET",
             "POST",
@@ -72,14 +100,25 @@ public class SecurityConfig {
             "OPTIONS"
         ));
 
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setExposedHeaders(List.of("Authorization"));
-        configuration.setAllowCredentials(true);
+        configuration.setAllowedHeaders(
+                List.of("*")
+        );
+
+        configuration.setExposedHeaders(
+                List.of("Authorization")
+        );
+
+        configuration.setAllowCredentials(
+                true
+        );
 
         UrlBasedCorsConfigurationSource source =
-            new UrlBasedCorsConfigurationSource();
+                new UrlBasedCorsConfigurationSource();
 
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration(
+                "/**",
+                configuration
+        );
 
         return source;
     }

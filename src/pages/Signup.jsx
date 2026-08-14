@@ -7,19 +7,28 @@ import {
 import './Signup.css'
 import logo from '../assets/footprint.png'
 
+const PASSWORD_PATTERN =
+  /^(?=.*[A-Za-z])(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{8,20}$/
+
 function Signup({ onBack }) {
-  const [userId, setUserId] = useState('')
+  const [userId, setUserId] =
+    useState('')
+
   const [nickname, setNickname] =
     useState('')
+
   const [password, setPassword] =
     useState('')
+
   const [
     passwordConfirm,
     setPasswordConfirm,
   ] = useState('')
 
-  const [showPassword, setShowPassword] =
-    useState(false)
+  const [
+    showPassword,
+    setShowPassword,
+  ] = useState(false)
 
   const [
     showPasswordConfirm,
@@ -57,8 +66,10 @@ function Signup({ onBack }) {
     setIsNicknameChecking,
   ] = useState(false)
 
-  const [isSigningUp, setIsSigningUp] =
-    useState(false)
+  const [
+    isSigningUp,
+    setIsSigningUp,
+  ] = useState(false)
 
   const handleUserIdChange = (event) => {
     setUserId(event.target.value)
@@ -74,11 +85,28 @@ function Signup({ onBack }) {
     setMessage('')
   }
 
+  const handlePasswordChange = (event) => {
+    setPassword(event.target.value)
+    setMessage('')
+  }
+
+  const handlePasswordConfirmChange = (
+    event
+  ) => {
+    setPasswordConfirm(
+      event.target.value
+    )
+    setMessage('')
+  }
+
   const handleIdCheck = async () => {
-    const trimmedUserId = userId.trim()
+    const trimmedUserId =
+      userId.trim()
 
     if (!trimmedUserId) {
-      setIdMessage('아이디를 입력해주세요.')
+      setIdMessage(
+        '아이디를 입력해주세요.'
+      )
       setIsIdChecked(false)
       return
     }
@@ -99,9 +127,10 @@ function Signup({ onBack }) {
     setIdMessage('확인 중입니다...')
 
     try {
-      const query = new URLSearchParams({
-        username: trimmedUserId,
-      })
+      const query =
+        new URLSearchParams({
+          username: trimmedUserId,
+        })
 
       const response = await fetch(
         `http://localhost:8080/api/users/check-username?${query}`
@@ -145,82 +174,89 @@ function Signup({ onBack }) {
     }
   }
 
-  const handleNicknameCheck = async () => {
-    const trimmedNickname =
-      nickname.trim()
+  const handleNicknameCheck =
+    async () => {
+      const trimmedNickname =
+        nickname.trim()
 
-    if (!trimmedNickname) {
-      setNicknameMessage(
-        '닉네임을 입력해주세요.'
-      )
-      setIsNicknameChecked(false)
-      return
-    }
-
-    if (
-      !/^[가-힣a-zA-Z0-9]{1,10}$/.test(
-        trimmedNickname
-      )
-    ) {
-      setNicknameMessage(
-        '특수문자 제외, 10글자 이내로 입력해주세요.'
-      )
-      setIsNicknameChecked(false)
-      return
-    }
-
-    setIsNicknameChecking(true)
-    setNicknameMessage('확인 중입니다...')
-
-    try {
-      const query = new URLSearchParams({
-        nickname: trimmedNickname,
-      })
-
-      const response = await fetch(
-        `http://localhost:8080/api/users/check-nickname?${query}`
-      )
-
-      if (!response.ok) {
+      if (!trimmedNickname) {
         setNicknameMessage(
-          '닉네임 중복 확인에 실패했습니다.'
+          '닉네임을 입력해주세요.'
         )
         setIsNicknameChecked(false)
         return
       }
 
-      const isDuplicated =
-        await response.json()
-
-      if (isDuplicated) {
+      if (
+        !/^[가-힣a-zA-Z0-9]{1,10}$/.test(
+          trimmedNickname
+        )
+      ) {
         setNicknameMessage(
-          '이미 사용 중인 닉네임입니다.'
+          '특수문자 제외, 10글자 이내로 입력해주세요.'
         )
         setIsNicknameChecked(false)
         return
       }
 
+      setIsNicknameChecking(true)
       setNicknameMessage(
-        '사용 가능한 닉네임입니다.'
-      )
-      setIsNicknameChecked(true)
-    } catch (error) {
-      console.error(
-        '닉네임 중복 확인 오류:',
-        error
+        '확인 중입니다...'
       )
 
-      setNicknameMessage(
-        '서버에 연결할 수 없습니다.'
-      )
-      setIsNicknameChecked(false)
-    } finally {
-      setIsNicknameChecking(false)
+      try {
+        const query =
+          new URLSearchParams({
+            nickname:
+              trimmedNickname,
+          })
+
+        const response = await fetch(
+          `http://localhost:8080/api/users/check-nickname?${query}`
+        )
+
+        if (!response.ok) {
+          setNicknameMessage(
+            '닉네임 중복 확인에 실패했습니다.'
+          )
+          setIsNicknameChecked(false)
+          return
+        }
+
+        const isDuplicated =
+          await response.json()
+
+        if (isDuplicated) {
+          setNicknameMessage(
+            '이미 사용 중인 닉네임입니다.'
+          )
+          setIsNicknameChecked(false)
+          return
+        }
+
+        setNicknameMessage(
+          '사용 가능한 닉네임입니다.'
+        )
+        setIsNicknameChecked(true)
+      } catch (error) {
+        console.error(
+          '닉네임 중복 확인 오류:',
+          error
+        )
+
+        setNicknameMessage(
+          '서버에 연결할 수 없습니다.'
+        )
+        setIsNicknameChecked(false)
+      } finally {
+        setIsNicknameChecking(false)
+      }
     }
-  }
 
   const handleSignup = async () => {
-    const trimmedUserId = userId.trim()
+    const trimmedUserId =
+      userId.trim()
+
     const trimmedNickname =
       nickname.trim()
 
@@ -261,17 +297,19 @@ function Signup({ onBack }) {
     }
 
     if (
-      !/^(?=.*[A-Za-z])(?=.*[0-9])[A-Za-z0-9]{2,16}$/.test(
+      !PASSWORD_PATTERN.test(
         password
       )
     ) {
       setMessage(
-        '비밀번호는 영문+숫자 조합 16자 이내로 입력해주세요.'
+        '비밀번호는 영문, 숫자, 특수문자를 각각 포함하여 8~20자로 입력해주세요. 사용 가능한 특수문자: !@#$%^&*'
       )
       return
     }
 
-    if (password !== passwordConfirm) {
+    if (
+      password !== passwordConfirm
+    ) {
       setMessage(
         '비밀번호가 일치하지 않습니다.'
       )
@@ -291,14 +329,17 @@ function Signup({ onBack }) {
               'application/json',
           },
           body: JSON.stringify({
-            username: trimmedUserId,
+            username:
+              trimmedUserId,
             password,
-            nickname: trimmedNickname,
+            nickname:
+              trimmedNickname,
           }),
         }
       )
 
-      const result = await response.text()
+      const result =
+        await response.text()
 
       if (!response.ok) {
         setMessage(
@@ -334,7 +375,11 @@ function Signup({ onBack }) {
       <div className="signup-container">
         <div className="signup-title">
           <h1>회원가입</h1>
-          <img src={logo} alt="발자국" />
+
+          <img
+            src={logo}
+            alt="발자국"
+          />
         </div>
 
         <div className="signup-field">
@@ -353,7 +398,9 @@ function Signup({ onBack }) {
               id="signup-user-id"
               type="text"
               value={userId}
-              onChange={handleUserIdChange}
+              onChange={
+                handleUserIdChange
+              }
               maxLength={10}
               disabled={isSigningUp}
             />
@@ -417,7 +464,9 @@ function Signup({ onBack }) {
             <button
               type="button"
               className="check-button"
-              onClick={handleNicknameCheck}
+              onClick={
+                handleNicknameCheck
+              }
               disabled={
                 isNicknameChecking ||
                 isSigningUp
@@ -453,7 +502,8 @@ function Signup({ onBack }) {
             </label>
 
             <span>
-              영문+숫자 조합 16자 내
+              영문+숫자+특수문자
+              (!@#$%^&*) 8~20자
             </span>
           </div>
 
@@ -466,12 +516,12 @@ function Signup({ onBack }) {
                   : 'password'
               }
               value={password}
-              onChange={(event) =>
-                setPassword(
-                  event.target.value
-                )
+              onChange={
+                handlePasswordChange
               }
-              maxLength={16}
+              minLength={8}
+              maxLength={20}
+              autoComplete="new-password"
               disabled={isSigningUp}
             />
 
@@ -516,12 +566,12 @@ function Signup({ onBack }) {
                   : 'password'
               }
               value={passwordConfirm}
-              onChange={(event) =>
-                setPasswordConfirm(
-                  event.target.value
-                )
+              onChange={
+                handlePasswordConfirmChange
               }
-              maxLength={16}
+              minLength={8}
+              maxLength={20}
+              autoComplete="new-password"
               disabled={isSigningUp}
             />
 

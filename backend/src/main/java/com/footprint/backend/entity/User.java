@@ -2,6 +2,8 @@ package com.footprint.backend.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,9 +23,23 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    // 기존 회원에게는 닉네임이 없으므로 당장은 nullable 허용
     @Column(unique = true, length = 10)
     private String nickname;
+
+    /*
+     * 기존 회원 데이터와의 호환성을 위해 null을 허용합니다.
+     * 값이 없는 기존 회원은 getRole()에서 USER로 처리합니다.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private UserRole role = UserRole.USER;
+
+    /*
+     * 프로필 이미지가 저장된 주소입니다.
+     * 프로필 이미지를 등록하지 않은 사용자는 null입니다.
+     */
+    @Column(length = 1000)
+    private String profileImageUrl;
 
     public User() {
     }
@@ -58,5 +74,25 @@ public class User {
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public UserRole getRole() {
+        if (role == null) {
+            return UserRole.USER;
+        }
+
+        return role;
+    }
+
+    public void setRole(UserRole role) {
+        this.role = role;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 }
