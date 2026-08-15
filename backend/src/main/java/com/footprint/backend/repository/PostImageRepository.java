@@ -14,5 +14,10 @@ public interface PostImageRepository
                     Long postId
             );
 
+    List<PostImage>
+            findByPostIdInOrderByPostIdAscDisplayOrderAsc(
+                    List<Long> postIds
+            );
+
     void deleteByPostId(Long postId);
 }
