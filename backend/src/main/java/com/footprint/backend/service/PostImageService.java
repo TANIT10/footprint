@@ -63,6 +63,67 @@ public class PostImageService {
 
         validateImageCount(images);
 
+        return saveImages(images);
+    }
+
+    public List<String> saveOptional(
+            List<MultipartFile> images) {
+
+        if (images == null
+                || images.isEmpty()) {
+
+            return new ArrayList<>();
+        }
+
+        if (images.size()
+                > MAXIMUM_IMAGE_COUNT) {
+
+            throw new IllegalArgumentException(
+                    "사진은 최대 5장까지만 "
+                    + "등록할 수 있습니다."
+            );
+        }
+
+        return saveImages(images);
+    }
+
+    public void validateTotalImageCount(
+            int totalImageCount) {
+
+        if (totalImageCount
+                < MINIMUM_IMAGE_COUNT) {
+
+            throw new IllegalArgumentException(
+                    "사진을 한 장 이상 "
+                    + "등록해주세요."
+            );
+        }
+
+        if (totalImageCount
+                > MAXIMUM_IMAGE_COUNT) {
+
+            throw new IllegalArgumentException(
+                    "사진은 최대 5장까지만 "
+                    + "등록할 수 있습니다."
+            );
+        }
+    }
+
+    public void deleteAll(
+            List<String> imageUrls) {
+
+        if (imageUrls == null) {
+            return;
+        }
+
+        for (String imageUrl : imageUrls) {
+            delete(imageUrl);
+        }
+    }
+
+    private List<String> saveImages(
+            List<MultipartFile> images) {
+
         List<String> savedImageUrls =
                 new ArrayList<>();
 
@@ -79,18 +140,6 @@ public class PostImageService {
             deleteAll(savedImageUrls);
 
             throw exception;
-        }
-    }
-
-    public void deleteAll(
-            List<String> imageUrls) {
-
-        if (imageUrls == null) {
-            return;
-        }
-
-        for (String imageUrl : imageUrls) {
-            delete(imageUrl);
         }
     }
 

@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.footprint.backend.dto.PostCreateRequest;
 import com.footprint.backend.dto.PostPageResponse;
 import com.footprint.backend.dto.PostResponse;
+import com.footprint.backend.dto.PostUpdateRequest;
 import com.footprint.backend.service.PostService;
 
 import jakarta.validation.Valid;
@@ -83,6 +85,38 @@ public class PostController {
 
         PostResponse response =
                 postService.getPost(postId);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping(
+            value = "/{postId}",
+            consumes =
+                    MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<PostResponse>
+            updatePost(
+                    Authentication authentication,
+                    @PathVariable Long postId,
+                    @Valid
+                    @RequestPart("data")
+                    PostUpdateRequest request,
+                    @RequestPart(
+                            value = "newImages",
+                            required = false
+                    )
+                    List<MultipartFile> newImages) {
+
+        String username =
+                authentication.getName();
+
+        PostResponse response =
+                postService.updatePost(
+                        username,
+                        postId,
+                        request,
+                        newImages
+                );
 
         return ResponseEntity.ok(response);
     }

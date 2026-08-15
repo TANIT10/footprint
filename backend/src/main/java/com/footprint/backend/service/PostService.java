@@ -2,20 +2,26 @@ package com.footprint.backend.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.footprint.backend.dto.PostCreateRequest;
 import com.footprint.backend.dto.PostListItemResponse;
 import com.footprint.backend.dto.PostPageResponse;
 import com.footprint.backend.dto.PostResponse;
+import com.footprint.backend.dto.PostUpdateRequest;
 import com.footprint.backend.entity.Gender;
 import com.footprint.backend.entity.Post;
 import com.footprint.backend.entity.PostImage;
@@ -109,23 +115,10 @@ public class PostService {
                     postRepository.save(post);
 
             List<PostImage> postImages =
-                    new ArrayList<>();
-
-            for (int index = 0;
-                    index < savedImageUrls.size();
-                    index++) {
-
-                PostImage postImage =
-                        new PostImage();
-
-                postImage.setPost(savedPost);
-                postImage.setImageUrl(
-                        savedImageUrls.get(index)
-                );
-                postImage.setDisplayOrder(index);
-
-                postImages.add(postImage);
-            }
+                    createPostImages(
+                            savedPost,
+                            savedImageUrls
+                    );
 
             postImageRepository.saveAll(
                     postImages
@@ -207,27 +200,302 @@ public class PostService {
     public PostResponse getPost(
             Long postId) {
 
-        Post post = postRepository
+        Post post = findPost(postId);
+
+        List<String> imageUrls =
+                getImageUrls(postId);
+
+        return toResponse(
+                post,
+                imageUrls
+        );
+    }
+
+    @Transactional
+    public PostResponse updatePost(
+            String username,
+            Long postId,
+            PostUpdateRequest request,
+            List<MultipartFile> newImages) {
+
+        Post post = findPost(postId);
+
+        validateAuthor(
+                post,
+                username
+        );
+
+        List<String> currentImageUrls =
+                getImageUrls(postId);
+
+        List<String> existingImageUrls =
+                new ArrayList<>(
+                        request.getExistingImageUrls()
+                );
+
+        validateExistingImageUrls(
+                existingImageUrls,
+                currentImageUrls
+        );
+
+        int newImageCount =
+                newImages == null
+                        ? 0
+                        : newImages.size();
+
+        postImageService
+                .validateTotalImageCount(
+                        existingImageUrls.size()
+                                + newImageCount
+                );
+
+        List<String> savedNewImageUrls =
+                postImageService.saveOptional(
+                        newImages
+                );
+
+        List<String> removedImageUrls =
+                currentImageUrls.stream()
+                .filter(imageUrl ->
+                        !existingImageUrls
+                                .contains(imageUrl)
+                )
+                .toList();
+
+        registerImageCleanup(
+                savedNewImageUrls,
+                removedImageUrls
+        );
+
+        updatePostFields(
+                post,
+                request
+        );
+
+        Post savedPost =
+                postRepository.saveAndFlush(
+                        post
+                );
+
+        postImageRepository.deleteByPostId(
+                postId
+        );
+        postImageRepository.flush();
+
+        List<String> finalImageUrls =
+                new ArrayList<>(
+                        existingImageUrls
+                );
+
+        finalImageUrls.addAll(
+                savedNewImageUrls
+        );
+
+        List<PostImage> finalPostImages =
+                createPostImages(
+                        savedPost,
+                        finalImageUrls
+                );
+
+        postImageRepository.saveAll(
+                finalPostImages
+        );
+        postImageRepository.flush();
+
+        return toResponse(
+                savedPost,
+                finalImageUrls
+        );
+    }
+
+    private Post findPost(Long postId) {
+
+        return postRepository
                 .findById(postId)
                 .orElseThrow(() ->
                         new IllegalArgumentException(
                                 "게시글을 찾을 수 없습니다."
                         )
                 );
+    }
 
-        List<String> imageUrls =
-                postImageRepository
+    private List<String> getImageUrls(
+            Long postId) {
+
+        return postImageRepository
                 .findByPostIdOrderByDisplayOrderAsc(
                         postId
                 )
                 .stream()
                 .map(PostImage::getImageUrl)
                 .toList();
+    }
 
-        return toResponse(
-                post,
-                imageUrls
+    private List<PostImage> createPostImages(
+            Post post,
+            List<String> imageUrls) {
+
+        List<PostImage> postImages =
+                new ArrayList<>();
+
+        for (int index = 0;
+                index < imageUrls.size();
+                index++) {
+
+            PostImage postImage =
+                    new PostImage();
+
+            postImage.setPost(post);
+            postImage.setImageUrl(
+                    imageUrls.get(index)
+            );
+            postImage.setDisplayOrder(index);
+
+            postImages.add(postImage);
+        }
+
+        return postImages;
+    }
+
+    private void validateAuthor(
+            Post post,
+            String username) {
+
+        if (!post.getAuthor()
+                .getUsername()
+                .equals(username)) {
+
+            throw new AccessDeniedException(
+                    "본인이 작성한 게시글만 "
+                    + "수정할 수 있습니다."
+            );
+        }
+    }
+
+    private void validateExistingImageUrls(
+            List<String> existingImageUrls,
+            List<String> currentImageUrls) {
+
+        Set<String> currentImageUrlSet =
+                new HashSet<>(
+                        currentImageUrls
+                );
+
+        Set<String> requestedImageUrlSet =
+                new HashSet<>();
+
+        for (String imageUrl
+                : existingImageUrls) {
+
+            if (imageUrl == null
+                    || imageUrl.isBlank()) {
+
+                throw new IllegalArgumentException(
+                        "유지할 사진 주소가 "
+                        + "올바르지 않습니다."
+                );
+            }
+
+            if (!requestedImageUrlSet.add(
+                    imageUrl
+            )) {
+                throw new IllegalArgumentException(
+                        "같은 사진을 중복해서 "
+                        + "등록할 수 없습니다."
+                );
+            }
+
+            if (!currentImageUrlSet.contains(
+                    imageUrl
+            )) {
+                throw new IllegalArgumentException(
+                        "해당 게시글에 등록되지 "
+                        + "않은 사진입니다."
+                );
+            }
+        }
+    }
+
+    private void updatePostFields(
+            Post post,
+            PostUpdateRequest request) {
+
+        post.setPostType(
+                request.getPostType()
         );
+        post.setBreed(
+                request.getBreed()
+        );
+
+        if (request.getGender() == null) {
+            post.setGender(Gender.UNKNOWN);
+        } else {
+            post.setGender(
+                    request.getGender()
+            );
+        }
+
+        post.setAge(
+                emptyToNull(request.getAge())
+        );
+        post.setColor(
+                emptyToNull(request.getColor())
+        );
+        post.setFeature(
+                emptyToNull(request.getFeature())
+        );
+        post.setLocation(
+                request.getLocation()
+        );
+        post.setDate(
+                request.getDate()
+        );
+        post.setContact(
+                emptyToNull(request.getContact())
+        );
+        post.setContent(
+                request.getContent()
+        );
+    }
+
+    private void registerImageCleanup(
+            List<String> newImageUrls,
+            List<String> removedImageUrls) {
+
+        List<String> newImages =
+                List.copyOf(newImageUrls);
+
+        List<String> removedImages =
+                List.copyOf(removedImageUrls);
+
+        TransactionSynchronizationManager
+                .registerSynchronization(
+                        new TransactionSynchronization() {
+
+                            @Override
+                            public void afterCommit() {
+
+                                postImageService
+                                        .deleteAll(
+                                                removedImages
+                                        );
+                            }
+
+                            @Override
+                            public void afterCompletion(
+                                    int status) {
+
+                                if (status
+                                        != STATUS_COMMITTED) {
+
+                                    postImageService
+                                            .deleteAll(
+                                                    newImages
+                                            );
+                                }
+                            }
+                        }
+                );
     }
 
     private Map<Long, String>
