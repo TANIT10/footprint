@@ -1,0 +1,88 @@
+package com.footprint.backend.service;
+
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.footprint.backend.dto.NoticeListItemResponse;
+import com.footprint.backend.dto.NoticePageResponse;
+import com.footprint.backend.dto.NoticeResponse;
+import com.footprint.backend.entity.Notice;
+import com.footprint.backend.repository.NoticeRepository;
+
+@Service
+@Transactional(readOnly = true)
+public class NoticeService {
+
+    private static final int NOTICE_PAGE_SIZE = 20;
+
+    private final NoticeRepository noticeRepository;
+
+    public NoticeService(NoticeRepository noticeRepository) {
+        this.noticeRepository = noticeRepository;
+    }
+
+    public NoticePageResponse getNotices(int page) {
+        if (page < 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "페이지 번호는 0 이상이어야 합니다."
+            );
+        }
+
+        Page<Notice> noticePage =
+                noticeRepository.findAllByOrderByImportantDescCreatedAtDesc(
+                        PageRequest.of(page, NOTICE_PAGE_SIZE)
+                );
+
+        List<NoticeListItemResponse> notices = noticePage.getContent()
+                .stream()
+                .map(this::toListItemResponse)
+                .toList();
+
+        return new NoticePageResponse(
+                notices,
+                noticePage.getNumber(),
+                noticePage.getTotalPages(),
+                noticePage.getTotalElements(),
+                noticePage.isFirst(),
+                noticePage.isLast()
+        );
+    }
+
+    public NoticeResponse getNotice(Long noticeId) {
+        Notice notice = noticeRepository.findById(noticeId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "공지사항을 찾을 수 없습니다."
+                ));
+
+        return toResponse(notice);
+    }
+
+    private NoticeListItemResponse toListItemResponse(Notice notice) {
+        return new NoticeListItemResponse(
+                notice.getId(),
+                notice.getTitle(),
+                notice.isImportant(),
+                notice.getCreatedAt(),
+                notice.getUpdatedAt()
+        );
+    }
+
+    private NoticeResponse toResponse(Notice notice) {
+        return new NoticeResponse(
+                notice.getId(),
+                notice.getTitle(),
+                notice.getContent(),
+                notice.isImportant(),
+                notice.getCreatedAt(),
+                notice.getUpdatedAt()
+        );
+    }
+}
