@@ -203,6 +203,33 @@ public class PostService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public PostResponse getPost(
+            Long postId) {
+
+        Post post = postRepository
+                .findById(postId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "게시글을 찾을 수 없습니다."
+                        )
+                );
+
+        List<String> imageUrls =
+                postImageRepository
+                .findByPostIdOrderByDisplayOrderAsc(
+                        postId
+                )
+                .stream()
+                .map(PostImage::getImageUrl)
+                .toList();
+
+        return toResponse(
+                post,
+                imageUrls
+        );
+    }
+
     private Map<Long, String>
             getRepresentativeImageMap(
                     List<Long> postIds) {
