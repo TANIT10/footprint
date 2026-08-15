@@ -1,8 +1,11 @@
 package com.footprint.backend.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,5 +52,25 @@ public class CommentController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    @GetMapping(
+            "/api/posts/{postId}/comments"
+    )
+    public ResponseEntity<List<CommentResponse>>
+            getComments(
+                    Authentication authentication,
+                    @PathVariable Long postId) {
+
+        String username =
+                authentication.getName();
+
+        List<CommentResponse> responses =
+                commentService.getComments(
+                        username,
+                        postId
+                );
+
+        return ResponseEntity.ok(responses);
     }
 }
