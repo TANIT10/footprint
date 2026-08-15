@@ -26,6 +26,7 @@ import com.footprint.backend.entity.Gender;
 import com.footprint.backend.entity.Post;
 import com.footprint.backend.entity.PostImage;
 import com.footprint.backend.entity.User;
+import com.footprint.backend.entity.UserRole;
 import com.footprint.backend.repository.PostImageRepository;
 import com.footprint.backend.repository.PostRepository;
 import com.footprint.backend.repository.UserRepository;
@@ -59,13 +60,7 @@ public class PostService {
             PostCreateRequest request,
             List<MultipartFile> images) {
 
-        User author = userRepository
-                .findByUsername(username)
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "사용자를 찾을 수 없습니다."
-                        )
-                );
+        User author = findUser(username);
 
         List<String> savedImageUrls =
                 postImageService.saveAll(images);
@@ -142,11 +137,7 @@ public class PostService {
     public PostPageResponse getPostPage(
             int page) {
 
-        if (page < 0) {
-            throw new IllegalArgumentException(
-                    "페이지 번호는 0 이상이어야 합니다."
-            );
-        }
+        validatePage(page);
 
         Pageable pageable =
                 PageRequest.of(
@@ -160,40 +151,32 @@ public class PostService {
                         pageable
                 );
 
-        List<Post> posts =
-                postPage.getContent();
+        return toPageResponse(postPage);
+    }
 
-        List<Long> postIds =
-                posts.stream()
-                .map(Post::getId)
-                .toList();
+    @Transactional(readOnly = true)
+    public PostPageResponse getMyPostPage(
+            String username,
+            int page) {
 
-        Map<Long, String>
-                representativeImageMap =
-                        getRepresentativeImageMap(
-                                postIds
-                        );
+        validatePage(page);
 
-        List<PostListItemResponse> responses =
-                posts.stream()
-                .map(post ->
-                        toListItemResponse(
-                                post,
-                                representativeImageMap
-                                        .get(post.getId())
-                        )
-                )
-                .toList();
+        User user = findUser(username);
 
-        return new PostPageResponse(
-                responses,
-                postPage.getNumber(),
-                postPage.getSize(),
-                postPage.getTotalElements(),
-                postPage.getTotalPages(),
-                postPage.isFirst(),
-                postPage.isLast()
-        );
+        Pageable pageable =
+                PageRequest.of(
+                        page,
+                        POST_PAGE_SIZE
+                );
+
+        Page<Post> postPage =
+                postRepository
+                .findByAuthorIdOrderByCreatedAtDesc(
+                        user.getId(),
+                        pageable
+                );
+
+        return toPageResponse(postPage);
     }
 
     @Transactional(readOnly = true)
@@ -220,7 +203,7 @@ public class PostService {
 
         Post post = findPost(postId);
 
-        validateAuthor(
+        validateUpdateAuthor(
                 post,
                 username
         );
@@ -262,7 +245,7 @@ public class PostService {
                 )
                 .toList();
 
-        registerImageCleanup(
+        registerUpdateImageCleanup(
                 savedNewImageUrls,
                 removedImageUrls
         );
@@ -308,6 +291,48 @@ public class PostService {
         );
     }
 
+    @Transactional
+    public void deletePost(
+            String username,
+            Long postId) {
+
+        User currentUser =
+                findUser(username);
+
+        Post post = findPost(postId);
+
+        validateDeletePermission(
+                currentUser,
+                post
+        );
+
+        List<String> imageUrls =
+                getImageUrls(postId);
+
+        registerDeleteImageCleanup(
+                imageUrls
+        );
+
+        postImageRepository.deleteByPostId(
+                postId
+        );
+        postImageRepository.flush();
+
+        postRepository.delete(post);
+        postRepository.flush();
+    }
+
+    private User findUser(String username) {
+
+        return userRepository
+                .findByUsername(username)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "사용자를 찾을 수 없습니다."
+                        )
+                );
+    }
+
     private Post findPost(Long postId) {
 
         return postRepository
@@ -317,6 +342,54 @@ public class PostService {
                                 "게시글을 찾을 수 없습니다."
                         )
                 );
+    }
+
+    private void validatePage(int page) {
+
+        if (page < 0) {
+            throw new IllegalArgumentException(
+                    "페이지 번호는 0 이상이어야 합니다."
+            );
+        }
+    }
+
+    private PostPageResponse toPageResponse(
+            Page<Post> postPage) {
+
+        List<Post> posts =
+                postPage.getContent();
+
+        List<Long> postIds =
+                posts.stream()
+                .map(Post::getId)
+                .toList();
+
+        Map<Long, String>
+                representativeImageMap =
+                        getRepresentativeImageMap(
+                                postIds
+                        );
+
+        List<PostListItemResponse> responses =
+                posts.stream()
+                .map(post ->
+                        toListItemResponse(
+                                post,
+                                representativeImageMap
+                                        .get(post.getId())
+                        )
+                )
+                .toList();
+
+        return new PostPageResponse(
+                responses,
+                postPage.getNumber(),
+                postPage.getSize(),
+                postPage.getTotalElements(),
+                postPage.getTotalPages(),
+                postPage.isFirst(),
+                postPage.isLast()
+        );
     }
 
     private List<String> getImageUrls(
@@ -357,7 +430,7 @@ public class PostService {
         return postImages;
     }
 
-    private void validateAuthor(
+    private void validateUpdateAuthor(
             Post post,
             String username) {
 
@@ -368,6 +441,27 @@ public class PostService {
             throw new AccessDeniedException(
                     "본인이 작성한 게시글만 "
                     + "수정할 수 있습니다."
+            );
+        }
+    }
+
+    private void validateDeletePermission(
+            User currentUser,
+            Post post) {
+
+        boolean isAuthor =
+                post.getAuthor()
+                .getId()
+                .equals(currentUser.getId());
+
+        boolean isAdmin =
+                currentUser.getRole()
+                        == UserRole.ADMIN;
+
+        if (!isAuthor && !isAdmin) {
+            throw new AccessDeniedException(
+                    "본인이 작성한 게시글만 "
+                    + "삭제할 수 있습니다."
             );
         }
     }
@@ -458,7 +552,7 @@ public class PostService {
         );
     }
 
-    private void registerImageCleanup(
+    private void registerUpdateImageCleanup(
             List<String> newImageUrls,
             List<String> removedImageUrls) {
 
@@ -493,6 +587,28 @@ public class PostService {
                                                     newImages
                                             );
                                 }
+                            }
+                        }
+                );
+    }
+
+    private void registerDeleteImageCleanup(
+            List<String> imageUrls) {
+
+        List<String> images =
+                List.copyOf(imageUrls);
+
+        TransactionSynchronizationManager
+                .registerSynchronization(
+                        new TransactionSynchronization() {
+
+                            @Override
+                            public void afterCommit() {
+
+                                postImageService
+                                        .deleteAll(
+                                                images
+                                        );
                             }
                         }
                 );

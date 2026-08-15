@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -78,6 +79,27 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<PostPageResponse>
+            getMyPostPage(
+                    Authentication authentication,
+                    @RequestParam(
+                            defaultValue = "0"
+                    )
+                    int page) {
+
+        String username =
+                authentication.getName();
+
+        PostPageResponse response =
+                postService.getMyPostPage(
+                        username,
+                        page
+                );
+
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponse>
             getPost(
@@ -119,5 +141,24 @@ public class PostController {
                 );
 
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Void>
+            deletePost(
+                    Authentication authentication,
+                    @PathVariable Long postId) {
+
+        String username =
+                authentication.getName();
+
+        postService.deletePost(
+                username,
+                postId
+        );
+
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 }
