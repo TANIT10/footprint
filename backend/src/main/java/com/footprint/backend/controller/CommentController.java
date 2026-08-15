@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -72,5 +73,26 @@ public class CommentController {
                 );
 
         return ResponseEntity.ok(responses);
+    }
+
+    @DeleteMapping(
+            "/api/comments/{commentId}"
+    )
+    public ResponseEntity<Void>
+            deleteComment(
+                    Authentication authentication,
+                    @PathVariable Long commentId) {
+
+        String username =
+                authentication.getName();
+
+        commentService.deleteComment(
+                username,
+                commentId
+        );
+
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 }

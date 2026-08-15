@@ -27,6 +27,7 @@ import com.footprint.backend.entity.Post;
 import com.footprint.backend.entity.PostImage;
 import com.footprint.backend.entity.User;
 import com.footprint.backend.entity.UserRole;
+import com.footprint.backend.repository.CommentRepository;
 import com.footprint.backend.repository.PostImageRepository;
 import com.footprint.backend.repository.PostRepository;
 import com.footprint.backend.repository.UserRepository;
@@ -38,18 +39,22 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final PostImageRepository postImageRepository;
+    private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final PostImageService postImageService;
 
     public PostService(
             PostRepository postRepository,
             PostImageRepository postImageRepository,
+            CommentRepository commentRepository,
             UserRepository userRepository,
             PostImageService postImageService) {
 
         this.postRepository = postRepository;
         this.postImageRepository =
                 postImageRepository;
+        this.commentRepository =
+                commentRepository;
         this.userRepository = userRepository;
         this.postImageService = postImageService;
     }
@@ -312,6 +317,11 @@ public class PostService {
         registerDeleteImageCleanup(
                 imageUrls
         );
+
+        commentRepository.deleteByPostId(
+                postId
+        );
+        commentRepository.flush();
 
         postImageRepository.deleteByPostId(
                 postId

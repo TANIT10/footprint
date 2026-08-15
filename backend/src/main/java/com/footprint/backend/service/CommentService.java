@@ -2,6 +2,7 @@ package com.footprint.backend.service;
 
 import java.util.List;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -91,6 +92,32 @@ public class CommentService {
                 .toList();
     }
 
+    @Transactional
+    public void deleteComment(
+            String username,
+            Long commentId) {
+
+        User currentUser =
+                findUser(username);
+
+        Comment comment =
+                commentRepository
+                .findById(commentId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "댓글을 찾을 수 없습니다."
+                        )
+                );
+
+        validateDeletePermission(
+                currentUser,
+                comment
+        );
+
+        commentRepository.delete(comment);
+        commentRepository.flush();
+    }
+
     private User findUser(String username) {
 
         return userRepository
@@ -111,6 +138,27 @@ public class CommentService {
                                 "게시글을 찾을 수 없습니다."
                         )
                 );
+    }
+
+    private void validateDeletePermission(
+            User currentUser,
+            Comment comment) {
+
+        boolean isAuthor =
+                comment.getAuthor()
+                .getId()
+                .equals(currentUser.getId());
+
+        boolean isAdmin =
+                currentUser.getRole()
+                        == UserRole.ADMIN;
+
+        if (!isAuthor && !isAdmin) {
+            throw new AccessDeniedException(
+                    "본인이 작성한 댓글만 "
+                    + "삭제할 수 있습니다."
+            );
+        }
     }
 
     private CommentResponse toResponse(
