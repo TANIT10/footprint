@@ -2,12 +2,16 @@ package com.footprint.backend.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.footprint.backend.dto.ReportCreateRequest;
+import com.footprint.backend.dto.ReportHandleRequest;
+import com.footprint.backend.dto.ReportPageResponse;
 import com.footprint.backend.dto.ReportResponse;
 import com.footprint.backend.entity.Report;
 import com.footprint.backend.entity.ReportStatus;
@@ -21,6 +25,8 @@ import com.footprint.backend.repository.UserRepository;
 @Service
 @Transactional(readOnly = true)
 public class ReportService {
+
+    private static final int REPORT_PAGE_SIZE = 20;
 
     private static final List<ReportStatus>
             ACTIVE_REPORT_STATUSES = List.of(
@@ -50,11 +56,7 @@ public class ReportService {
             String username,
             ReportCreateRequest request
     ) {
-        User reporter = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED,
-                        "로그인한 사용자를 찾을 수 없습니다."
-                ));
+        User reporter = findUser(username);
 
         validateTarget(
                 reporter,
@@ -95,6 +97,83 @@ public class ReportService {
         return toResponse(savedReport);
     }
 
+    public ReportPageResponse getAdminReports(
+            int page,
+            ReportStatus status
+    ) {
+        if (page < 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "페이지 번호는 0 이상이어야 합니다."
+            );
+        }
+
+        PageRequest pageRequest = PageRequest.of(
+                page,
+                REPORT_PAGE_SIZE
+        );
+
+        Page<Report> reportPage =
+                status == null
+                        ? reportRepository
+                                .findAllByOrderByCreatedAtDesc(
+                                        pageRequest
+                                )
+                        : reportRepository
+                                .findByStatusOrderByCreatedAtDesc(
+                                        status,
+                                        pageRequest
+                                );
+
+        List<ReportResponse> reports =
+                reportPage.getContent()
+                        .stream()
+                        .map(this::toResponse)
+                        .toList();
+
+        return new ReportPageResponse(
+                reports,
+                reportPage.getNumber(),
+                reportPage.getTotalPages(),
+                reportPage.getTotalElements(),
+                reportPage.isFirst(),
+                reportPage.isLast()
+        );
+    }
+
+    public ReportResponse getAdminReport(
+            Long reportId
+    ) {
+        return toResponse(findReport(reportId));
+    }
+
+    @Transactional
+    public ReportResponse handleReport(
+            String adminUsername,
+            Long reportId,
+            ReportHandleRequest request
+    ) {
+        if (request.status() == ReportStatus.PENDING) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "관리자 처리 상태로 PENDING을 선택할 수 없습니다."
+            );
+        }
+
+        User admin = findUser(adminUsername);
+        Report report = findReport(reportId);
+
+        report.handle(
+                request.status(),
+                normalizeOptionalText(
+                        request.adminNote()
+                ),
+                admin
+        );
+
+        return toResponse(report);
+    }
+
     private void validateTarget(
             User reporter,
             ReportTargetType targetType,
@@ -125,6 +204,22 @@ public class ReportService {
                     "자기 자신은 신고할 수 없습니다."
             );
         }
+    }
+
+    private Report findReport(Long reportId) {
+        return reportRepository.findById(reportId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "신고 내역을 찾을 수 없습니다."
+                ));
+    }
+
+    private User findUser(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "로그인한 사용자를 찾을 수 없습니다."
+                ));
     }
 
     private String normalizeOptionalText(
