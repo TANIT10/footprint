@@ -13,6 +13,7 @@ import com.footprint.backend.dto.ReportCreateRequest;
 import com.footprint.backend.dto.ReportHandleRequest;
 import com.footprint.backend.dto.ReportPageResponse;
 import com.footprint.backend.dto.ReportResponse;
+import com.footprint.backend.entity.NotificationType;
 import com.footprint.backend.entity.Report;
 import com.footprint.backend.entity.ReportStatus;
 import com.footprint.backend.entity.ReportTargetType;
@@ -38,17 +39,20 @@ public class ReportService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
+    private final NotificationService notificationService;
 
     public ReportService(
             ReportRepository reportRepository,
             UserRepository userRepository,
             PostRepository postRepository,
-            CommentRepository commentRepository
+            CommentRepository commentRepository,
+            NotificationService notificationService
     ) {
         this.reportRepository = reportRepository;
         this.userRepository = userRepository;
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -156,12 +160,15 @@ public class ReportService {
         if (request.status() == ReportStatus.PENDING) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "관리자 처리 상태로 PENDING을 선택할 수 없습니다."
+                    "관리자 처리 상태로 PENDING을 "
+                    + "선택할 수 없습니다."
             );
         }
 
         User admin = findUser(adminUsername);
         Report report = findReport(reportId);
+        ReportStatus previousStatus =
+                report.getStatus();
 
         report.handle(
                 request.status(),
@@ -171,7 +178,41 @@ public class ReportService {
                 admin
         );
 
+        if (
+                previousStatus != request.status()
+                && isFinalStatus(request.status())
+        ) {
+            notificationService.createNotification(
+                    report.getReporter(),
+                    NotificationType.REPORT_RESULT,
+                    "신고 처리 결과가 도착했어요",
+                    getReportResultMessage(
+                            request.status()
+                    ),
+                    "신고 결과",
+                    null,
+                    null
+            );
+        }
+
         return toResponse(report);
+    }
+
+    private boolean isFinalStatus(
+            ReportStatus status
+    ) {
+        return status == ReportStatus.RESOLVED
+                || status == ReportStatus.REJECTED;
+    }
+
+    private String getReportResultMessage(
+            ReportStatus status
+    ) {
+        if (status == ReportStatus.RESOLVED) {
+            return "접수한 신고가 처리 완료됐어요.";
+        }
+
+        return "접수한 신고가 반려됐어요.";
     }
 
     private void validateTarget(
@@ -208,18 +249,23 @@ public class ReportService {
 
     private Report findReport(Long reportId) {
         return reportRepository.findById(reportId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "신고 내역을 찾을 수 없습니다."
-                ));
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "신고 내역을 찾을 수 없습니다."
+                        )
+                );
     }
 
     private User findUser(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED,
-                        "로그인한 사용자를 찾을 수 없습니다."
-                ));
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.UNAUTHORIZED,
+                                "로그인한 사용자를 "
+                                + "찾을 수 없습니다."
+                        )
+                );
     }
 
     private String normalizeOptionalText(

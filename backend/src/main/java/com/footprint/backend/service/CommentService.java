@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.footprint.backend.dto.CommentCreateRequest;
 import com.footprint.backend.dto.CommentResponse;
 import com.footprint.backend.entity.Comment;
+import com.footprint.backend.entity.NotificationType;
 import com.footprint.backend.entity.Post;
 import com.footprint.backend.entity.User;
 import com.footprint.backend.entity.UserRole;
@@ -28,31 +29,35 @@ public class CommentService {
     private final UserRepository
             userRepository;
 
+    private final NotificationService
+            notificationService;
+
     public CommentService(
             CommentRepository commentRepository,
             PostRepository postRepository,
-            UserRepository userRepository) {
-
+            UserRepository userRepository,
+            NotificationService notificationService
+    ) {
         this.commentRepository =
                 commentRepository;
         this.postRepository =
                 postRepository;
         this.userRepository =
                 userRepository;
+        this.notificationService =
+                notificationService;
     }
 
     @Transactional
     public CommentResponse createComment(
             String username,
             Long postId,
-            CommentCreateRequest request) {
-
+            CommentCreateRequest request
+    ) {
         User author = findUser(username);
-
         Post post = findPost(postId);
 
         Comment comment = new Comment();
-
         comment.setPost(post);
         comment.setAuthor(author);
         comment.setContent(
@@ -61,6 +66,25 @@ public class CommentService {
 
         Comment savedComment =
                 commentRepository.save(comment);
+
+        User postAuthor = post.getAuthor();
+
+        if (
+                !postAuthor.getId()
+                        .equals(author.getId())
+        ) {
+            notificationService.createNotification(
+                    postAuthor,
+                    NotificationType.COMMENT,
+                    "새 댓글이 달렸어요",
+                    getDisplayName(author)
+                            + "님이 회원님의 게시글에 "
+                            + "댓글을 남겼어요.",
+                    "댓글",
+                    post.getId(),
+                    null
+            );
+        }
 
         return toResponse(
                 savedComment,
@@ -71,8 +95,8 @@ public class CommentService {
     @Transactional(readOnly = true)
     public List<CommentResponse> getComments(
             String username,
-            Long postId) {
-
+            Long postId
+    ) {
         User currentUser =
                 findUser(username);
 
@@ -95,19 +119,19 @@ public class CommentService {
     @Transactional
     public void deleteComment(
             String username,
-            Long commentId) {
-
+            Long commentId
+    ) {
         User currentUser =
                 findUser(username);
 
         Comment comment =
                 commentRepository
-                .findById(commentId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "댓글을 찾을 수 없습니다."
-                        )
-                );
+                        .findById(commentId)
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "댓글을 찾을 수 없습니다."
+                                )
+                        );
 
         validateDeletePermission(
                 currentUser,
@@ -119,7 +143,6 @@ public class CommentService {
     }
 
     private User findUser(String username) {
-
         return userRepository
                 .findByUsername(username)
                 .orElseThrow(() ->
@@ -130,7 +153,6 @@ public class CommentService {
     }
 
     private Post findPost(Long postId) {
-
         return postRepository
                 .findById(postId)
                 .orElseThrow(() ->
@@ -142,12 +164,12 @@ public class CommentService {
 
     private void validateDeletePermission(
             User currentUser,
-            Comment comment) {
-
+            Comment comment
+    ) {
         boolean isAuthor =
                 comment.getAuthor()
-                .getId()
-                .equals(currentUser.getId());
+                        .getId()
+                        .equals(currentUser.getId());
 
         boolean isAdmin =
                 currentUser.getRole()
@@ -161,15 +183,26 @@ public class CommentService {
         }
     }
 
+    private String getDisplayName(User user) {
+        if (
+                user.getNickname() != null
+                && !user.getNickname().isBlank()
+        ) {
+            return user.getNickname();
+        }
+
+        return user.getUsername();
+    }
+
     private CommentResponse toResponse(
             Comment comment,
-            User currentUser) {
-
+            User currentUser
+    ) {
         User author = comment.getAuthor();
 
         boolean isAuthor =
                 author.getId()
-                .equals(currentUser.getId());
+                        .equals(currentUser.getId());
 
         boolean isAdmin =
                 currentUser.getRole()

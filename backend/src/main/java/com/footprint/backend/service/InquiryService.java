@@ -15,6 +15,7 @@ import com.footprint.backend.dto.InquiryMessageCreateRequest;
 import com.footprint.backend.dto.InquiryMessageResponse;
 import com.footprint.backend.entity.Inquiry;
 import com.footprint.backend.entity.InquirySender;
+import com.footprint.backend.entity.NotificationType;
 import com.footprint.backend.entity.User;
 import com.footprint.backend.repository.InquiryRepository;
 import com.footprint.backend.repository.UserRepository;
@@ -27,13 +28,16 @@ public class InquiryService {
 
     private final InquiryRepository inquiryRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public InquiryService(
             InquiryRepository inquiryRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            NotificationService notificationService
     ) {
         this.inquiryRepository = inquiryRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -167,6 +171,16 @@ public class InquiryService {
 
         Inquiry savedInquiry =
                 inquiryRepository.save(inquiry);
+
+        notificationService.createNotification(
+                user,
+                NotificationType.INQUIRY_REPLY,
+                "문의 답변이 도착했어요",
+                "관리자가 문의에 답변했어요.",
+                "문의",
+                null,
+                null
+        );
 
         return toMessageResponse(savedInquiry);
     }
