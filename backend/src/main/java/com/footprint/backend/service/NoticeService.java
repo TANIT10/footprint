@@ -9,11 +9,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.footprint.backend.dto.NoticeCreateRequest;
 import com.footprint.backend.dto.NoticeListItemResponse;
 import com.footprint.backend.dto.NoticePageResponse;
 import com.footprint.backend.dto.NoticeResponse;
+import com.footprint.backend.dto.NoticeUpdateRequest;
 import com.footprint.backend.entity.Notice;
+import com.footprint.backend.entity.User;
 import com.footprint.backend.repository.NoticeRepository;
+import com.footprint.backend.repository.UserRepository;
 
 @Service
 @Transactional(readOnly = true)
@@ -22,9 +26,14 @@ public class NoticeService {
     private static final int NOTICE_PAGE_SIZE = 20;
 
     private final NoticeRepository noticeRepository;
+    private final UserRepository userRepository;
 
-    public NoticeService(NoticeRepository noticeRepository) {
+    public NoticeService(
+            NoticeRepository noticeRepository,
+            UserRepository userRepository
+    ) {
         this.noticeRepository = noticeRepository;
+        this.userRepository = userRepository;
     }
 
     public NoticePageResponse getNotices(int page) {
@@ -56,13 +65,60 @@ public class NoticeService {
     }
 
     public NoticeResponse getNotice(Long noticeId) {
-        Notice notice = noticeRepository.findById(noticeId)
+        Notice notice = findNotice(noticeId);
+
+        return toResponse(notice);
+    }
+
+    @Transactional
+    public NoticeResponse createNotice(
+            String username,
+            NoticeCreateRequest request
+    ) {
+        User author = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "로그인한 사용자를 찾을 수 없습니다."
+                ));
+
+        Notice notice = new Notice();
+        notice.setAuthor(author);
+        notice.setTitle(request.title().trim());
+        notice.setContent(request.content().trim());
+        notice.setImportant(request.important());
+
+        Notice savedNotice = noticeRepository.save(notice);
+
+        return toResponse(savedNotice);
+    }
+
+    @Transactional
+    public NoticeResponse updateNotice(
+            Long noticeId,
+            NoticeUpdateRequest request
+    ) {
+        Notice notice = findNotice(noticeId);
+
+        notice.setTitle(request.title().trim());
+        notice.setContent(request.content().trim());
+        notice.setImportant(request.important());
+
+        return toResponse(notice);
+    }
+
+    @Transactional
+    public void deleteNotice(Long noticeId) {
+        Notice notice = findNotice(noticeId);
+
+        noticeRepository.delete(notice);
+    }
+
+    private Notice findNotice(Long noticeId) {
+        return noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "공지사항을 찾을 수 없습니다."
                 ));
-
-        return toResponse(notice);
     }
 
     private NoticeListItemResponse toListItemResponse(Notice notice) {
