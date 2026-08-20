@@ -753,7 +753,7 @@
   margin: 0;
 
   stroke-width: 2.3;
-  transform: translate(-1px, -1px);
+  transform: none;
 }
 
 .comment-send-button:disabled {
