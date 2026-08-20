@@ -4,6 +4,8 @@ import './Login.css'
 
 import logo from '../assets/logo.png'
 
+import LoadingScreen from './LoadingScreen'
+
 function Login({
   onSignup,
   onLoginSuccess,
@@ -134,6 +136,10 @@ function Login({
     }
   }
 
+  if (isLoggingIn) {
+    return <LoadingScreen />
+  }
+
   return (
     <div className="login-page">
       <main className="login-container">
@@ -167,7 +173,6 @@ function Login({
                 }
                 maxLength={10}
                 autoComplete="username"
-                disabled={isLoggingIn}
               />
             </div>
 
@@ -189,7 +194,6 @@ function Login({
                 }
                 maxLength={16}
                 autoComplete="current-password"
-                disabled={isLoggingIn}
               />
             </div>
           </div>
@@ -208,11 +212,8 @@ function Login({
           <button
             className="login-button"
             type="submit"
-            disabled={isLoggingIn}
           >
-            {isLoggingIn
-              ? '로그인 중...'
-              : '로그인'}
+            로그인
           </button>
         </form>
 
@@ -220,7 +221,6 @@ function Login({
           className="signup-button"
           type="button"
           onClick={onSignup}
-          disabled={isLoggingIn}
         >
           회원가입
         </button>

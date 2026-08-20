@@ -18,6 +18,7 @@ import NoticeDetail from './pages/NoticeDetail'
 import Inquiry from './pages/Inquiry'
 import Withdraw from './pages/Withdraw'
 import UserProfile from './pages/UserProfile'
+import LoadingScreen from './pages/LoadingScreen'
 
 const CURRENT_NICKNAME_KEY =
   'footprint-current-nickname'
@@ -615,7 +616,7 @@ function App() {
       []
     )
 
-  const handleLoginSuccess = ({
+  const handleLoginSuccess = async ({
     nickname,
     username,
   }) => {
@@ -635,6 +636,18 @@ function App() {
     setProfileImages(
       readProfileImageMap()
     )
+
+    setPage('loading')
+
+    await Promise.all([
+      loadPosts(),
+      new Promise((resolve) => {
+        window.setTimeout(
+          resolve,
+          3200
+        )
+      }),
+    ])
 
     setPage('postList')
   }
@@ -1476,6 +1489,10 @@ function App() {
         }
       />
     )
+  }
+
+  if (page === 'loading') {
+    return <LoadingScreen />
   }
 
   if (page === 'postList') {
