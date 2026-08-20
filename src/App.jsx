@@ -19,8 +19,6 @@ import Inquiry from './pages/Inquiry'
 import Withdraw from './pages/Withdraw'
 import UserProfile from './pages/UserProfile'
 
-import notices from './data/notices'
-
 const STORAGE_KEY =
   'footprint-posts'
 
@@ -237,11 +235,6 @@ function App() {
       post.id === selectedPostId
   )
 
-  const selectedNotice = notices.find(
-    (notice) =>
-      notice.id === selectedNoticeId
-  )
-
   const handleProfileImageChange =
     useCallback(
       (username, profileImage) => {
@@ -322,12 +315,7 @@ function App() {
   const handleNoticeSelect = (
     noticeId
   ) => {
-    const noticeExists = notices.some(
-      (notice) =>
-        notice.id === noticeId
-    )
-
-    if (!noticeExists) {
+    if (!noticeId) {
       window.alert(
         '선택한 공지사항을 찾을 수 없어요.'
       )
@@ -405,15 +393,9 @@ function App() {
 
   const handleNoticeSelectFromNotification =
     (noticeId) => {
-      const selectedNoticeExists =
-        notices.some(
-          (notice) =>
-            notice.id === noticeId
-        )
-
-      if (!selectedNoticeExists) {
+      if (!noticeId) {
         window.alert(
-          '삭제되었거나 찾을 수 없는 공지사항이에요.'
+          '선택한 공지사항을 찾을 수 없어요.'
         )
         return
       }
@@ -1104,7 +1086,6 @@ function App() {
   if (page === 'noticeList') {
     return (
       <NoticeList
-        noticeItems={notices}
         onBack={() =>
           setPage('myPage')
         }
@@ -1117,12 +1098,12 @@ function App() {
 
   if (
     page === 'noticeDetail' &&
-    selectedNotice
+    selectedNoticeId
   ) {
     return (
       <NoticeDetail
-        notice={
-          selectedNotice
+        noticeId={
+          selectedNoticeId
         }
         onBack={() =>
           setPage(

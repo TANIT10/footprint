@@ -15,9 +15,7 @@ import com.footprint.backend.dto.NoticePageResponse;
 import com.footprint.backend.dto.NoticeResponse;
 import com.footprint.backend.dto.NoticeUpdateRequest;
 import com.footprint.backend.entity.Notice;
-import com.footprint.backend.entity.NotificationType;
 import com.footprint.backend.entity.User;
-import com.footprint.backend.entity.UserRole;
 import com.footprint.backend.repository.NoticeRepository;
 import com.footprint.backend.repository.UserRepository;
 
@@ -26,19 +24,17 @@ import com.footprint.backend.repository.UserRepository;
 public class NoticeService {
 
     private static final int NOTICE_PAGE_SIZE = 20;
+    private static final int SUMMARY_MAX_LENGTH = 60;
 
     private final NoticeRepository noticeRepository;
     private final UserRepository userRepository;
-    private final NotificationService notificationService;
 
     public NoticeService(
             NoticeRepository noticeRepository,
-            UserRepository userRepository,
-            NotificationService notificationService
+            UserRepository userRepository
     ) {
         this.noticeRepository = noticeRepository;
         this.userRepository = userRepository;
-        this.notificationService = notificationService;
     }
 
     public NoticePageResponse getNotices(int page) {
@@ -50,13 +46,12 @@ public class NoticeService {
         }
 
         Page<Notice> noticePage =
-                noticeRepository
-                        .findAllByOrderByImportantDescCreatedAtDesc(
-                                PageRequest.of(
-                                        page,
-                                        NOTICE_PAGE_SIZE
-                                )
-                        );
+                noticeRepository.findAllByOrderByImportantDescCreatedAtDesc(
+                        PageRequest.of(
+                                page,
+                                NOTICE_PAGE_SIZE
+                        )
+                );
 
         List<NoticeListItemResponse> notices =
                 noticePage.getContent()
@@ -74,7 +69,9 @@ public class NoticeService {
         );
     }
 
-    public NoticeResponse getNotice(Long noticeId) {
+    public NoticeResponse getNotice(
+            Long noticeId
+    ) {
         Notice notice = findNotice(noticeId);
 
         return toResponse(notice);
@@ -85,45 +82,30 @@ public class NoticeService {
             String username,
             NoticeCreateRequest request
     ) {
-        User author = userRepository
-                .findByUsername(username)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.UNAUTHORIZED,
-                                "로그인한 사용자를 "
-                                + "찾을 수 없습니다."
-                        )
-                );
+        User author =
+                userRepository
+                        .findByUsername(username)
+                        .orElseThrow(() ->
+                                new ResponseStatusException(
+                                        HttpStatus.UNAUTHORIZED,
+                                        "로그인한 사용자를 찾을 수 없습니다."
+                                )
+                        );
 
         Notice notice = new Notice();
         notice.setAuthor(author);
-        notice.setTitle(request.title().trim());
-        notice.setContent(request.content().trim());
-        notice.setImportant(request.important());
+        notice.setTitle(
+                request.title().trim()
+        );
+        notice.setContent(
+                request.content().trim()
+        );
+        notice.setImportant(
+                request.important()
+        );
 
         Notice savedNotice =
                 noticeRepository.save(notice);
-
-        List<User> recipients =
-                userRepository.findByRole(
-                        UserRole.USER
-                );
-
-        String label = savedNotice.isImportant()
-                ? "중요 공지"
-                : "공지";
-
-        recipients.forEach(recipient ->
-                notificationService.createNotification(
-                        recipient,
-                        NotificationType.NOTICE,
-                        "새 공지가 등록됐어요",
-                        savedNotice.getTitle(),
-                        label,
-                        null,
-                        savedNotice.getId()
-                )
-        );
 
         return toResponse(savedNotice);
     }
@@ -135,22 +117,33 @@ public class NoticeService {
     ) {
         Notice notice = findNotice(noticeId);
 
-        notice.setTitle(request.title().trim());
-        notice.setContent(request.content().trim());
-        notice.setImportant(request.important());
+        notice.setTitle(
+                request.title().trim()
+        );
+        notice.setContent(
+                request.content().trim()
+        );
+        notice.setImportant(
+                request.important()
+        );
 
         return toResponse(notice);
     }
 
     @Transactional
-    public void deleteNotice(Long noticeId) {
+    public void deleteNotice(
+            Long noticeId
+    ) {
         Notice notice = findNotice(noticeId);
 
         noticeRepository.delete(notice);
     }
 
-    private Notice findNotice(Long noticeId) {
-        return noticeRepository.findById(noticeId)
+    private Notice findNotice(
+            Long noticeId
+    ) {
+        return noticeRepository
+                .findById(noticeId)
                 .orElseThrow(() ->
                         new ResponseStatusException(
                                 HttpStatus.NOT_FOUND,
@@ -159,12 +152,16 @@ public class NoticeService {
                 );
     }
 
-    private NoticeListItemResponse toListItemResponse(
-            Notice notice
-    ) {
+    private NoticeListItemResponse
+            toListItemResponse(
+                    Notice notice
+            ) {
         return new NoticeListItemResponse(
                 notice.getId(),
                 notice.getTitle(),
+                createSummary(
+                        notice.getContent()
+                ),
                 notice.isImportant(),
                 notice.getCreatedAt(),
                 notice.getUpdatedAt()
@@ -182,5 +179,29 @@ public class NoticeService {
                 notice.getCreatedAt(),
                 notice.getUpdatedAt()
         );
+    }
+
+    private String createSummary(
+            String content
+    ) {
+        String normalizedContent =
+                content
+                        .replaceAll(
+                                "\\s+",
+                                " "
+                        )
+                        .trim();
+
+        if (
+                normalizedContent.length()
+                <= SUMMARY_MAX_LENGTH
+        ) {
+            return normalizedContent;
+        }
+
+        return normalizedContent.substring(
+                0,
+                SUMMARY_MAX_LENGTH
+        ) + "...";
     }
 }

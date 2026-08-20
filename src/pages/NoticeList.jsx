@@ -2,51 +2,139 @@ import {
   ArrowLeft,
   ChevronRight,
 } from 'lucide-react'
+import {
+  useEffect,
+  useState,
+} from 'react'
 
 import './NoticeList.css'
 
-import notices from '../data/notices'
+const API_BASE_URL =
+  'http://localhost:8080'
 
 function formatNoticeDate(createdAt) {
   if (!createdAt) {
     return ''
   }
 
-  return new Date(
-    createdAt
-  ).toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  })
+  const date = new Date(createdAt)
+
+  if (Number.isNaN(date.getTime())) {
+    return ''
+  }
+
+  return date.toLocaleDateString(
+    'ko-KR',
+    {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }
+  )
 }
 
 function NoticeList({
-  noticeItems = notices,
   onBack,
   onNoticeSelect,
 }) {
-  /*
-   * 기존 배열을 직접 변경하지 않고 복사한 뒤,
-   * 중요 공지가 항상 위에 오도록 정렬
-   *
-   * 중요도가 같은 공지끼리는 notices.js에
-   * 작성된 순서를 그대로 유지
-   */
-  const sortedNoticeItems = [
-    ...noticeItems,
-  ].sort((firstNotice, secondNotice) => {
-    if (
-      firstNotice.isImportant ===
-      secondNotice.isImportant
-    ) {
-      return 0
+  const [noticeItems, setNoticeItems] =
+    useState([])
+
+  const [isLoading, setIsLoading] =
+    useState(true)
+
+  const [loadError, setLoadError] =
+    useState('')
+
+  useEffect(() => {
+    const abortController =
+      new AbortController()
+
+    const loadNotices = async () => {
+      const token =
+        localStorage.getItem('token')
+
+      if (!token) {
+        setLoadError(
+          '로그인 정보를 찾을 수 없어요. 다시 로그인해 주세요.'
+        )
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        setIsLoading(true)
+        setLoadError('')
+
+        const response = await fetch(
+          `${API_BASE_URL}/api/notices?page=0`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+            },
+            signal:
+              abortController.signal,
+          }
+        )
+
+        if (
+          response.status === 401 ||
+          response.status === 403
+        ) {
+          throw new Error(
+            '로그인 시간이 만료됐어요. 다시 로그인해 주세요.'
+          )
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            '공지사항을 불러오지 못했어요.'
+          )
+        }
+
+        const noticePage =
+          await response.json()
+
+        setNoticeItems(
+          Array.isArray(
+            noticePage.notices
+          )
+            ? noticePage.notices
+            : []
+        )
+      } catch (error) {
+        if (
+          error.name === 'AbortError'
+        ) {
+          return
+        }
+
+        console.error(
+          '공지사항을 불러오지 못했습니다.',
+          error
+        )
+
+        setLoadError(
+          error.message ||
+            '공지사항을 불러오지 못했어요.'
+        )
+      } finally {
+        if (
+          !abortController.signal.aborted
+        ) {
+          setIsLoading(false)
+        }
+      }
     }
 
-    return firstNotice.isImportant
-      ? -1
-      : 1
-  })
+    loadNotices()
+
+    return () => {
+      abortController.abort()
+    }
+  }, [])
 
   return (
     <div className="notice-list-page">
@@ -67,12 +155,26 @@ function NoticeList({
         </header>
 
         <main className="notice-list-content">
-          {sortedNoticeItems.length > 0 ? (
+          {isLoading ? (
+            <section className="notice-list-empty">
+              <p>
+                공지사항을 불러오는 중이에요.
+              </p>
+            </section>
+          ) : loadError ? (
+            <section className="notice-list-empty">
+              <p>{loadError}</p>
+
+              <span>
+                잠시 후 다시 시도해 주세요.
+              </span>
+            </section>
+          ) : noticeItems.length > 0 ? (
             <section
               className="notice-list"
               aria-label="공지사항 목록"
             >
-              {sortedNoticeItems.map(
+              {noticeItems.map(
                 (notice) => (
                   <button
                     className="notice-list-item"
@@ -86,7 +188,7 @@ function NoticeList({
                   >
                     <span className="notice-list-information">
                       <span className="notice-title-row">
-                        {notice.isImportant && (
+                        {notice.important && (
                           <span className="important-label">
                             중요
                           </span>
