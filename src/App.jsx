@@ -22,9 +22,6 @@ import UserProfile from './pages/UserProfile'
 const STORAGE_KEY =
   'footprint-posts'
 
-const NOTIFICATION_STORAGE_KEY =
-  'footprint-notifications'
-
 const CURRENT_NICKNAME_KEY =
   'footprint-current-nickname'
 
@@ -33,6 +30,9 @@ const CURRENT_USERNAME_KEY =
 
 const PROFILE_IMAGES_KEY =
   'footprint-profile-images'
+
+const API_BASE_URL =
+  'http://localhost:8080'
 
 function readProfileImageMap() {
   try {
@@ -122,11 +122,15 @@ function App() {
     () => readProfileImageMap()
   )
 
-  const [selectedProfile, setSelectedProfile] =
-    useState(null)
+  const [
+    selectedProfile,
+    setSelectedProfile,
+  ] = useState(null)
 
-  const [profileBackPage, setProfileBackPage] =
-    useState('postDetail')
+  const [
+    profileBackPage,
+    setProfileBackPage,
+  ] = useState('postDetail')
 
   const [posts, setPosts] =
     useState(() => {
@@ -152,25 +156,7 @@ function App() {
   const [
     notifications,
     setNotifications,
-  ] = useState(() => {
-    try {
-      const savedNotifications =
-        localStorage.getItem(
-          NOTIFICATION_STORAGE_KEY
-        )
-
-      return savedNotifications
-        ? JSON.parse(savedNotifications)
-        : []
-    } catch (error) {
-      console.error(
-        '저장된 알림을 불러오지 못했습니다.',
-        error
-      )
-
-      return []
-    }
-  })
+  ] = useState([])
 
   useEffect(() => {
     try {
@@ -190,39 +176,94 @@ function App() {
     }
   }, [posts])
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        NOTIFICATION_STORAGE_KEY,
-        JSON.stringify(notifications)
-      )
-    } catch (error) {
-      console.error(
-        '알림 저장에 실패했습니다.',
-        error
-      )
-    }
-  }, [notifications])
+  const loadNotifications =
+    useCallback(async () => {
+      const token =
+        localStorage.getItem('token')
 
-  const currentUserNotifications =
-    notifications
-      .filter(
-        (notification) =>
-          notification.recipientUsername ===
-          currentUsername
-      )
-      .sort(
-        (
-          firstNotification,
-          secondNotification
-        ) =>
-          new Date(
-            secondNotification.createdAt
-          ).getTime() -
-          new Date(
-            firstNotification.createdAt
-          ).getTime()
-      )
+      if (!token) {
+        setNotifications([])
+        return
+      }
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/notifications?page=0`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
+        )
+
+        if (
+          response.status === 401 ||
+          response.status === 403
+        ) {
+          throw new Error(
+            '로그인 시간이 만료됐습니다.'
+          )
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            '알림을 불러오지 못했습니다.'
+          )
+        }
+
+        const notificationPage =
+          await response.json()
+
+        setNotifications(
+          Array.isArray(
+            notificationPage.notifications
+          )
+            ? notificationPage.notifications
+            : []
+        )
+      } catch (error) {
+        console.error(
+          '알림을 불러오지 못했습니다.',
+          error
+        )
+      }
+    }, [])
+
+  useEffect(() => {
+    if (!currentUsername) {
+      setNotifications([])
+      return
+    }
+
+    if (
+      page === 'postList' ||
+      page === 'myPage' ||
+      page === 'notifications'
+    ) {
+      loadNotifications()
+    }
+  }, [
+    currentUsername,
+    page,
+    loadNotifications,
+  ])
+
+  const currentUserNotifications = [
+    ...notifications,
+  ].sort(
+    (
+      firstNotification,
+      secondNotification
+    ) =>
+      new Date(
+        secondNotification.createdAt
+      ).getTime() -
+      new Date(
+        firstNotification.createdAt
+      ).getTime()
+  )
 
   const hasUnreadNotification =
     currentUserNotifications.some(
@@ -357,6 +398,7 @@ function App() {
       username,
       nickname: nickname || '닉네임',
     })
+
     setProfileBackPage('postDetail')
     setPage('userProfile')
   }
@@ -571,39 +613,6 @@ function App() {
           : post
       )
     )
-
-    if (
-      targetPost.author &&
-      targetPost.author !==
-        currentUsername
-    ) {
-      const newNotification = {
-        id: crypto.randomUUID(),
-        recipientUsername:
-          targetPost.author,
-        type: 'COMMENT',
-        title:
-          '새로운 댓글이 달렸어요.',
-        message:
-          `${currentNickname}님이 회원님의 게시글에 댓글을 남겼어요.`,
-        label: '댓글',
-        postId,
-        commentId:
-          newComment.id,
-        isRead: false,
-        createdAt:
-          new Date().toISOString(),
-      }
-
-      setNotifications(
-        (
-          previousNotifications
-        ) => [
-          newNotification,
-          ...previousNotifications,
-        ]
-      )
-    }
   }
 
   const handleCommentDelete = (
@@ -663,46 +672,23 @@ function App() {
           : post
       )
     )
-
-    setNotifications(
-      (previousNotifications) =>
-        previousNotifications.filter(
-          (notification) =>
-            notification.commentId !==
-            commentId
-        )
-    )
   }
 
-  const handleNotificationRead = (
-    notificationId
-  ) => {
-    setNotifications(
-      (previousNotifications) =>
-        previousNotifications.map(
-          (notification) =>
-            notification.id ===
-            notificationId
-              ? {
-                  ...notification,
-                  isRead: true,
-                }
-              : notification
-        )
-    )
-  }
+  const handleNotificationRead =
+    async (notificationId) => {
+      const token =
+        localStorage.getItem('token')
 
-  const handleAllNotificationsRead =
-    () => {
+      if (!token) {
+        return
+      }
+
       setNotifications(
-        (
-          previousNotifications
-        ) =>
+        (previousNotifications) =>
           previousNotifications.map(
             (notification) =>
-              notification
-                .recipientUsername ===
-              currentUsername
+              notification.id ===
+              notificationId
                 ? {
                     ...notification,
                     isRead: true,
@@ -710,36 +696,97 @@ function App() {
                 : notification
           )
       )
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/notifications/${notificationId}/read`,
+          {
+            method: 'PUT',
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error(
+            '알림 읽음 처리에 실패했습니다.'
+          )
+        }
+
+        const updatedNotification =
+          await response.json()
+
+        setNotifications(
+          (previousNotifications) =>
+            previousNotifications.map(
+              (notification) =>
+                notification.id ===
+                notificationId
+                  ? updatedNotification
+                  : notification
+            )
+        )
+      } catch (error) {
+        console.error(
+          '알림 읽음 처리에 실패했습니다.',
+          error
+        )
+
+        loadNotifications()
+      }
+    }
+
+  const handleAllNotificationsRead =
+    async () => {
+      const token =
+        localStorage.getItem('token')
+
+      if (!token) {
+        return
+      }
+
+      setNotifications(
+        (previousNotifications) =>
+          previousNotifications.map(
+            (notification) => ({
+              ...notification,
+              isRead: true,
+            })
+          )
+      )
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/notifications/read-all`,
+          {
+            method: 'PUT',
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error(
+            '알림 전체 읽음 처리에 실패했습니다.'
+          )
+        }
+      } catch (error) {
+        console.error(
+          '알림 전체 읽음 처리에 실패했습니다.',
+          error
+        )
+
+        loadNotifications()
+      }
     }
 
   const handleWithdrawSuccess = () => {
     const withdrawnUsername =
       currentUsername
-
-    const withdrawnPostIds =
-      posts
-        .filter(
-          (post) =>
-            post.author ===
-            withdrawnUsername
-        )
-        .map(
-          (post) => post.id
-        )
-
-    const withdrawnCommentIds =
-      posts.flatMap((post) =>
-        (post.comments ?? [])
-          .filter(
-            (comment) =>
-              comment.authorUsername ===
-              withdrawnUsername
-          )
-          .map(
-            (comment) =>
-              comment.id
-          )
-      )
 
     setPosts((previousPosts) =>
       previousPosts
@@ -760,23 +807,7 @@ function App() {
         }))
     )
 
-    setNotifications(
-      (
-        previousNotifications
-      ) =>
-        previousNotifications.filter(
-          (notification) =>
-            notification
-              .recipientUsername !==
-              withdrawnUsername &&
-            !withdrawnPostIds.includes(
-              notification.postId
-            ) &&
-            !withdrawnCommentIds.includes(
-              notification.commentId
-            )
-        )
-    )
+    setNotifications([])
 
     localStorage.removeItem(
       `footprint-inquiries-${withdrawnUsername}`
@@ -982,17 +1013,30 @@ function App() {
     )
   }
 
-  if (page === 'userProfile' && selectedProfile) {
+  if (
+    page === 'userProfile' &&
+    selectedProfile
+  ) {
     return (
       <UserProfile
-        username={selectedProfile.username}
-        nickname={selectedProfile.nickname}
+        username={
+          selectedProfile.username
+        }
+        nickname={
+          selectedProfile.nickname
+        }
         profileImage={
-          profileImages[selectedProfile.username] ?? ''
+          profileImages[
+            selectedProfile.username
+          ] ?? ''
         }
         posts={posts}
-        onBack={() => setPage(profileBackPage)}
-        onPostSelect={handlePostSelectFromUserProfile}
+        onBack={() =>
+          setPage(profileBackPage)
+        }
+        onPostSelect={
+          handlePostSelectFromUserProfile
+        }
       />
     )
   }
