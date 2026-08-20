@@ -64,7 +64,6 @@ function formatCreatedAt(createdAt) {
 
 function PostDetail({
   post,
-  currentUsername,
   profileImages = {},
   onBack,
   onCommentAdd,
@@ -144,10 +143,7 @@ function PostDetail({
   const handleCommentDelete = (
     savedComment
   ) => {
-    if (
-      savedComment.authorUsername !==
-      currentUsername
-    ) {
+    if (!savedComment.deletable) {
       window.alert(
         '본인이 작성한 댓글만 삭제할 수 있어요.'
       )
@@ -432,16 +428,18 @@ function PostDetail({
                 {comments.map(
                   (savedComment) => {
                     const commentProfileImage =
-                      savedComment.authorUsername
+                      savedComment.authorProfileImageUrl ||
+                      (savedComment.authorUsername
                         ? profileImages[
                             savedComment
                               .authorUsername
                           ] ?? ''
-                        : ''
+                        : '')
 
-                    const isMyComment =
-                      savedComment.authorUsername ===
-                      currentUsername
+                    const canDeleteComment =
+                      Boolean(
+                        savedComment.deletable
+                      )
 
                     return (
                       <li
@@ -481,7 +479,13 @@ function PostDetail({
                                     ? 'comment-profile-image'
                                     : 'comment-default-profile-image'
                                 }
-                                src={commentProfileImage || footprint}
+                                src={
+                                  commentProfileImage
+                                    ? resolveMediaUrl(
+                                        commentProfileImage
+                                      )
+                                    : footprint
+                                }
                                 alt=""
                               />
                             </span>
@@ -527,7 +531,7 @@ function PostDetail({
                                   )}
                                 </time>
 
-                                {isMyComment && (
+                                {canDeleteComment && (
                                   <button
                                     className="comment-delete-button"
                                     type="button"
@@ -593,7 +597,7 @@ function PostDetail({
                 )
               }
               placeholder="댓글을 입력해 주세요."
-              maxLength={500}
+              maxLength={1000}
               rows={1}
             />
 

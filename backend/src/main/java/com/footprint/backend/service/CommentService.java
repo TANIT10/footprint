@@ -142,7 +142,9 @@ public class CommentService {
         commentRepository.flush();
     }
 
-    private User findUser(String username) {
+    private User findUser(
+            String username
+    ) {
         return userRepository
                 .findByUsername(username)
                 .orElseThrow(() ->
@@ -152,7 +154,9 @@ public class CommentService {
                 );
     }
 
-    private Post findPost(Long postId) {
+    private Post findPost(
+            Long postId
+    ) {
         return postRepository
                 .findById(postId)
                 .orElseThrow(() ->
@@ -169,7 +173,9 @@ public class CommentService {
         boolean isAuthor =
                 comment.getAuthor()
                         .getId()
-                        .equals(currentUser.getId());
+                        .equals(
+                                currentUser.getId()
+                        );
 
         boolean isAdmin =
                 currentUser.getRole()
@@ -178,15 +184,18 @@ public class CommentService {
         if (!isAuthor && !isAdmin) {
             throw new AccessDeniedException(
                     "본인이 작성한 댓글만 "
-                    + "삭제할 수 있습니다."
+                            + "삭제할 수 있습니다."
             );
         }
     }
 
-    private String getDisplayName(User user) {
+    private String getDisplayName(
+            User user
+    ) {
         if (
                 user.getNickname() != null
-                && !user.getNickname().isBlank()
+                        && !user.getNickname()
+                                .isBlank()
         ) {
             return user.getNickname();
         }
@@ -198,11 +207,14 @@ public class CommentService {
             Comment comment,
             User currentUser
     ) {
-        User author = comment.getAuthor();
+        User author =
+                comment.getAuthor();
 
         boolean isAuthor =
                 author.getId()
-                        .equals(currentUser.getId());
+                        .equals(
+                                currentUser.getId()
+                        );
 
         boolean isAdmin =
                 currentUser.getRole()
@@ -212,6 +224,7 @@ public class CommentService {
                 comment.getId(),
                 comment.getPost().getId(),
                 author.getId(),
+                author.getUsername(),
                 author.getNickname(),
                 author.getProfileImageUrl(),
                 comment.getContent(),

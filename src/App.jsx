@@ -81,6 +81,16 @@ async function readErrorMessage(
   }
 }
 
+function normalizeComment(comment) {
+  return {
+    ...comment,
+    author:
+      comment.authorNickname ||
+      comment.authorUsername ||
+      '익명',
+  }
+}
+
 function createPostFormData(
   requestData,
   imageFiles,
@@ -364,17 +374,75 @@ function App() {
         const postDetail =
           await response.json()
 
-        setSelectedPost(
-          (previousPost) => ({
-            ...postDetail,
-            comments:
-              previousPost?.id ===
-              postDetail.id
-                ? previousPost.comments ??
-                  []
-                : [],
-          })
+        const commentsResponse =
+          await fetch(
+            `${API_BASE_URL}/api/posts/${postId}/comments`,
+            {
+              method: 'GET',
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+              },
+            }
+          )
+
+        if (
+          commentsResponse.status === 401 ||
+          commentsResponse.status === 403
+        ) {
+          throw new Error(
+            '로그인 시간이 만료됐습니다. 다시 로그인해 주세요.'
+          )
+        }
+
+        if (!commentsResponse.ok) {
+          throw new Error(
+            await readErrorMessage(
+              commentsResponse,
+              '댓글을 불러오지 못했습니다.'
+            )
+          )
+        }
+
+        const commentResponses =
+          await commentsResponse.json()
+
+        const comments = Array.isArray(
+          commentResponses
         )
+          ? commentResponses.map(
+              normalizeComment
+            )
+          : []
+
+        setProfileImages(
+          (previousProfileImages) => {
+            const updatedProfileImages = {
+              ...previousProfileImages,
+            }
+
+            comments.forEach(
+              (savedComment) => {
+                if (
+                  savedComment.authorUsername &&
+                  savedComment.authorProfileImageUrl
+                ) {
+                  updatedProfileImages[
+                    savedComment.authorUsername
+                  ] =
+                    savedComment.authorProfileImageUrl
+                }
+              }
+            )
+
+            return updatedProfileImages
+          }
+        )
+
+        setSelectedPost({
+          ...postDetail,
+          comments,
+        })
 
         setSelectedPostId(
           postDetail.id
@@ -967,14 +1035,14 @@ function App() {
       )
     }
 
-  const handleCommentAdd = (
+  const handleCommentAdd = async (
     postId,
     commentText
   ) => {
-    if (
-      !currentNickname ||
-      !currentUsername
-    ) {
+    const token =
+      localStorage.getItem('token')
+
+    if (!token) {
       window.alert(
         '로그인 정보를 찾을 수 없습니다. 다시 로그인해주세요.'
       )
@@ -991,29 +1059,83 @@ function App() {
       return
     }
 
-    const newComment = {
-      id: crypto.randomUUID(),
-      author: currentNickname,
-      authorUsername:
-        currentUsername,
-      content: commentText,
-      createdAt:
-        new Date().toISOString(),
-    }
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/posts/${postId}/comments`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+            'Content-Type':
+              'application/json',
+          },
+          body: JSON.stringify({
+            content: commentText,
+          }),
+        }
+      )
 
-    setSelectedPost(
-      (previousPost) => ({
-        ...previousPost,
-        comments: [
-          ...(previousPost.comments ??
-            []),
-          newComment,
-        ],
-      })
-    )
+      if (
+        response.status === 401 ||
+        response.status === 403
+      ) {
+        throw new Error(
+          '로그인 시간이 만료됐습니다. 다시 로그인해 주세요.'
+        )
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          await readErrorMessage(
+            response,
+            '댓글을 등록하지 못했습니다.'
+          )
+        )
+      }
+
+      const newComment =
+        normalizeComment(
+          await response.json()
+        )
+
+      if (
+        newComment.authorUsername &&
+        newComment.authorProfileImageUrl
+      ) {
+        setProfileImages(
+          (previousProfileImages) => ({
+            ...previousProfileImages,
+            [newComment.authorUsername]:
+              newComment.authorProfileImageUrl,
+          })
+        )
+      }
+
+      setSelectedPost(
+        (previousPost) => ({
+          ...previousPost,
+          comments: [
+            ...(previousPost.comments ??
+              []),
+            newComment,
+          ],
+        })
+      )
+    } catch (error) {
+      console.error(
+        '댓글 등록 실패:',
+        error
+      )
+
+      window.alert(
+        error.message ||
+          '댓글을 등록하지 못했어요.'
+      )
+    }
   }
 
-  const handleCommentDelete = (
+  const handleCommentDelete = async (
     postId,
     commentId
   ) => {
@@ -1042,28 +1164,82 @@ function App() {
       return
     }
 
-    if (
-      targetComment.authorUsername !==
-      currentUsername
-    ) {
+    if (!targetComment.deletable) {
       window.alert(
         '본인이 작성한 댓글만 삭제할 수 있어요.'
       )
       return
     }
 
-    setSelectedPost(
-      (previousPost) => ({
-        ...previousPost,
-        comments: (
-          previousPost.comments ?? []
-        ).filter(
-          (savedComment) =>
-            savedComment.id !==
-            commentId
-        ),
-      })
-    )
+    const token =
+      localStorage.getItem('token')
+
+    if (!token) {
+      window.alert(
+        '로그인 정보를 찾을 수 없습니다. 다시 로그인해 주세요.'
+      )
+      return
+    }
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/comments/${commentId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+          },
+        }
+      )
+
+      if (
+        response.status === 401 ||
+        response.status === 403
+      ) {
+        throw new Error(
+          '본인이 작성한 댓글만 삭제할 수 있어요.'
+        )
+      }
+
+      if (response.status === 404) {
+        throw new Error(
+          '삭제할 댓글을 찾을 수 없어요.'
+        )
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          await readErrorMessage(
+            response,
+            '댓글을 삭제하지 못했습니다.'
+          )
+        )
+      }
+
+      setSelectedPost(
+        (previousPost) => ({
+          ...previousPost,
+          comments: (
+            previousPost.comments ?? []
+          ).filter(
+            (savedComment) =>
+              savedComment.id !==
+              commentId
+          ),
+        })
+      )
+    } catch (error) {
+      console.error(
+        '댓글 삭제 실패:',
+        error
+      )
+
+      window.alert(
+        error.message ||
+          '댓글을 삭제하지 못했어요.'
+      )
+    }
   }
 
   const handleNotificationRead =

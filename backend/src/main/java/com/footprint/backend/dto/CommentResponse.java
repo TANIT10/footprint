@@ -10,6 +10,8 @@ public class CommentResponse {
 
     private Long authorId;
 
+    private String authorUsername;
+
     private String authorNickname;
 
     private String authorProfileImageUrl;
@@ -24,16 +26,20 @@ public class CommentResponse {
             Long id,
             Long postId,
             Long authorId,
+            String authorUsername,
             String authorNickname,
             String authorProfileImageUrl,
             String content,
             LocalDateTime createdAt,
-            boolean deletable) {
-
+            boolean deletable
+    ) {
         this.id = id;
         this.postId = postId;
         this.authorId = authorId;
-        this.authorNickname = authorNickname;
+        this.authorUsername =
+                authorUsername;
+        this.authorNickname =
+                authorNickname;
         this.authorProfileImageUrl =
                 authorProfileImageUrl;
         this.content = content;
@@ -51,6 +57,10 @@ public class CommentResponse {
 
     public Long getAuthorId() {
         return authorId;
+    }
+
+    public String getAuthorUsername() {
+        return authorUsername;
     }
 
     public String getAuthorNickname() {
