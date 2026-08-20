@@ -9,6 +9,8 @@ import {
 
 import './PostDetail.css'
 
+import resolveMediaUrl from '../utils/mediaUrl'
+
 import logo from '../assets/logo.png'
 import footprint from '../assets/footprint.png'
 
@@ -210,11 +212,9 @@ function PostDetail({
                 <>
                   <img
                     className="post-detail-image"
-                    src={
-                      postImages[
-                        currentImageIndex
-                      ]
-                    }
+                    src={resolveMediaUrl(
+                      postImages[currentImageIndex]
+                    )}
                     alt={`${
                       post.breed || '동물'
                     } 사진 ${

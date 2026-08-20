@@ -11,6 +11,7 @@ import footprint from '../assets/footprint.png'
 import missingStatus from '../assets/MISSING.png'
 import sightedStatus from '../assets/SIGHTED.png'
 import returnedStatus from '../assets/RETURNED.png'
+import resolveMediaUrl from '../utils/mediaUrl'
 
 const POST_TYPE_INFO = {
   MISSING: {
@@ -44,7 +45,7 @@ function UserProfile({
 
   const userPosts = posts.filter(
     (post) =>
-      post.author === username
+      post.authorUsername === username
   )
 
   const totalPages = Math.ceil(
@@ -107,10 +108,15 @@ function UserProfile({
                     : 'user-profile-default-image'
                 }
                 src={
-                  profileImage ||
-                  footprint
+                  profileImage
+                    ? resolveMediaUrl(
+                        profileImage
+                      )
+                    : footprint
                 }
-                alt={`${nickname || '사용자'} 프로필`}
+                alt={`${
+                  nickname || '사용자'
+                } 프로필`}
               />
             </span>
 
@@ -120,7 +126,7 @@ function UserProfile({
               </strong>
 
               <span className="user-profile-message">
-                  우리 함께 발자국을 이어가요. 🐾
+                우리 함께 발자국을 이어가요. 🐾
               </span>
             </div>
           </section>
@@ -192,9 +198,9 @@ function UserProfile({
                               {post.representativeImage ? (
                                 <img
                                   className="post-card-image"
-                                  src={
+                                  src={resolveMediaUrl(
                                     post.representativeImage
-                                  }
+                                  )}
                                   alt={`${
                                     post.breed ||
                                     '동물'

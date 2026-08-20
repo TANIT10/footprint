@@ -13,6 +13,8 @@ public class PostResponse {
 
     private Long authorId;
 
+    private String authorUsername;
+
     private String authorNickname;
 
     private String authorProfileImageUrl;
@@ -48,6 +50,7 @@ public class PostResponse {
     public PostResponse(
             Long id,
             Long authorId,
+            String authorUsername,
             String authorNickname,
             String authorProfileImageUrl,
             PostType postType,
@@ -63,11 +66,14 @@ public class PostResponse {
             String representativeImage,
             List<String> images,
             LocalDateTime createdAt,
-            LocalDateTime updatedAt) {
+            LocalDateTime updatedAt
+    ) {
         this.id = id;
         this.authorId = authorId;
+        this.authorUsername = authorUsername;
         this.authorNickname = authorNickname;
-        this.authorProfileImageUrl = authorProfileImageUrl;
+        this.authorProfileImageUrl =
+                authorProfileImageUrl;
         this.postType = postType;
         this.breed = breed;
         this.gender = gender;
@@ -78,7 +84,8 @@ public class PostResponse {
         this.date = date;
         this.contact = contact;
         this.content = content;
-        this.representativeImage = representativeImage;
+        this.representativeImage =
+                representativeImage;
         this.images = images;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -90,6 +97,10 @@ public class PostResponse {
 
     public Long getAuthorId() {
         return authorId;
+    }
+
+    public String getAuthorUsername() {
+        return authorUsername;
     }
 
     public String getAuthorNickname() {

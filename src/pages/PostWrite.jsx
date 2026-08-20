@@ -1,9 +1,18 @@
-import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, Plus, X } from 'lucide-react'
+import {
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
+import {
+  ArrowLeft,
+  Plus,
+  X,
+} from 'lucide-react'
 
 import './PostWrite.css'
 
 import logo from '../assets/logo.png'
+import resolveMediaUrl from '../utils/mediaUrl'
 
 const POST_TYPES = [
   {
@@ -19,83 +28,6 @@ const POST_TYPES = [
     label: '귀가 완료',
   },
 ]
-
-function compressImage(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-
-    reader.onload = () => {
-      const image = new Image()
-
-      image.onload = () => {
-        const maximumSize = 1200
-
-        let width = image.width
-        let height = image.height
-
-        if (width > height && width > maximumSize) {
-          height = Math.round(
-            height * (maximumSize / width)
-          )
-          width = maximumSize
-        } else if (
-          height >= width &&
-          height > maximumSize
-        ) {
-          width = Math.round(
-            width * (maximumSize / height)
-          )
-          height = maximumSize
-        }
-
-        const canvas =
-          document.createElement('canvas')
-
-        const context = canvas.getContext('2d')
-
-        if (!context) {
-          reject(
-            new Error(
-              '사진 변환 기능을 사용할 수 없습니다.'
-            )
-          )
-          return
-        }
-
-        canvas.width = width
-        canvas.height = height
-
-        context.drawImage(
-          image,
-          0,
-          0,
-          width,
-          height
-        )
-
-        resolve(
-          canvas.toDataURL('image/jpeg', 0.75)
-        )
-      }
-
-      image.onerror = () => {
-        reject(
-          new Error('사진을 불러오지 못했습니다.')
-        )
-      }
-
-      image.src = reader.result
-    }
-
-    reader.onerror = () => {
-      reject(
-        new Error('사진 파일을 읽지 못했습니다.')
-      )
-    }
-
-    reader.readAsDataURL(file)
-  })
-}
 
 function PostWrite({
   onBack,
@@ -120,10 +52,12 @@ function PostWrite({
           : []
 
     return savedImages.map(
-      (imageData, index) => ({
+      (imageUrl, index) => ({
         id: `existing-image-${index}`,
         file: null,
-        previewUrl: imageData,
+        originalUrl: imageUrl,
+        previewUrl:
+          resolveMediaUrl(imageUrl),
         isExisting: true,
       })
     )
@@ -141,7 +75,11 @@ function PostWrite({
     content: editingPost?.content ?? '',
   })
 
-  const [isDirty, setIsDirty] = useState(false)
+  const [isDirty, setIsDirty] =
+    useState(false)
+
+  const [isSubmitting, setIsSubmitting] =
+    useState(false)
 
   useEffect(() => {
     imagesRef.current = images
@@ -149,11 +87,15 @@ function PostWrite({
 
   useEffect(() => {
     return () => {
-      imagesRef.current.forEach((image) => {
-        if (!image.isExisting) {
-          URL.revokeObjectURL(image.previewUrl)
+      imagesRef.current.forEach(
+        (image) => {
+          if (!image.isExisting) {
+            URL.revokeObjectURL(
+              image.previewUrl
+            )
+          }
         }
-      })
+      )
     }
   }, [])
 
@@ -184,35 +126,59 @@ function PostWrite({
       event.target.files ?? []
     )
 
-    const remainingCount = 5 - images.length
+    const remainingCount =
+      5 - images.length
 
     if (remainingCount <= 0) {
       event.target.value = ''
       return
     }
 
-    const imageFiles = selectedFiles.filter(
-      (file) => file.type.startsWith('image/')
-    )
+    const imageFiles =
+      selectedFiles.filter(
+        (file) =>
+          file.type.startsWith('image/')
+      )
 
     if (
-      imageFiles.length !== selectedFiles.length
+      imageFiles.length !==
+      selectedFiles.length
     ) {
       window.alert(
         '이미지 파일만 등록할 수 있어요.'
       )
     }
 
-    const filesToAdd = imageFiles.slice(
-      0,
-      remainingCount
-    )
+    const validImageFiles =
+      imageFiles.filter((file) => {
+        const maximumFileSize =
+          5 * 1024 * 1024
+
+        return file.size <= maximumFileSize
+      })
+
+    if (
+      validImageFiles.length !==
+      imageFiles.length
+    ) {
+      window.alert(
+        '사진 한 장의 크기는 5MB 이하여야 해요.'
+      )
+    }
+
+    const filesToAdd =
+      validImageFiles.slice(
+        0,
+        remainingCount
+      )
 
     const newImages = filesToAdd.map(
       (file) => ({
         id: `${file.name}-${file.lastModified}-${crypto.randomUUID()}`,
         file,
-        previewUrl: URL.createObjectURL(file),
+        originalUrl: '',
+        previewUrl:
+          URL.createObjectURL(file),
         isExisting: false,
       })
     )
@@ -226,7 +192,10 @@ function PostWrite({
       setIsDirty(true)
     }
 
-    if (imageFiles.length > remainingCount) {
+    if (
+      validImageFiles.length >
+      remainingCount
+    ) {
       window.alert(
         '사진은 최대 5장까지만 등록할 수 있어요.'
       )
@@ -235,11 +204,14 @@ function PostWrite({
     event.target.value = ''
   }
 
-  const handleImageDelete = (imageId) => {
+  const handleImageDelete = (
+    imageId
+  ) => {
     setImages((previousImages) => {
       const imageToDelete =
         previousImages.find(
-          (image) => image.id === imageId
+          (image) =>
+            image.id === imageId
         )
 
       if (
@@ -252,7 +224,8 @@ function PostWrite({
       }
 
       return previousImages.filter(
-        (image) => image.id !== imageId
+        (image) =>
+          image.id !== imageId
       )
     })
 
@@ -261,6 +234,10 @@ function PostWrite({
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+
+    if (isSubmitting) {
+      return
+    }
 
     if (!postType) {
       window.alert(
@@ -277,17 +254,23 @@ function PostWrite({
     }
 
     if (!formData.breed.trim()) {
-      window.alert('품종을 입력해 주세요.')
+      window.alert(
+        '품종을 입력해 주세요.'
+      )
       return
     }
 
     if (!formData.location.trim()) {
-      window.alert('장소를 입력해 주세요.')
+      window.alert(
+        '장소를 입력해 주세요.'
+      )
       return
     }
 
     if (!formData.date) {
-      window.alert('날짜를 선택해 주세요.')
+      window.alert(
+        '날짜를 선택해 주세요.'
+      )
       return
     }
 
@@ -298,62 +281,77 @@ function PostWrite({
       return
     }
 
+    const existingImageUrls = images
+      .filter(
+        (image) => image.isExisting
+      )
+      .map(
+        (image) => image.originalUrl
+      )
+
+    const newImageFiles = images
+      .filter(
+        (image) => !image.isExisting
+      )
+      .map((image) => image.file)
+
+    const requestData = {
+      postType,
+      breed: formData.breed.trim(),
+      gender:
+        formData.gender || null,
+      age: formData.age.trim(),
+      color: formData.color.trim(),
+      feature:
+        formData.feature.trim(),
+      location:
+        formData.location.trim(),
+      date: formData.date,
+      contact:
+        formData.contact.trim(),
+      content:
+        formData.content.trim(),
+    }
+
+    if (isEditing) {
+      requestData.existingImageUrls =
+        existingImageUrls
+    }
+
     try {
-      const completedImages =
-        await Promise.all(
-          images.map((image) =>
-            image.isExisting
-              ? image.previewUrl
-              : compressImage(image.file)
-          )
-        )
+      setIsSubmitting(true)
 
-      const completedPost = {
-        ...(editingPost ?? {}),
-        id:
-          editingPost?.id ??
-          crypto.randomUUID(),
-        postType,
-        representativeImage:
-          completedImages[0],
-        images: completedImages,
-        breed: formData.breed.trim(),
-        gender: formData.gender,
-        age: formData.age.trim(),
-        color: formData.color.trim(),
-        feature: formData.feature.trim(),
-        location: formData.location.trim(),
-        date: formData.date,
-        contact: formData.contact.trim(),
-        content: formData.content.trim(),
-        createdAt:
-          editingPost?.createdAt ??
-          new Date().toISOString(),
-        updatedAt: isEditing
-          ? new Date().toISOString()
-          : undefined,
-      }
-
-      onComplete(completedPost)
+      await onComplete?.({
+        data: requestData,
+        newImages: newImageFiles,
+      })
     } catch (error) {
       console.error(
-        '사진 처리 실패:',
+        '게시글 저장 실패:',
         error
       )
 
       window.alert(
-        '사진을 처리하지 못했어요. 다른 사진으로 다시 시도해 주세요.'
+        error.message ||
+          '게시글을 저장하지 못했어요.'
       )
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   const handleCancel = () => {
+    if (isSubmitting) {
+      return
+    }
+
     if (isDirty) {
-      const shouldLeave = window.confirm(
-        isEditing
-          ? '수정한 내용이 사라져요. 내 게시글로 돌아갈까요?'
-          : '작성 중인 내용이 사라져요. 게시글 목록으로 돌아갈까요?'
-      )
+      const shouldLeave =
+        window.confirm(
+          isEditing
+            ? '수정한 내용이 사라져요. 내 게시글로 돌아갈까요?'
+            : '작성 중인 내용이 사라져요. 게시글 목록으로 돌아갈까요?'
+        )
 
       if (!shouldLeave) {
         return
@@ -370,6 +368,7 @@ function PostWrite({
           className="post-write-back-button"
           type="button"
           onClick={handleCancel}
+          disabled={isSubmitting}
           aria-label={
             isEditing
               ? '내 게시글로 돌아가기'
@@ -414,6 +413,7 @@ function PostWrite({
                       type.value
                     )
                   }
+                  disabled={isSubmitting}
                   aria-pressed={
                     postType === type.value
                   }
@@ -439,42 +439,50 @@ function PostWrite({
               className="hidden-file-input"
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp,image/gif"
               multiple
               onChange={handleImageChange}
+              disabled={isSubmitting}
             />
 
             <div className="image-upload-list">
-              {images.map((image, index) => (
-                <div
-                  className="image-preview-box"
-                  key={image.id}
-                >
-                  <img
-                    src={image.previewUrl}
-                    alt={`등록 사진 ${index + 1}`}
-                  />
-
-                  {index === 0 && (
-                    <span className="representative-label">
-                      대표
-                    </span>
-                  )}
-
-                  <button
-                    className="image-delete-button"
-                    type="button"
-                    onClick={() =>
-                      handleImageDelete(image.id)
-                    }
-                    aria-label={`등록 사진 ${
-                      index + 1
-                    } 삭제`}
+              {images.map(
+                (image, index) => (
+                  <div
+                    className="image-preview-box"
+                    key={image.id}
                   >
-                    <X />
-                  </button>
-                </div>
-              ))}
+                    <img
+                      src={image.previewUrl}
+                      alt={`등록 사진 ${
+                        index + 1
+                      }`}
+                    />
+
+                    {index === 0 && (
+                      <span className="representative-label">
+                        대표
+                      </span>
+                    )}
+
+                    <button
+                      className="image-delete-button"
+                      type="button"
+                      onClick={() =>
+                        handleImageDelete(
+                          image.id
+                        )
+                      }
+                      disabled={isSubmitting}
+                      aria-label={`등록 사진 ${
+                        index + 1
+                      } 삭제`}
+                    >
+                      <X />
+                    </button>
+                  </div>
+                )
+              )}
 
               {images.length < 5 && (
                 <button
@@ -483,6 +491,7 @@ function PostWrite({
                   onClick={
                     handleImageButtonClick
                   }
+                  disabled={isSubmitting}
                   aria-label="사진 추가"
                 >
                   <Plus />
@@ -505,6 +514,7 @@ function PostWrite({
                 onChange={handleInputChange}
                 placeholder="ex. 믹스견, 말티즈, 아메리칸 숏헤어"
                 maxLength={50}
+                disabled={isSubmitting}
               />
             </label>
 
@@ -516,8 +526,11 @@ function PostWrite({
                   name="gender"
                   value={formData.gender}
                   onChange={handleInputChange}
+                  disabled={isSubmitting}
                 >
-                  <option value="">선택</option>
+                  <option value="">
+                    선택
+                  </option>
                   <option value="MALE">
                     수컷
                   </option>
@@ -540,6 +553,7 @@ function PostWrite({
                   onChange={handleInputChange}
                   placeholder="ex. 3살 추정"
                   maxLength={30}
+                  disabled={isSubmitting}
                 />
               </label>
             </div>
@@ -554,6 +568,7 @@ function PostWrite({
                 onChange={handleInputChange}
                 placeholder="ex. 흰색, 갈색과 검은색"
                 maxLength={50}
+                disabled={isSubmitting}
               />
             </label>
 
@@ -565,7 +580,8 @@ function PostWrite({
                 value={formData.feature}
                 onChange={handleInputChange}
                 placeholder="목줄, 옷, 상처 등 눈에 띄는 특징을 적어 주세요."
-                maxLength={300}
+                maxLength={500}
+                disabled={isSubmitting}
               />
             </label>
           </section>
@@ -582,7 +598,8 @@ function PostWrite({
                 value={formData.location}
                 onChange={handleInputChange}
                 placeholder="ex. 서울시 마포구 망원한강공원"
-                maxLength={100}
+                maxLength={255}
+                disabled={isSubmitting}
               />
             </label>
 
@@ -594,6 +611,7 @@ function PostWrite({
                 name="date"
                 value={formData.date}
                 onChange={handleInputChange}
+                disabled={isSubmitting}
               />
             </label>
 
@@ -606,7 +624,8 @@ function PostWrite({
                 value={formData.contact}
                 onChange={handleInputChange}
                 placeholder="ex. 010-1234-5678"
-                maxLength={30}
+                maxLength={100}
+                disabled={isSubmitting}
               />
             </label>
 
@@ -619,11 +638,12 @@ function PostWrite({
                 value={formData.content}
                 onChange={handleInputChange}
                 placeholder="동물을 마지막으로 본 위치와 당시 상황 등 자세한 내용을 작성해 주세요."
-                maxLength={2000}
+                maxLength={3000}
+                disabled={isSubmitting}
               />
 
               <small>
-                {formData.content.length}/2000
+                {formData.content.length}/3000
               </small>
             </label>
           </section>
@@ -633,6 +653,7 @@ function PostWrite({
               className="post-write-cancel-button"
               type="button"
               onClick={handleCancel}
+              disabled={isSubmitting}
             >
               취소
             </button>
@@ -640,8 +661,13 @@ function PostWrite({
             <button
               className="post-write-submit-button"
               type="submit"
+              disabled={isSubmitting}
             >
-              {isEditing ? '수정 완료' : '완료'}
+              {isSubmitting
+                ? '저장 중...'
+                : isEditing
+                  ? '수정 완료'
+                  : '완료'}
             </button>
           </div>
         </form>

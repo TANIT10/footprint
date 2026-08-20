@@ -19,9 +19,6 @@ import Inquiry from './pages/Inquiry'
 import Withdraw from './pages/Withdraw'
 import UserProfile from './pages/UserProfile'
 
-const STORAGE_KEY =
-  'footprint-posts'
-
 const CURRENT_NICKNAME_KEY =
   'footprint-current-nickname'
 
@@ -66,6 +63,52 @@ function readProfileImageMap() {
   }
 }
 
+async function readErrorMessage(
+  response,
+  defaultMessage
+) {
+  try {
+    const errorBody =
+      await response.json()
+
+    return (
+      errorBody.message ||
+      errorBody.error ||
+      defaultMessage
+    )
+  } catch {
+    return defaultMessage
+  }
+}
+
+function createPostFormData(
+  requestData,
+  imageFiles,
+  imagePartName
+) {
+  const multipartData =
+    new FormData()
+
+  multipartData.append(
+    'data',
+    new Blob(
+      [JSON.stringify(requestData)],
+      {
+        type: 'application/json',
+      }
+    )
+  )
+
+  imageFiles.forEach((imageFile) => {
+    multipartData.append(
+      imagePartName,
+      imageFile
+    )
+  })
+
+  return multipartData
+}
+
 function App() {
   const [page, setPage] =
     useState('start')
@@ -73,6 +116,11 @@ function App() {
   const [
     selectedPostId,
     setSelectedPostId,
+  ] = useState(null)
+
+  const [
+    selectedPost,
+    setSelectedPost,
   ] = useState(null)
 
   const [
@@ -133,48 +181,241 @@ function App() {
   ] = useState('postDetail')
 
   const [posts, setPosts] =
-    useState(() => {
-      try {
-        const savedPosts =
-          localStorage.getItem(
-            STORAGE_KEY
-          )
+    useState([])
 
-        return savedPosts
-          ? JSON.parse(savedPosts)
-          : []
-      } catch (error) {
-        console.error(
-          '저장된 게시글을 불러오지 못했습니다.',
-          error
-        )
-
-        return []
-      }
-    })
+  const [myPosts, setMyPosts] =
+    useState([])
 
   const [
     notifications,
     setNotifications,
   ] = useState([])
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(posts)
-      )
-    } catch (error) {
-      console.error(
-        '게시글 저장에 실패했습니다.',
-        error
-      )
+  const loadPosts =
+    useCallback(async () => {
+      const token =
+        localStorage.getItem('token')
 
-      window.alert(
-        '사진 용량이 너무 커서 게시글을 저장하지 못했어요.'
-      )
+      if (!token) {
+        setPosts([])
+        return
+      }
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/posts?page=0`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
+        )
+
+        if (
+          response.status === 401 ||
+          response.status === 403
+        ) {
+          throw new Error(
+            '로그인 시간이 만료됐습니다. 다시 로그인해 주세요.'
+          )
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            await readErrorMessage(
+              response,
+              '게시글 목록을 불러오지 못했습니다.'
+            )
+          )
+        }
+
+        const postPage =
+          await response.json()
+
+        setPosts(
+          Array.isArray(postPage.posts)
+            ? postPage.posts
+            : []
+        )
+      } catch (error) {
+        console.error(
+          '게시글 목록 조회 실패:',
+          error
+        )
+
+        window.alert(
+          error.message ||
+            '게시글 목록을 불러오지 못했어요.'
+        )
+      }
+    }, [])
+
+  const loadMyPosts =
+    useCallback(async () => {
+      const token =
+        localStorage.getItem('token')
+
+      if (!token) {
+        setMyPosts([])
+        return
+      }
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/posts/me?page=0`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
+        )
+
+        if (
+          response.status === 401 ||
+          response.status === 403
+        ) {
+          throw new Error(
+            '로그인 시간이 만료됐습니다. 다시 로그인해 주세요.'
+          )
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            await readErrorMessage(
+              response,
+              '내 게시글을 불러오지 못했습니다.'
+            )
+          )
+        }
+
+        const postPage =
+          await response.json()
+
+        setMyPosts(
+          Array.isArray(postPage.posts)
+            ? postPage.posts
+            : []
+        )
+      } catch (error) {
+        console.error(
+          '내 게시글 조회 실패:',
+          error
+        )
+
+        window.alert(
+          error.message ||
+            '내 게시글을 불러오지 못했어요.'
+        )
+      }
+    }, [])
+
+  const loadPostDetail =
+    useCallback(async (postId) => {
+      const token =
+        localStorage.getItem('token')
+
+      if (!token) {
+        window.alert(
+          '로그인 정보를 찾을 수 없습니다. 다시 로그인해 주세요.'
+        )
+        return null
+      }
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/posts/${postId}`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
+        )
+
+        if (
+          response.status === 401 ||
+          response.status === 403
+        ) {
+          throw new Error(
+            '로그인 시간이 만료됐습니다. 다시 로그인해 주세요.'
+          )
+        }
+
+        if (response.status === 404) {
+          throw new Error(
+            '삭제되었거나 찾을 수 없는 게시글이에요.'
+          )
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            await readErrorMessage(
+              response,
+              '게시글을 불러오지 못했습니다.'
+            )
+          )
+        }
+
+        const postDetail =
+          await response.json()
+
+        setSelectedPost(
+          (previousPost) => ({
+            ...postDetail,
+            comments:
+              previousPost?.id ===
+              postDetail.id
+                ? previousPost.comments ??
+                  []
+                : [],
+          })
+        )
+
+        setSelectedPostId(
+          postDetail.id
+        )
+
+        return postDetail
+      } catch (error) {
+        console.error(
+          '게시글 상세 조회 실패:',
+          error
+        )
+
+        window.alert(
+          error.message ||
+            '게시글을 불러오지 못했어요.'
+        )
+
+        return null
+      }
+    }, [])
+
+  useEffect(() => {
+    if (
+      page === 'postList' ||
+      page === 'userProfile'
+    ) {
+      loadPosts()
     }
-  }, [posts])
+  }, [
+    page,
+    loadPosts,
+  ])
+
+  useEffect(() => {
+    if (page === 'myPosts') {
+      loadMyPosts()
+    }
+  }, [
+    page,
+    loadMyPosts,
+  ])
 
   const loadNotifications =
     useCallback(async () => {
@@ -271,11 +512,6 @@ function App() {
         !notification.isRead
     )
 
-  const selectedPost = posts.find(
-    (post) =>
-      post.id === selectedPostId
-  )
-
   const handleProfileImageChange =
     useCallback(
       (username, profileImage) => {
@@ -335,23 +571,66 @@ function App() {
     setPage('postList')
   }
 
-  const handlePostComplete = (
-    newPost
-  ) => {
-    setPosts((previousPosts) => [
-      {
-        ...newPost,
-        author: currentUsername,
-        authorNickname:
-          currentNickname,
-        comments:
-          newPost.comments ?? [],
-      },
-      ...previousPosts,
-    ])
+  const handlePostComplete =
+    async ({
+      data,
+      newImages,
+    }) => {
+      const token =
+        localStorage.getItem('token')
 
-    setPage('postList')
-  }
+      if (!token) {
+        throw new Error(
+          '로그인 정보를 찾을 수 없습니다. 다시 로그인해 주세요.'
+        )
+      }
+
+      const multipartData =
+        createPostFormData(
+          data,
+          newImages,
+          'images'
+        )
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/posts`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+          },
+          body: multipartData,
+        }
+      )
+
+      if (
+        response.status === 401 ||
+        response.status === 403
+      ) {
+        throw new Error(
+          '로그인 시간이 만료됐습니다. 다시 로그인해 주세요.'
+        )
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          await readErrorMessage(
+            response,
+            '게시글을 등록하지 못했습니다.'
+          )
+        )
+      }
+
+      await response.json()
+      await loadPosts()
+
+      setPage('postList')
+
+      window.alert(
+        '게시글이 등록됐어요.'
+      )
+    }
 
   const handleNoticeSelect = (
     noticeId
@@ -370,20 +649,38 @@ function App() {
     setPage('noticeDetail')
   }
 
+  const openPostDetail =
+    async (
+      postId,
+      backPage
+    ) => {
+      const loadedPost =
+        await loadPostDetail(postId)
+
+      if (!loadedPost) {
+        return
+      }
+
+      setDetailBackPage(backPage)
+      setPage('postDetail')
+    }
+
   const handlePostSelectFromList = (
     postId
   ) => {
-    setSelectedPostId(postId)
-    setDetailBackPage('postList')
-    setPage('postDetail')
+    openPostDetail(
+      postId,
+      'postList'
+    )
   }
 
   const handlePostSelectFromMyPosts = (
     postId
   ) => {
-    setSelectedPostId(postId)
-    setDetailBackPage('myPosts')
-    setPage('postDetail')
+    openPostDetail(
+      postId,
+      'myPosts'
+    )
   }
 
   const handleUserProfileSelect = (
@@ -396,7 +693,8 @@ function App() {
 
     setSelectedProfile({
       username,
-      nickname: nickname || '닉네임',
+      nickname:
+        nickname || '닉네임',
     })
 
     setProfileBackPage('postDetail')
@@ -406,31 +704,25 @@ function App() {
   const handlePostSelectFromUserProfile = (
     postId
   ) => {
-    setSelectedPostId(postId)
-    setDetailBackPage('userProfile')
-    setPage('postDetail')
+    openPostDetail(
+      postId,
+      'userProfile'
+    )
   }
 
   const handlePostSelectFromNotification =
     (postId) => {
-      const selectedPostExists =
-        posts.some(
-          (post) =>
-            post.id === postId
-        )
-
-      if (!selectedPostExists) {
+      if (!postId) {
         window.alert(
-          '삭제되었거나 찾을 수 없는 게시글이에요.'
+          '연결된 게시글을 찾을 수 없어요.'
         )
         return
       }
 
-      setSelectedPostId(postId)
-      setDetailBackPage(
+      openPostDetail(
+        postId,
         'notifications'
       )
-      setPage('postDetail')
     }
 
   const handleNoticeSelectFromNotification =
@@ -465,103 +757,215 @@ function App() {
       setPage('notifications')
     }
 
-  const handlePostDelete = (
-    postId
-  ) => {
-    setPosts((previousPosts) =>
-      previousPosts.filter(
-        (post) =>
-          post.id !== postId
-      )
-    )
+  const handlePostDelete =
+    async (postId) => {
+      const token =
+        localStorage.getItem('token')
 
-    setNotifications(
-      (previousNotifications) =>
-        previousNotifications.filter(
-          (notification) =>
-            notification.postId !==
-            postId
+      if (!token) {
+        window.alert(
+          '로그인 정보를 찾을 수 없습니다. 다시 로그인해 주세요.'
         )
-    )
+        return
+      }
 
-    if (
-      selectedPostId === postId
-    ) {
-      setSelectedPostId(null)
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/posts/${postId}`,
+          {
+            method: 'DELETE',
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
+        )
+
+        if (
+          response.status === 401 ||
+          response.status === 403
+        ) {
+          throw new Error(
+            '본인이 작성한 게시글만 삭제할 수 있어요.'
+          )
+        }
+
+        if (response.status === 404) {
+          throw new Error(
+            '삭제할 게시글을 찾을 수 없어요.'
+          )
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            await readErrorMessage(
+              response,
+              '게시글을 삭제하지 못했습니다.'
+            )
+          )
+        }
+
+        setPosts(
+          (previousPosts) =>
+            previousPosts.filter(
+              (post) =>
+                post.id !== postId
+            )
+        )
+
+        setMyPosts(
+          (previousPosts) =>
+            previousPosts.filter(
+              (post) =>
+                post.id !== postId
+            )
+        )
+
+        setNotifications(
+          (
+            previousNotifications
+          ) =>
+            previousNotifications.filter(
+              (notification) =>
+                notification.postId !==
+                postId
+            )
+        )
+
+        if (
+          selectedPostId === postId
+        ) {
+          setSelectedPostId(null)
+          setSelectedPost(null)
+        }
+
+        window.alert(
+          '게시글이 삭제됐어요.'
+        )
+      } catch (error) {
+        console.error(
+          '게시글 삭제 실패:',
+          error
+        )
+
+        window.alert(
+          error.message ||
+            '게시글을 삭제하지 못했어요.'
+        )
+
+        await loadMyPosts()
+      }
     }
-  }
 
-  const handlePostEdit = (
-    postId
-  ) => {
-    const postToEdit = posts.find(
-      (post) =>
-        post.id === postId
-    )
+  const handlePostEdit =
+    async (postId) => {
+      const postToEdit =
+        await loadPostDetail(postId)
 
-    if (!postToEdit) {
+      if (!postToEdit) {
+        return
+      }
+
+      if (
+        postToEdit.authorUsername !==
+        currentUsername
+      ) {
+        window.alert(
+          '본인이 작성한 게시글만 수정할 수 있어요.'
+        )
+        return
+      }
+
+      setPage('postEdit')
+    }
+
+  const handlePostUpdate =
+    async ({
+      data,
+      newImages,
+    }) => {
+      const token =
+        localStorage.getItem('token')
+
+      if (!token) {
+        throw new Error(
+          '로그인 정보를 찾을 수 없습니다. 다시 로그인해 주세요.'
+        )
+      }
+
+      if (!selectedPostId) {
+        throw new Error(
+          '수정할 게시글을 찾을 수 없습니다.'
+        )
+      }
+
+      const multipartData =
+        createPostFormData(
+          data,
+          newImages,
+          'newImages'
+        )
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/posts/${selectedPostId}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+          },
+          body: multipartData,
+        }
+      )
+
+      if (
+        response.status === 401 ||
+        response.status === 403
+      ) {
+        throw new Error(
+          '본인이 작성한 게시글만 수정할 수 있어요.'
+        )
+      }
+
+      if (response.status === 404) {
+        throw new Error(
+          '수정할 게시글을 찾을 수 없어요.'
+        )
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          await readErrorMessage(
+            response,
+            '게시글을 수정하지 못했습니다.'
+          )
+        )
+      }
+
+      const updatedPost =
+        await response.json()
+
+      setSelectedPost({
+        ...updatedPost,
+        comments:
+          selectedPost?.comments ?? [],
+      })
+
+      setSelectedPostId(
+        updatedPost.id
+      )
+
+      await Promise.all([
+        loadPosts(),
+        loadMyPosts(),
+      ])
+
+      setPage('myPosts')
+
       window.alert(
-        '수정할 게시글을 찾을 수 없어요.'
+        '게시글이 수정됐어요.'
       )
-      return
     }
-
-    if (
-      postToEdit.author !==
-      currentUsername
-    ) {
-      window.alert(
-        '본인이 작성한 게시글만 수정할 수 있어요.'
-      )
-      return
-    }
-
-    setSelectedPostId(postId)
-    setPage('postEdit')
-  }
-
-  const handlePostUpdate = (
-    updatedPost
-  ) => {
-    if (
-      updatedPost.author !==
-      currentUsername
-    ) {
-      window.alert(
-        '본인이 작성한 게시글만 수정할 수 있어요.'
-      )
-      return
-    }
-
-    setPosts((previousPosts) =>
-      previousPosts.map((post) =>
-        post.id === updatedPost.id
-          ? {
-              ...post,
-              ...updatedPost,
-              id: post.id,
-              author: post.author,
-              authorNickname:
-                post.authorNickname,
-              comments:
-                post.comments ?? [],
-              createdAt:
-                post.createdAt,
-            }
-          : post
-      )
-    )
-
-    setSelectedPostId(
-      updatedPost.id
-    )
-
-    setPage('myPosts')
-
-    window.alert(
-      '게시글이 수정됐어요.'
-    )
-  }
 
   const handleCommentAdd = (
     postId,
@@ -577,12 +981,10 @@ function App() {
       return
     }
 
-    const targetPost = posts.find(
-      (post) =>
-        post.id === postId
-    )
-
-    if (!targetPost) {
+    if (
+      !selectedPost ||
+      selectedPost.id !== postId
+    ) {
       window.alert(
         '댓글을 작성할 게시글을 찾을 수 없어요.'
       )
@@ -599,19 +1001,15 @@ function App() {
         new Date().toISOString(),
     }
 
-    setPosts((previousPosts) =>
-      previousPosts.map((post) =>
-        post.id === postId
-          ? {
-              ...post,
-              comments: [
-                ...(post.comments ??
-                  []),
-                newComment,
-              ],
-            }
-          : post
-      )
+    setSelectedPost(
+      (previousPost) => ({
+        ...previousPost,
+        comments: [
+          ...(previousPost.comments ??
+            []),
+          newComment,
+        ],
+      })
     )
   }
 
@@ -619,12 +1017,10 @@ function App() {
     postId,
     commentId
   ) => {
-    const targetPost = posts.find(
-      (post) =>
-        post.id === postId
-    )
-
-    if (!targetPost) {
+    if (
+      !selectedPost ||
+      selectedPost.id !== postId
+    ) {
       window.alert(
         '게시글을 찾을 수 없어요.'
       )
@@ -632,7 +1028,7 @@ function App() {
     }
 
     const targetComment = (
-      targetPost.comments ?? []
+      selectedPost.comments ?? []
     ).find(
       (savedComment) =>
         savedComment.id ===
@@ -656,21 +1052,17 @@ function App() {
       return
     }
 
-    setPosts((previousPosts) =>
-      previousPosts.map((post) =>
-        post.id === postId
-          ? {
-              ...post,
-              comments: (
-                post.comments ?? []
-              ).filter(
-                (savedComment) =>
-                  savedComment.id !==
-                  commentId
-              ),
-            }
-          : post
-      )
+    setSelectedPost(
+      (previousPost) => ({
+        ...previousPost,
+        comments: (
+          previousPost.comments ?? []
+        ).filter(
+          (savedComment) =>
+            savedComment.id !==
+            commentId
+        ),
+      })
     )
   }
 
@@ -788,25 +1180,9 @@ function App() {
     const withdrawnUsername =
       currentUsername
 
-    setPosts((previousPosts) =>
-      previousPosts
-        .filter(
-          (post) =>
-            post.author !==
-            withdrawnUsername
-        )
-        .map((post) => ({
-          ...post,
-          comments: (
-            post.comments ?? []
-          ).filter(
-            (comment) =>
-              comment.authorUsername !==
-              withdrawnUsername
-          ),
-        }))
-    )
-
+    setPosts([])
+    setMyPosts([])
+    setSelectedPost(null)
     setNotifications([])
 
     localStorage.removeItem(
@@ -847,9 +1223,7 @@ function App() {
       'footprint-profile-image'
     )
 
-    localStorage.removeItem(
-      'token'
-    )
+    localStorage.removeItem('token')
 
     localStorage.removeItem(
       CURRENT_NICKNAME_KEY
@@ -1107,7 +1481,7 @@ function App() {
   if (page === 'myPosts') {
     return (
       <MyPosts
-        posts={posts}
+        posts={myPosts}
         currentUsername={
           currentUsername
         }

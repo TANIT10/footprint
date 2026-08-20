@@ -5,6 +5,8 @@ import {
 
 import './PostList.css'
 
+import resolveMediaUrl from '../utils/mediaUrl'
+
 import logo from '../assets/logo.png'
 import bell from '../assets/bell.png'
 import footprint from '../assets/footprint.png'
@@ -194,9 +196,9 @@ function PostList({
                           {post.representativeImage ? (
                             <img
                               className="post-card-image"
-                              src={
+                              src={resolveMediaUrl(
                                 post.representativeImage
-                              }
+                              )}
                               alt={`${
                                 post.breed ||
                                 '동물'

@@ -667,6 +667,7 @@ public class PostService {
         return new PostListItemResponse(
                 post.getId(),
                 author.getId(),
+                author.getUsername(),
                 author.getNickname(),
                 author.getProfileImageUrl(),
                 post.getPostType(),
@@ -697,6 +698,7 @@ public class PostService {
         return new PostResponse(
                 post.getId(),
                 author.getId(),
+                author.getUsername(),
                 author.getNickname(),
                 author.getProfileImageUrl(),
                 post.getPostType(),

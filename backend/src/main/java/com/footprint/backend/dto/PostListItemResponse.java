@@ -12,6 +12,8 @@ public class PostListItemResponse {
 
     private Long authorId;
 
+    private String authorUsername;
+
     private String authorNickname;
 
     private String authorProfileImageUrl;
@@ -33,6 +35,7 @@ public class PostListItemResponse {
     public PostListItemResponse(
             Long id,
             Long authorId,
+            String authorUsername,
             String authorNickname,
             String authorProfileImageUrl,
             PostType postType,
@@ -41,10 +44,11 @@ public class PostListItemResponse {
             String location,
             LocalDate date,
             String representativeImage,
-            LocalDateTime createdAt) {
-
+            LocalDateTime createdAt
+    ) {
         this.id = id;
         this.authorId = authorId;
+        this.authorUsername = authorUsername;
         this.authorNickname = authorNickname;
         this.authorProfileImageUrl =
                 authorProfileImageUrl;
@@ -64,6 +68,10 @@ public class PostListItemResponse {
 
     public Long getAuthorId() {
         return authorId;
+    }
+
+    public String getAuthorUsername() {
+        return authorUsername;
     }
 
     public String getAuthorNickname() {
