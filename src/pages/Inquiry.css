@@ -170,7 +170,7 @@
   gap: 2px;
 }
 
-/*말풍선 꼬리 */
+/* 안내 말풍선 꼬리 */
 .inquiry-guide-bubble::before {
   content: '';
 
@@ -195,7 +195,7 @@
   font-weight: 500;
 }
 
-/* 사용자가 보낸 메시지 목록 */
+/* 메시지 목록 */
 .inquiry-message-list {
   display: flex;
   flex: 1;
@@ -206,6 +206,25 @@
   gap: 14px;
 }
 
+/* 로딩 및 오류 문구 */
+.inquiry-status-message {
+  width: 100%;
+
+  margin: 6px 0;
+  padding: 8px 12px;
+
+  color: #888888;
+
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.inquiry-error-message {
+  color: #c44f4f;
+}
+
+/* 사용자가 보낸 메시지 */
 .inquiry-user-message {
   display: flex;
   align-items: flex-end;
@@ -236,6 +255,38 @@
   white-space: pre-wrap;
 }
 
+/* 관리자가 보낸 메시지 */
+.inquiry-admin-message {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+
+  width: 100%;
+  margin: 0;
+
+  gap: 7px;
+}
+
+.inquiry-admin-bubble {
+  max-width: 75%;
+
+  margin: 0;
+  padding: 11px 14px;
+
+  border-radius: 6px 14px 14px 14px;
+
+  background-color: #e3e3e3;
+  color: #252525;
+
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: left;
+
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+/* 메시지 전송 시간 */
 .inquiry-message-time {
   flex: 0 0 auto;
 
@@ -392,11 +443,9 @@
     border-left: 1px solid #eee9e5;
   }
 
-  .inquiry-guide-bubble {
-    font-size: 15px;
-  }
-
-  .inquiry-user-bubble {
+  .inquiry-guide-bubble,
+  .inquiry-user-bubble,
+  .inquiry-admin-bubble {
     font-size: 15px;
   }
 }
