@@ -209,12 +209,16 @@ function PostDetail({
                   <img
                     className="post-detail-image"
                     src={resolveMediaUrl(
-                      postImages[currentImageIndex]
+                      postImages[
+                        currentImageIndex
+                      ]
                     )}
                     alt={`${
-                      post.breed || '동물'
+                      post.breed ||
+                      '동물'
                     } 사진 ${
-                      currentImageIndex + 1
+                      currentImageIndex +
+                      1
                     }`}
                   />
 
@@ -324,7 +328,8 @@ function PostDetail({
                   <dd>
                     {GENDER_LABELS[
                       post.gender
-                    ] || '정보 없음'}
+                    ] ||
+                      '정보 없음'}
                   </dd>
                 </div>
 
@@ -458,18 +463,24 @@ function PostDetail({
                                 savedComment.author
                               )
                             }
-                            disabled={!savedComment.authorUsername}
+                            disabled={
+                              !savedComment.authorUsername
+                            }
                             aria-label={`${savedComment.author || '사용자'} 프로필 보기`}
                             style={{
-                              flex: '0 0 auto',
+                              flex:
+                                '0 0 auto',
                               margin: 0,
                               padding: 0,
                               border: 0,
-                              borderRadius: '50%',
-                              background: 'transparent',
-                              cursor: savedComment.authorUsername
-                                ? 'pointer'
-                                : 'default',
+                              borderRadius:
+                                '50%',
+                              background:
+                                'transparent',
+                              cursor:
+                                savedComment.authorUsername
+                                  ? 'pointer'
+                                  : 'default',
                             }}
                           >
                             <span className="comment-profile-image-box">
@@ -502,26 +513,38 @@ function PostDetail({
                                     savedComment.author
                                   )
                                 }
-                                disabled={!savedComment.authorUsername}
+                                disabled={
+                                  !savedComment.authorUsername
+                                }
                                 style={{
                                   minWidth: 0,
                                   margin: 0,
                                   padding: 0,
-                                  overflow: 'hidden',
+                                  overflow:
+                                    'hidden',
                                   border: 0,
-                                  background: 'transparent',
-                                  color: '#292929',
-                                  fontFamily: 'inherit',
-                                  fontSize: '14px',
-                                  fontWeight: 800,
-                                  textOverflow: 'ellipsis',
-                                  whiteSpace: 'nowrap',
-                                  cursor: savedComment.authorUsername
-                                    ? 'pointer'
-                                    : 'default',
+                                  background:
+                                    'transparent',
+                                  color:
+                                    '#292929',
+                                  fontFamily:
+                                    'inherit',
+                                  fontSize:
+                                    '14px',
+                                  fontWeight:
+                                    800,
+                                  textOverflow:
+                                    'ellipsis',
+                                  whiteSpace:
+                                    'nowrap',
+                                  cursor:
+                                    savedComment.authorUsername
+                                      ? 'pointer'
+                                      : 'default',
                                 }}
                               >
-                                {savedComment.author || '익명'}
+                                {savedComment.author ||
+                                  '익명'}
                               </button>
 
                               <div className="comment-side">

@@ -19,31 +19,44 @@
 
   margin: 0 auto;
 
-  overflow-x: hidden;
+  overflow-x: clip;
   background-color: #ffffff;
 }
 
-/* 상단 영역 */
+/*
+ * 상단 고정 헤더
+ * 게시글 목록 모바일 기준과 통일
+ */
 .my-posts-header {
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 500;
 
   width: 100%;
-  height: 155px;
+  height: 145px;
+
+  background-color: #ffffff;
+
+  border-bottom: 1px solid #f1eeec;
+
+  box-shadow:
+    0 3px 10px
+    rgba(0, 0, 0, 0.035);
 }
 
-/* 게시글 상세 화면과 같은 뒤로가기 버튼 */
+/* 뒤로가기 */
 .my-posts-back-button {
   position: absolute;
 
-  top: 62px;
-  left: 18px;
+  top: 53px;
+  left: 20px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  width: 42px;
-  height: 42px;
+  width: 48px;
+  height: 48px;
 
   padding: 0;
 
@@ -67,7 +80,7 @@
 .my-posts-title {
   position: absolute;
 
-  top: 69px;
+  top: 61px;
   left: 50%;
 
   width: calc(100% - 150px);
@@ -84,17 +97,20 @@
   transform: translateX(-50%);
 }
 
-
 /* 게시글 영역 */
 .my-posts-content {
   width: 100%;
   min-width: 0;
 
   margin: 0;
-  padding: 0 18px 45px;
+
+  padding:
+    18px
+    18px
+    45px;
 }
 
-/* 게시글 카드와 메뉴 버튼을 함께 감싸는 영역 */
+/* 게시글 카드와 메뉴 버튼 */
 .my-post-card-wrapper {
   position: relative;
 
@@ -102,12 +118,13 @@
   min-width: 0;
 }
 
-/* 기존 게시글 카드가 wrapper 안을 가득 채우도록 설정 */
-.my-post-card-wrapper .post-card {
+/* 기존 게시글 카드 */
+.my-post-card-wrapper
+  .post-card {
   height: 100%;
 }
 
-/* 카드 오른쪽 위 점 세 개 버튼 */
+/* 카드 오른쪽 위 점 세 개 */
 .my-post-menu-button {
   position: absolute;
 
@@ -127,7 +144,14 @@
   border: 0;
   border-radius: 50%;
 
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color:
+    rgba(
+      255,
+      255,
+      255,
+      0.9
+    );
+
   color: #555555;
 
   cursor: pointer;
@@ -187,7 +211,13 @@
 
   padding: 18px;
 
-  background-color: rgba(0, 0, 0, 0.38);
+  background-color:
+    rgba(
+      0,
+      0,
+      0,
+      0.38
+    );
 }
 
 /* 아래에서 나타나는 관리 메뉴 */
@@ -221,14 +251,28 @@
   cursor: pointer;
 }
 
-.my-post-action-sheet .my-post-delete-button {
+.my-post-action-sheet
+  .my-post-delete-button {
   color: #e04444;
 }
 
-.my-post-action-sheet .my-post-cancel-button {
+.my-post-action-sheet
+  .my-post-cancel-button {
   margin-top: 7px;
 
   color: #777777;
+}
+
+/* 매우 좁은 휴대폰 */
+@media screen and (max-width: 359px) {
+  .my-posts-back-button {
+    left: 16px;
+  }
+
+  .my-posts-content {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
 }
 
 /* PC 화면 */
@@ -242,11 +286,11 @@
   }
 
   .my-posts-back-button {
-    top: 55px;
+    top: 42px;
     left: 68px;
 
-    width: 48px;
-    height: 48px;
+    width: 70px;
+    height: 70px;
   }
 
   .my-posts-back-button svg {
@@ -255,7 +299,7 @@
   }
 
   .my-posts-title {
-    top: 61px;
+    top: 59px;
 
     font-size: 23px;
   }
@@ -264,7 +308,11 @@
     width: 640px;
 
     margin: 0 auto;
-    padding: 0 0 60px;
+
+    padding:
+      28px
+      0
+      60px;
   }
 
   .my-post-menu-button {

@@ -10,56 +10,78 @@
   color: #2e2925;
 }
 
+/*
+ * 상단 고정 헤더
+ * 게시글 목록 모바일 기준과 통일
+ */
 .post-write-header {
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 500;
 
   width: 100%;
-  max-width: 760px;
+  max-width: 1126px;
   height: 145px;
 
   margin: 0 auto;
+
+  background-color: #ffffff;
+
+  border-bottom: 1px solid #f1eeec;
+
+  box-shadow:
+    0 3px 10px
+    rgba(0, 0, 0, 0.035);
 }
 
+/* 뒤로가기 */
 .post-write-back-button {
   position: absolute;
 
-  padding: 0;
-  border: 0;
-
-  background-color: transparent;
-
-  cursor: pointer;
-}
-
-.post-write-back-button {
-  top: 63px;
-  left: 18px;
+  top: 53px;
+  left: 20px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
 
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+
+  background-color: transparent;
   color: #443a32;
+
+  cursor: pointer;
 }
 
 .post-write-back-button svg {
-  width: 29px;
-  height: 29px;
+  width: 27px;
+  height: 27px;
 
-  stroke-width: 1.8;
+  stroke-width: 2;
 }
 
+/*
+ * 가운데 로고
+ * 기존 디자인 유지
+ */
 .post-write-logo {
   position: absolute;
 
-  top: 67px;
+  top: 61px;
   left: 50%;
+
+  display: block;
 
   width: 155px;
   height: auto;
+
+  object-fit: contain;
 
   transform: translateX(-50%);
 }
@@ -69,7 +91,11 @@
   max-width: 680px;
 
   margin: 0 auto;
-  padding: 0 18px 55px;
+
+  padding:
+    28px
+    18px
+    55px;
 }
 
 .post-write-title {
@@ -97,7 +123,12 @@
 
 .post-type-buttons {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
 
   gap: 9px;
 
@@ -138,7 +169,16 @@
   background-color: #b98b67;
   color: #ffffff;
 
-  box-shadow: 0 4px 10px rgba(185, 139, 103, 0.24);
+  box-shadow:
+    0
+    4px
+    10px
+    rgba(
+      185,
+      139,
+      103,
+      0.24
+    );
 }
 
 .post-write-section {
@@ -180,7 +220,12 @@
 
 .image-upload-list {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
 
   gap: 9px;
 
@@ -223,7 +268,14 @@
 
   border-radius: 12px;
 
-  background-color: rgba(50, 42, 36, 0.78);
+  background-color:
+    rgba(
+      50,
+      42,
+      36,
+      0.78
+    );
+
   color: #ffffff;
 
   font-size: 10px;
@@ -248,7 +300,14 @@
   border: 0;
   border-radius: 50%;
 
-  background-color: rgba(35, 31, 28, 0.72);
+  background-color:
+    rgba(
+      35,
+      31,
+      28,
+      0.72
+    );
+
   color: #ffffff;
 
   cursor: pointer;
@@ -359,7 +418,17 @@
 .post-write-field textarea:focus {
   border-color: #b98b67;
 
-  box-shadow: 0 0 0 3px rgba(185, 139, 103, 0.13);
+  box-shadow:
+    0
+    0
+    0
+    3px
+    rgba(
+      185,
+      139,
+      103,
+      0.13
+    );
 }
 
 .post-write-field small {
@@ -375,14 +444,22 @@
 
 .two-column-fields {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
 
   gap: 10px;
 }
 
 .post-write-actions {
   display: grid;
-  grid-template-columns: 1fr 1.4fr;
+
+  grid-template-columns:
+    1fr
+    1.4fr;
 
   gap: 10px;
 
@@ -413,33 +490,77 @@
   background-color: #b98b67;
   color: #ffffff;
 
-  box-shadow: 0 5px 12px rgba(185, 139, 103, 0.25);
+  box-shadow:
+    0
+    5px
+    12px
+    rgba(
+      185,
+      139,
+      103,
+      0.25
+    );
 }
 
-@media screen and (min-width: 801px) {
-  .post-write-header {
-    max-width: 1126px;
-    height: 175px;
-  }
-
+/* 매우 좁은 휴대폰 */
+@media screen and (max-width: 380px) {
   .post-write-back-button {
-    top: 52px;
-    left: 70px;
-
-    width: 50px;
-    height: 50px;
+    left: 16px;
   }
 
   .post-write-logo {
-    top: 42px;
+    width: 135px;
+  }
 
-    width: 230px;
+  .post-type-button {
+    font-size: 12px;
+  }
+
+  .two-column-fields {
+    grid-template-columns: 1fr;
+
+    gap: 0;
+  }
+
+  .post-write-page {
+    width: 100%;
+    height: auto;
+    min-height: 100dvh;
+  }
+}
+
+/* PC 화면 */
+@media screen and (min-width: 801px) {
+  .post-write-header {
+    height: 190px;
+  }
+
+  .post-write-back-button {
+    top: 42px;
+    left: 68px;
+
+    width: 70px;
+    height: 70px;
+  }
+
+  .post-write-back-button svg {
+    width: 31px;
+    height: 31px;
+  }
+
+  .post-write-logo {
+    top: 34px;
+
+    width: 250px;
   }
 
   .post-write-content {
     max-width: 720px;
 
-    padding-bottom: 80px;
+    padding:
+      34px
+      18px
+      80px;
   }
 
   .post-write-title {
@@ -453,7 +574,11 @@
   }
 
   .image-upload-list {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns:
+      repeat(
+        5,
+        minmax(0, 1fr)
+      );
 
     gap: 12px;
   }
@@ -462,26 +587,4 @@
     margin-top: 18px;
     padding: 27px 0;
   }
-}
-
-@media screen and (max-width: 380px) {
-  .post-write-logo {
-    width: 135px;
-  }
-
-  .post-type-button {
-    font-size: 12px;
-  }
-
-  .two-column-fields {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-
-  .post-write-page {
-    width: 100%;
-    height: auto;
-    min-height: 100dvh;
-    overflow: visible;
-    }
 }

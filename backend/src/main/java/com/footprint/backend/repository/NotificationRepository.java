@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.footprint.backend.entity.Notification;
+import com.footprint.backend.entity.NotificationType;
 
 public interface NotificationRepository
         extends JpaRepository<Notification, Long> {
@@ -31,5 +32,11 @@ public interface NotificationRepository
 
     long countByRecipientUsernameAndReadFalse(
             String username
+    );
+
+    boolean existsByRecipientUsernameAndTypeAndPostId(
+            String username,
+            NotificationType type,
+            Long postId
     );
 }

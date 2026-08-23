@@ -23,4 +23,38 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(errorResponse);
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
+            IllegalArgumentException e) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                e.getMessage()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(errorResponse);
+    }
+
+    @ExceptionHandler(
+        org.springframework.web.bind.MethodArgumentNotValidException.class
+)
+public ResponseEntity<ErrorResponse> handleValidationException(
+        org.springframework.web.bind.MethodArgumentNotValidException e) {
+
+    ErrorResponse errorResponse =
+            new ErrorResponse(
+                    HttpStatus.BAD_REQUEST.value(),
+                    e.getBindingResult()
+                    .getFieldErrors()
+                    .get(0)
+                    .getDefaultMessage()
+            );
+
+    return ResponseEntity
+            .badRequest()
+            .body(errorResponse);
+}
 }

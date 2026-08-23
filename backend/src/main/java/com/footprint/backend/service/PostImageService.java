@@ -109,6 +109,55 @@ public class PostImageService {
         }
     }
 
+    public Path getImagePath(
+            String imageUrl) {
+
+        if (imageUrl == null
+                || imageUrl.isBlank()
+                || !imageUrl.startsWith(
+                        POST_URL_PREFIX
+                )) {
+
+            throw new IllegalArgumentException(
+                    "올바르지 않은 게시글 "
+                    + "사진 주소입니다."
+            );
+        }
+
+        String storedFileName =
+                imageUrl.substring(
+                        POST_URL_PREFIX.length()
+                );
+
+        Path imagePath =
+                postUploadDirectory
+                .resolve(storedFileName)
+                .normalize();
+
+        if (!imagePath.startsWith(
+                postUploadDirectory
+        )) {
+
+            throw new IllegalArgumentException(
+                    "올바르지 않은 게시글 "
+                    + "사진 경로입니다."
+            );
+        }
+
+        if (!Files.exists(imagePath)
+                || !Files.isRegularFile(
+                        imagePath
+                )) {
+
+            throw new IllegalStateException(
+                    "게시글 사진 파일을 "
+                    + "찾을 수 없습니다."
+            );
+        }
+
+        return imagePath;
+    }
+
     public void deleteAll(
             List<String> imageUrls) {
 

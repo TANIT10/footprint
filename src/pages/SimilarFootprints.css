@@ -1,0 +1,747 @@
+.similar-footprints-page {
+  width: 100%;
+  min-height: 100dvh;
+
+  background-color: #ffffff;
+  color: #191919;
+}
+
+.similar-footprints-page,
+.similar-footprints-page * {
+  box-sizing: border-box;
+}
+
+.similar-footprints-inner {
+  position: relative;
+
+  width: min(
+    100%,
+    520px
+  );
+
+  min-height: 100dvh;
+
+  margin: 0 auto;
+
+  overflow-x: clip;
+
+  background-color: #ffffff;
+}
+
+/*
+ * 상단 고정 헤더
+ * 게시글 목록 / 문의하기와 같은 모바일 높이
+ */
+.similar-footprints-header {
+  position: sticky;
+  top: 0;
+  z-index: 500;
+
+  width: 100%;
+  height: 145px;
+
+  padding: 0;
+
+  background-color: #ffffff;
+
+  border-bottom: 1px solid #f0e3d9;
+
+  box-shadow:
+    0
+    3px
+    10px
+    rgba(
+      0,
+      0,
+      0,
+      0.035
+    );
+}
+
+.similar-footprints-header::before {
+  content: none;
+}
+
+/*
+ * 뒤로가기
+ * 다른 화면과 동일
+ */
+.similar-footprints-back-button {
+  position: absolute;
+
+  top: 53px;
+  left: 20px;
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  height: 48px;
+
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  background-color: transparent;
+  color: #443127;
+
+  cursor: pointer;
+}
+
+.similar-footprints-back-button svg {
+  width: 27px;
+  height: 27px;
+
+  stroke-width: 2;
+}
+
+/*
+ * 닮은 발자국 제목 영역
+ *
+ * 문의하기 제목처럼
+ * 헤더 안의 같은 높이에 제목을 배치
+ */
+.similar-footprints-title-area {
+  position: absolute;
+
+  top: 61px;
+  left: 50%;
+
+  width: calc(100% - 120px);
+
+  margin: 0;
+  padding: 0;
+
+  text-align: center;
+
+  transform: translateX(-50%);
+}
+
+/*
+ * 제목
+ * 문의하기와 같은 20px 비율
+ */
+.similar-footprints-title-area h1 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0;
+
+  color: #2e2119;
+
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.4;
+
+  white-space: nowrap;
+}
+
+/*
+ * 제목 옆 발자국
+ * 기존보다 조금 크게
+ */
+.similar-footprints-title-paw {
+  display: block;
+  flex: 0 0 auto;
+
+  width: 42px;
+  height: 42px;
+
+  margin-left: -5px;
+
+  object-fit: contain;
+}
+
+/*
+ * 제목 바로 아래 상세 설명
+ */
+.similar-footprints-title-area p {
+  position: absolute;
+
+  top: 33px;
+  left: 50%;
+
+  width: max-content;
+  max-width: calc(100vw - 38px);
+
+  margin: 0;
+
+  color: #755f50;
+
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.45;
+
+  text-align: center;
+  white-space: nowrap;
+
+  transform: translateX(-50%);
+}
+
+/* 본문 */
+.similar-footprints-content {
+  padding:
+    18px
+    16px
+    42px;
+}
+
+/* 후보 없음 */
+.similar-footprints-empty {
+  margin-top: 38px;
+
+  padding:
+    36px
+    22px;
+
+  border-radius: 22px;
+
+  background-color: #ffffff;
+
+  text-align: center;
+}
+
+.similar-footprints-empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 13px;
+}
+
+.similar-footprints-empty-icon img {
+  display: block;
+
+  width: 52px;
+  height: 52px;
+
+  object-fit: contain;
+}
+
+.similar-footprints-empty h2 {
+  margin:
+    0
+    0
+    9px;
+
+  color: #34261e;
+
+  font-size: 18px;
+}
+
+.similar-footprints-empty p {
+  margin: 0;
+
+  color: #806d60;
+
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* 찾아요 그룹 */
+.similar-footprints-group {
+  margin-bottom: 32px;
+}
+
+/* 내가 찾는 아이 */
+.similar-footprints-missing-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-bottom: 15px;
+
+  padding: 14px;
+
+  border: 1px solid #eee5de;
+  border-radius: 16px;
+
+  background-color: #ffffff;
+}
+
+.similar-footprints-missing-card.has-new-candidate {
+  border-color: #d7b79f;
+
+  box-shadow:
+    0
+    4px
+    13px
+    rgba(
+      185,
+      139,
+      103,
+      0.12
+    );
+}
+
+.similar-footprints-missing-info {
+  min-width: 0;
+}
+
+.similar-footprints-group-title-row {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  margin-bottom: 4px;
+}
+
+.similar-footprints-group-label {
+  display: block;
+
+  margin: 0;
+
+  color: #9c6743;
+
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.similar-footprints-group-new-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 32px;
+  height: 18px;
+
+  padding: 0 6px;
+
+  border-radius: 999px;
+
+  background-color: #b98b67;
+  color: #ffffff;
+
+  font-size: 8px;
+  font-weight: 900;
+  line-height: 1;
+
+  letter-spacing: 0.4px;
+
+  box-shadow:
+    0
+    2px
+    5px
+    rgba(
+      185,
+      139,
+      103,
+      0.2
+    );
+}
+
+.similar-footprints-missing-card h2 {
+  margin:
+    0
+    0
+    4px;
+
+  overflow: hidden;
+
+  color: #35271e;
+
+  font-size: 17px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.similar-footprints-missing-card p {
+  margin: 0;
+
+  overflow: hidden;
+
+  color: #79675a;
+
+  font-size: 12px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.similar-footprints-missing-card
+  > img,
+.similar-footprints-missing-no-image {
+  width: 62px;
+  height: 62px;
+
+  flex: 0 0 auto;
+
+  border-radius: 13px;
+}
+
+.similar-footprints-missing-card
+  > img {
+  object-fit: cover;
+}
+
+.similar-footprints-missing-no-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: #f5f1ee;
+}
+
+.similar-footprints-missing-no-image img {
+  width: 45px;
+  height: 45px;
+
+  object-fit: contain;
+}
+
+/* 후보 2열 */
+.similar-footprints-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+  gap: 12px;
+}
+
+/* 후보 카드 */
+.similar-footprints-card {
+  position: relative;
+
+  min-width: 0;
+
+  overflow: hidden;
+
+  border: 1px solid #eee4dd;
+  border-radius: 15px;
+
+  background-color: #ffffff;
+
+  box-shadow:
+    0
+    4px
+    13px
+    rgba(
+      72,
+      48,
+      33,
+      0.07
+    );
+}
+
+/* 70 이상 확인 요망 */
+.similar-footprints-card.attention-card {
+  border: 2px solid #d9534f;
+
+  box-shadow:
+    0
+    5px
+    16px
+    rgba(
+      201,
+      58,
+      52,
+      0.16
+    );
+}
+
+/* 확인 요망 */
+.similar-footprints-attention {
+  position: absolute;
+
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+
+  padding:
+    4px
+    7px;
+
+  border-radius: 999px;
+
+  background-color: #d94843;
+  color: #ffffff;
+
+  font-size: 9px;
+  font-weight: 900;
+
+  letter-spacing: -0.2px;
+}
+
+/* 카드 클릭 */
+.similar-footprints-card-click-area {
+  display: block;
+
+  width: 100%;
+
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+
+  background-color: transparent;
+  color: inherit;
+
+  font-family: inherit;
+  text-align: left;
+
+  cursor: pointer;
+}
+
+/* 후보 사진 */
+.similar-footprints-card-image-box {
+  width: 100%;
+
+  aspect-ratio: 1 / 0.92;
+
+  overflow: hidden;
+
+  background-color: #f2efec;
+}
+
+.similar-footprints-card-image-box
+  > img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+.similar-footprints-no-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 100%;
+
+  background-color: #f5f1ee;
+}
+
+.similar-footprints-no-image img {
+  display: block;
+
+  width: 48px;
+  height: 48px;
+
+  object-fit: contain;
+}
+
+/* 카드 정보 */
+.similar-footprints-card-body {
+  padding:
+    10px
+    10px
+    11px;
+}
+
+.similar-footprints-sighted-label {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #b27048;
+
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.similar-footprints-card-body h3 {
+  margin:
+    0
+    0
+    5px;
+
+  overflow: hidden;
+
+  color: #33251d;
+
+  font-size: 14px;
+  font-weight: 900;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.similar-footprints-location,
+.similar-footprints-date {
+  margin: 2px 0;
+
+  overflow: hidden;
+
+  color: #79695f;
+
+  font-size: 10px;
+  line-height: 1.4;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.similar-footprints-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 4px;
+
+  margin-top: 8px;
+
+  padding-top: 8px;
+
+  border-top: 1px solid #f0e8e2;
+
+  color: #945d38;
+
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.similar-footprints-detail-row svg {
+  width: 14px;
+  height: 14px;
+
+  flex: 0 0 auto;
+}
+
+/* 더보기 */
+.similar-footprints-more-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 4px;
+
+  width: 100%;
+
+  margin-top: 10px;
+
+  padding:
+    9px
+    10px;
+
+  border: 1px solid #eaded5;
+  border-radius: 11px;
+
+  background-color: #ffffff;
+  color: #8f6040;
+
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 900;
+
+  cursor: pointer;
+}
+
+.similar-footprints-more-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.similar-footprints-more-button:active {
+  background-color: #f8f4f1;
+}
+
+/* 매우 좁은 휴대폰 */
+@media screen and (max-width: 360px) {
+  .similar-footprints-back-button {
+    left: 16px;
+  }
+
+  .similar-footprints-title-area {
+    width: calc(100% - 110px);
+  }
+
+  .similar-footprints-title-area h1 {
+    font-size: 19px;
+  }
+
+  .similar-footprints-title-paw {
+    width: 39px;
+    height: 39px;
+
+    margin-left: -4px;
+  }
+
+  .similar-footprints-title-area p {
+    top: 31px;
+
+    font-size: 11px;
+  }
+
+  .similar-footprints-grid {
+    gap: 9px;
+  }
+
+  .similar-footprints-card-body {
+    padding: 9px;
+  }
+}
+
+/* PC */
+@media screen and (min-width: 801px) {
+  .similar-footprints-inner {
+    width: 100%;
+    max-width: 1126px;
+  }
+
+  .similar-footprints-header {
+    height: 190px;
+  }
+
+  .similar-footprints-back-button {
+    top: 42px;
+    left: 68px;
+
+    width: 70px;
+    height: 70px;
+  }
+
+  .similar-footprints-back-button svg {
+    width: 31px;
+    height: 31px;
+  }
+
+  .similar-footprints-title-area {
+    top: 59px;
+
+    width: calc(100% - 200px);
+  }
+
+  .similar-footprints-title-area h1 {
+    font-size: 24px;
+  }
+
+  .similar-footprints-title-paw {
+    width: 48px;
+    height: 48px;
+
+    margin-left: -5px;
+  }
+
+  .similar-footprints-title-area p {
+    top: 39px;
+
+    font-size: 13px;
+  }
+
+  .similar-footprints-content {
+    width: 680px;
+
+    margin: 0 auto;
+
+    padding:
+      18px
+      0
+      60px;
+  }
+}

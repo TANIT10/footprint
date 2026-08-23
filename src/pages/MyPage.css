@@ -30,15 +30,15 @@
 }
 
 /*
- * 뒤로가기와 알림 영역 전체 고정
- * 게시글 목록 헤더와 같은 높이
+ * 상단 고정 헤더
+ * 게시글 목록과 같은 높이/위치
  */
 .my-page-header {
   position: sticky;
 
   top: 0;
   left: 0;
-  z-index: 200;
+  z-index: 500;
 
   width: 100%;
   height: 145px;
@@ -86,7 +86,7 @@
 
 /*
  * 게시글 목록과 동일한
- * 종 크기와 위치
+ * 알림 버튼 위치/크기
  */
 .my-page-notification-button {
   position: absolute;
@@ -152,6 +152,7 @@
   max-width: 520px;
 
   margin: 0 auto;
+
   padding-top: 18px;
   padding-bottom: 180px;
 }
@@ -234,10 +235,6 @@
   white-space: nowrap;
 }
 
-/*
- * 마이페이지는 본인 화면이므로
- * 본인의 로그인 아이디를 표시
- */
 .profile-username {
   overflow: hidden;
 
@@ -302,6 +299,88 @@
 
 .withdraw-button {
   color: #777777;
+}
+
+/*
+ * 닮은 발자국 메뉴
+ * 글씨 강조는 그대로 유지
+ * 배경은 흰색
+ */
+.similar-footprints-menu-button {
+  background-color: #ffffff;
+}
+
+.similar-footprints-menu-button
+  > span:first-child {
+  color: #9a5f35;
+
+  font-weight: 800;
+}
+
+.similar-footprints-menu-button
+  .menu-arrow {
+  color: #9a5f35;
+
+  font-weight: 800;
+}
+
+.similar-footprints-menu-label {
+  display: flex;
+  align-items: center;
+
+  min-width: 0;
+
+  gap: 8px;
+}
+
+.similar-footprints-menu-text {
+  display: inline-flex;
+  align-items: center;
+
+  min-width: 0;
+
+  gap: 0;
+}
+
+/* 닮은 발자국 메뉴 이미지 */
+.similar-footprints-menu-paw {
+  display: block;
+  flex: 0 0 auto;
+
+  width: 48px;
+  height: 48px;
+
+  margin-left: -6px;
+
+  object-fit: contain;
+}
+
+/* NEW 배지 */
+.similar-footprints-new-badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 35px;
+  height: 20px;
+
+  padding: 0 7px;
+
+  border-radius: 999px;
+
+  background-color: #b98b67;
+  color: #ffffff;
+
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+
+  letter-spacing: 0.5px;
+
+  box-shadow:
+    0 2px 6px
+    rgba(185, 139, 103, 0.22);
 }
 
 /* 아래쪽 집 그림 */
@@ -415,6 +494,7 @@
 
   background-color:
     rgba(255, 255, 255, 0.15);
+
   color: #ffffff;
 
   cursor: pointer;
@@ -430,7 +510,11 @@
   align-items: center;
   justify-content: center;
 
-  width: min(82vw, 420px);
+  width: min(
+    82vw,
+    420px
+  );
+
   aspect-ratio: 1 / 1;
 
   overflow: hidden;
@@ -454,7 +538,7 @@
   object-fit: contain;
 }
 
-/* 화면이 매우 좁은 휴대폰일 때 */
+/* 매우 좁은 휴대폰 */
 @media screen and (max-width: 359px) {
   .my-page-back-button {
     left: 16px;
@@ -489,6 +573,17 @@
   .profile-username {
     font-size: 13px;
   }
+
+  .similar-footprints-menu-label {
+    gap: 5px;
+  }
+
+  .similar-footprints-menu-paw {
+    width: 44px;
+    height: 44px;
+
+    margin-left: -6px;
+  }
 }
 
 /* PC 화면 */
@@ -501,7 +596,7 @@
 
   /*
    * 게시글 목록 PC 헤더와
-   * 동일한 높이
+   * 같은 높이
    */
   .my-page-header {
     height: 190px;

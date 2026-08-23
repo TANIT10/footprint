@@ -37,52 +37,106 @@ public class PostService {
 
     private static final int POST_PAGE_SIZE = 50;
 
-    private final PostRepository postRepository;
-    private final PostImageRepository postImageRepository;
-    private final CommentRepository commentRepository;
-    private final UserRepository userRepository;
-    private final PostImageService postImageService;
+    private final PostRepository
+            postRepository;
+
+    private final PostImageRepository
+            postImageRepository;
+
+    private final CommentRepository
+            commentRepository;
+
+    private final UserRepository
+            userRepository;
+
+    private final PostImageService
+            postImageService;
+
+    /*
+     * 새 게시글 저장 후
+     * AI 매칭을 별도 스레드에서 실행한다.
+     */
+    private final AiMatchAsyncService
+            aiMatchAsyncService;
 
     public PostService(
             PostRepository postRepository,
             PostImageRepository postImageRepository,
             CommentRepository commentRepository,
             UserRepository userRepository,
-            PostImageService postImageService) {
+            PostImageService postImageService,
+            AiMatchAsyncService aiMatchAsyncService
+    ) {
 
-        this.postRepository = postRepository;
+        this.postRepository =
+                postRepository;
+
         this.postImageRepository =
                 postImageRepository;
+
         this.commentRepository =
                 commentRepository;
-        this.userRepository = userRepository;
-        this.postImageService = postImageService;
+
+        this.userRepository =
+                userRepository;
+
+        this.postImageService =
+                postImageService;
+
+        this.aiMatchAsyncService =
+                aiMatchAsyncService;
     }
 
+    /*
+     * =========================================================
+     * 게시글 등록
+     * =========================================================
+     */
     @Transactional
     public PostResponse createPost(
             String username,
             PostCreateRequest request,
-            List<MultipartFile> images) {
+            List<MultipartFile> images
+    ) {
 
-        User author = findUser(username);
+        User author =
+                findUser(
+                        username
+                );
 
+        /*
+         * 실제 이미지 파일을 먼저 저장한다.
+         */
         List<String> savedImageUrls =
-                postImageService.saveAll(images);
+                postImageService
+                        .saveAll(
+                                images
+                        );
 
         try {
-            Post post = new Post();
 
-            post.setAuthor(author);
+            Post post =
+                    new Post();
+
+            post.setAuthor(
+                    author
+            );
+
             post.setPostType(
                     request.getPostType()
             );
+
             post.setBreed(
                     request.getBreed()
             );
 
-            if (request.getGender() == null) {
-                post.setGender(Gender.UNKNOWN);
+            if (
+                    request.getGender()
+                            == null
+            ) {
+                post.setGender(
+                        Gender.UNKNOWN
+                );
             } else {
                 post.setGender(
                         request.getGender()
@@ -90,59 +144,113 @@ public class PostService {
             }
 
             post.setAge(
-                    emptyToNull(request.getAge())
+                    emptyToNull(
+                            request.getAge()
+                    )
             );
+
             post.setColor(
-                    emptyToNull(request.getColor())
+                    emptyToNull(
+                            request.getColor()
+                    )
             );
+
             post.setFeature(
-                    emptyToNull(request.getFeature())
+                    emptyToNull(
+                            request.getFeature()
+                    )
             );
+
             post.setLocation(
                     request.getLocation()
             );
+
             post.setDate(
                     request.getDate()
             );
+
             post.setContact(
-                    emptyToNull(request.getContact())
+                    emptyToNull(
+                            request.getContact()
+                    )
             );
+
             post.setContent(
                     request.getContent()
             );
 
             Post savedPost =
-                    postRepository.save(post);
+                    postRepository
+                            .save(
+                                    post
+                            );
 
+            /*
+             * 게시글 이미지 DB 저장.
+             */
             List<PostImage> postImages =
                     createPostImages(
                             savedPost,
                             savedImageUrls
                     );
 
-            postImageRepository.saveAll(
-                    postImages
+            postImageRepository
+                    .saveAll(
+                            postImages
+                    );
+
+            /*
+             * 중요.
+             *
+             * 비동기 AI를 지금 바로 실행하면
+             * 다른 스레드가 현재 트랜잭션이
+             * 커밋되기 전에 실행될 수 있다.
+             *
+             * 그러면 새 게시글이나 이미지가
+             * 아직 DB에서 조회되지 않을 수 있다.
+             *
+             * 따라서 트랜잭션 COMMIT이
+             * 성공한 뒤에만 AI 작업을 시작한다.
+             */
+            registerAiMatchAfterCommit(
+                    savedPost.getId()
             );
 
             return toResponse(
                     savedPost,
                     savedImageUrls
             );
-        } catch (RuntimeException exception) {
 
-            postImageService.deleteAll(
-                    savedImageUrls
-            );
+        } catch (
+                RuntimeException exception
+        ) {
+
+            /*
+             * DB 저장 실패 시
+             * 먼저 저장했던 실제 이미지 파일 제거.
+             */
+            postImageService
+                    .deleteAll(
+                            savedImageUrls
+                    );
 
             throw exception;
         }
     }
 
+    /*
+     * =========================================================
+     * 전체 게시글 목록
+     * =========================================================
+     */
     @Transactional(readOnly = true)
     public PostPageResponse getPostPage(
-            int page) {
+            int page
+    ) {
 
-        validatePage(page);
+        validatePage(
+                page
+        );
 
         Pageable pageable =
                 PageRequest.of(
@@ -152,21 +260,34 @@ public class PostService {
 
         Page<Post> postPage =
                 postRepository
-                .findAllByOrderByCreatedAtDesc(
-                        pageable
-                );
+                        .findAllByOrderByCreatedAtDesc(
+                                pageable
+                        );
 
-        return toPageResponse(postPage);
+        return toPageResponse(
+                postPage
+        );
     }
 
+    /*
+     * =========================================================
+     * 내가 작성한 게시글 목록
+     * =========================================================
+     */
     @Transactional(readOnly = true)
     public PostPageResponse getMyPostPage(
             String username,
-            int page) {
+            int page
+    ) {
 
-        validatePage(page);
+        validatePage(
+                page
+        );
 
-        User user = findUser(username);
+        User user =
+                findUser(
+                        username
+                );
 
         Pageable pageable =
                 PageRequest.of(
@@ -176,22 +297,35 @@ public class PostService {
 
         Page<Post> postPage =
                 postRepository
-                .findByAuthorIdOrderByCreatedAtDesc(
-                        user.getId(),
-                        pageable
-                );
+                        .findByAuthorIdOrderByCreatedAtDesc(
+                                user.getId(),
+                                pageable
+                        );
 
-        return toPageResponse(postPage);
+        return toPageResponse(
+                postPage
+        );
     }
 
+    /*
+     * =========================================================
+     * 게시글 상세
+     * =========================================================
+     */
     @Transactional(readOnly = true)
     public PostResponse getPost(
-            Long postId) {
+            Long postId
+    ) {
 
-        Post post = findPost(postId);
+        Post post =
+                findPost(
+                        postId
+                );
 
         List<String> imageUrls =
-                getImageUrls(postId);
+                getImageUrls(
+                        postId
+                );
 
         return toResponse(
                 post,
@@ -199,14 +333,23 @@ public class PostService {
         );
     }
 
+    /*
+     * =========================================================
+     * 게시글 수정
+     * =========================================================
+     */
     @Transactional
     public PostResponse updatePost(
             String username,
             Long postId,
             PostUpdateRequest request,
-            List<MultipartFile> newImages) {
+            List<MultipartFile> newImages
+    ) {
 
-        Post post = findPost(postId);
+        Post post =
+                findPost(
+                        postId
+                );
 
         validateUpdateAuthor(
                 post,
@@ -214,11 +357,14 @@ public class PostService {
         );
 
         List<String> currentImageUrls =
-                getImageUrls(postId);
+                getImageUrls(
+                        postId
+                );
 
         List<String> existingImageUrls =
                 new ArrayList<>(
-                        request.getExistingImageUrls()
+                        request
+                                .getExistingImageUrls()
                 );
 
         validateExistingImageUrls(
@@ -238,17 +384,22 @@ public class PostService {
                 );
 
         List<String> savedNewImageUrls =
-                postImageService.saveOptional(
-                        newImages
-                );
+                postImageService
+                        .saveOptional(
+                                newImages
+                        );
 
         List<String> removedImageUrls =
-                currentImageUrls.stream()
-                .filter(imageUrl ->
-                        !existingImageUrls
-                                .contains(imageUrl)
-                )
-                .toList();
+                currentImageUrls
+                        .stream()
+                        .filter(
+                                imageUrl ->
+                                        !existingImageUrls
+                                                .contains(
+                                                        imageUrl
+                                                )
+                        )
+                        .toList();
 
         registerUpdateImageCleanup(
                 savedNewImageUrls,
@@ -261,14 +412,18 @@ public class PostService {
         );
 
         Post savedPost =
-                postRepository.saveAndFlush(
-                        post
+                postRepository
+                        .saveAndFlush(
+                                post
+                        );
+
+        postImageRepository
+                .deleteByPostId(
+                        postId
                 );
 
-        postImageRepository.deleteByPostId(
-                postId
-        );
-        postImageRepository.flush();
+        postImageRepository
+                .flush();
 
         List<String> finalImageUrls =
                 new ArrayList<>(
@@ -285,10 +440,13 @@ public class PostService {
                         finalImageUrls
                 );
 
-        postImageRepository.saveAll(
-                finalPostImages
-        );
-        postImageRepository.flush();
+        postImageRepository
+                .saveAll(
+                        finalPostImages
+                );
+
+        postImageRepository
+                .flush();
 
         return toResponse(
                 savedPost,
@@ -296,15 +454,26 @@ public class PostService {
         );
     }
 
+    /*
+     * =========================================================
+     * 게시글 삭제
+     * =========================================================
+     */
     @Transactional
     public void deletePost(
             String username,
-            Long postId) {
+            Long postId
+    ) {
 
         User currentUser =
-                findUser(username);
+                findUser(
+                        username
+                );
 
-        Post post = findPost(postId);
+        Post post =
+                findPost(
+                        postId
+                );
 
         validateDeletePermission(
                 currentUser,
@@ -312,30 +481,107 @@ public class PostService {
         );
 
         List<String> imageUrls =
-                getImageUrls(postId);
+                getImageUrls(
+                        postId
+                );
 
         registerDeleteImageCleanup(
                 imageUrls
         );
 
-        commentRepository.deleteByPostId(
-                postId
-        );
-        commentRepository.flush();
+        commentRepository
+                .deleteByPostId(
+                        postId
+                );
 
-        postImageRepository.deleteByPostId(
-                postId
-        );
-        postImageRepository.flush();
+        commentRepository
+                .flush();
 
-        postRepository.delete(post);
-        postRepository.flush();
+        postImageRepository
+                .deleteByPostId(
+                        postId
+                );
+
+        postImageRepository
+                .flush();
+
+        postRepository
+                .delete(
+                        post
+                );
+
+        postRepository
+                .flush();
     }
 
-    private User findUser(String username) {
+    /*
+     * =========================================================
+     * 새 게시글 AI 매칭 예약
+     * =========================================================
+     *
+     * DB 트랜잭션이 정상적으로 커밋된 뒤
+     * 별도 스레드에서 AI 매칭을 시작한다.
+     */
+    private void registerAiMatchAfterCommit(
+            Long postId
+    ) {
+
+        if (
+                postId == null
+        ) {
+            return;
+        }
+
+        /*
+         * 현재 트랜잭션 동기화가 활성화된 경우
+         * afterCommit에서 AI 작업 시작.
+         */
+        if (
+                TransactionSynchronizationManager
+                        .isSynchronizationActive()
+        ) {
+
+            TransactionSynchronizationManager
+                    .registerSynchronization(
+                            new TransactionSynchronization() {
+
+                                @Override
+                                public void afterCommit() {
+
+                                    aiMatchAsyncService
+                                            .processNewPost(
+                                                    postId
+                                            );
+                                }
+                            }
+                    );
+
+            return;
+        }
+
+        /*
+         * 혹시 트랜잭션이 없는 환경에서
+         * 호출된 경우에도 안전하게 실행.
+         */
+        aiMatchAsyncService
+                .processNewPost(
+                        postId
+                );
+    }
+
+    /*
+     * =========================================================
+     * 사용자 조회
+     * =========================================================
+     */
+    private User findUser(
+            String username
+    ) {
 
         return userRepository
-                .findByUsername(username)
+                .findByUsername(
+                        username
+                )
                 .orElseThrow(() ->
                         new IllegalArgumentException(
                                 "사용자를 찾을 수 없습니다."
@@ -343,10 +589,19 @@ public class PostService {
                 );
     }
 
-    private Post findPost(Long postId) {
+    /*
+     * =========================================================
+     * 게시글 조회
+     * =========================================================
+     */
+    private Post findPost(
+            Long postId
+    ) {
 
         return postRepository
-                .findById(postId)
+                .findById(
+                        postId
+                )
                 .orElseThrow(() ->
                         new IllegalArgumentException(
                                 "게시글을 찾을 수 없습니다."
@@ -354,42 +609,66 @@ public class PostService {
                 );
     }
 
-    private void validatePage(int page) {
+    /*
+     * =========================================================
+     * 페이지 번호 검사
+     * =========================================================
+     */
+    private void validatePage(
+            int page
+    ) {
 
-        if (page < 0) {
+        if (
+                page < 0
+        ) {
             throw new IllegalArgumentException(
                     "페이지 번호는 0 이상이어야 합니다."
             );
         }
     }
 
-    private PostPageResponse toPageResponse(
-            Page<Post> postPage) {
+    /*
+     * =========================================================
+     * 게시글 페이지 응답 변환
+     * =========================================================
+     */
+    private PostPageResponse
+            toPageResponse(
+                    Page<Post> postPage
+            ) {
 
         List<Post> posts =
-                postPage.getContent();
+                postPage
+                        .getContent();
 
         List<Long> postIds =
-                posts.stream()
-                .map(Post::getId)
-                .toList();
+                posts
+                        .stream()
+                        .map(
+                                Post::getId
+                        )
+                        .toList();
 
         Map<Long, String>
                 representativeImageMap =
-                        getRepresentativeImageMap(
-                                postIds
-                        );
+                getRepresentativeImageMap(
+                        postIds
+                );
 
         List<PostListItemResponse> responses =
-                posts.stream()
-                .map(post ->
-                        toListItemResponse(
-                                post,
-                                representativeImageMap
-                                        .get(post.getId())
+                posts
+                        .stream()
+                        .map(
+                                post ->
+                                        toListItemResponse(
+                                                post,
+                                                representativeImageMap
+                                                        .get(
+                                                                post.getId()
+                                                        )
+                                        )
                         )
-                )
-                .toList();
+                        .toList();
 
         return new PostPageResponse(
                 responses,
@@ -402,83 +681,139 @@ public class PostService {
         );
     }
 
+    /*
+     * =========================================================
+     * 게시글 이미지 URL 목록
+     * =========================================================
+     */
     private List<String> getImageUrls(
-            Long postId) {
+            Long postId
+    ) {
 
         return postImageRepository
                 .findByPostIdOrderByDisplayOrderAsc(
                         postId
                 )
                 .stream()
-                .map(PostImage::getImageUrl)
+                .map(
+                        PostImage::getImageUrl
+                )
                 .toList();
     }
 
-    private List<PostImage> createPostImages(
-            Post post,
-            List<String> imageUrls) {
+    /*
+     * =========================================================
+     * PostImage 엔티티 생성
+     * =========================================================
+     */
+    private List<PostImage>
+            createPostImages(
+                    Post post,
+                    List<String> imageUrls
+            ) {
 
         List<PostImage> postImages =
                 new ArrayList<>();
 
-        for (int index = 0;
+        for (
+                int index = 0;
                 index < imageUrls.size();
-                index++) {
+                index++
+        ) {
 
             PostImage postImage =
                     new PostImage();
 
-            postImage.setPost(post);
-            postImage.setImageUrl(
-                    imageUrls.get(index)
+            postImage.setPost(
+                    post
             );
-            postImage.setDisplayOrder(index);
 
-            postImages.add(postImage);
+            postImage.setImageUrl(
+                    imageUrls.get(
+                            index
+                    )
+            );
+
+            postImage.setDisplayOrder(
+                    index
+            );
+
+            postImages.add(
+                    postImage
+            );
         }
 
         return postImages;
     }
 
+    /*
+     * =========================================================
+     * 수정 권한 확인
+     * =========================================================
+     */
     private void validateUpdateAuthor(
             Post post,
-            String username) {
+            String username
+    ) {
 
-        if (!post.getAuthor()
-                .getUsername()
-                .equals(username)) {
+        if (
+                !post.getAuthor()
+                        .getUsername()
+                        .equals(
+                                username
+                        )
+        ) {
 
             throw new AccessDeniedException(
                     "본인이 작성한 게시글만 "
-                    + "수정할 수 있습니다."
+                            + "수정할 수 있습니다."
             );
         }
     }
 
+    /*
+     * =========================================================
+     * 삭제 권한 확인
+     * =========================================================
+     */
     private void validateDeletePermission(
             User currentUser,
-            Post post) {
+            Post post
+    ) {
 
         boolean isAuthor =
                 post.getAuthor()
-                .getId()
-                .equals(currentUser.getId());
+                        .getId()
+                        .equals(
+                                currentUser
+                                        .getId()
+                        );
 
         boolean isAdmin =
                 currentUser.getRole()
                         == UserRole.ADMIN;
 
-        if (!isAuthor && !isAdmin) {
+        if (
+                !isAuthor &&
+                !isAdmin
+        ) {
+
             throw new AccessDeniedException(
                     "본인이 작성한 게시글만 "
-                    + "삭제할 수 있습니다."
+                            + "삭제할 수 있습니다."
             );
         }
     }
 
+    /*
+     * =========================================================
+     * 수정 시 기존 이미지 검증
+     * =========================================================
+     */
     private void validateExistingImageUrls(
             List<String> existingImageUrls,
-            List<String> currentImageUrls) {
+            List<String> currentImageUrls
+    ) {
 
         Set<String> currentImageUrlSet =
                 new HashSet<>(
@@ -488,51 +823,75 @@ public class PostService {
         Set<String> requestedImageUrlSet =
                 new HashSet<>();
 
-        for (String imageUrl
-                : existingImageUrls) {
+        for (
+                String imageUrl
+                : existingImageUrls
+        ) {
 
-            if (imageUrl == null
-                    || imageUrl.isBlank()) {
+            if (
+                    imageUrl == null ||
+                    imageUrl.isBlank()
+            ) {
 
                 throw new IllegalArgumentException(
                         "유지할 사진 주소가 "
-                        + "올바르지 않습니다."
+                                + "올바르지 않습니다."
                 );
             }
 
-            if (!requestedImageUrlSet.add(
-                    imageUrl
-            )) {
+            if (
+                    !requestedImageUrlSet
+                            .add(
+                                    imageUrl
+                            )
+            ) {
+
                 throw new IllegalArgumentException(
                         "같은 사진을 중복해서 "
-                        + "등록할 수 없습니다."
+                                + "등록할 수 없습니다."
                 );
             }
 
-            if (!currentImageUrlSet.contains(
-                    imageUrl
-            )) {
+            if (
+                    !currentImageUrlSet
+                            .contains(
+                                    imageUrl
+                            )
+            ) {
+
                 throw new IllegalArgumentException(
                         "해당 게시글에 등록되지 "
-                        + "않은 사진입니다."
+                                + "않은 사진입니다."
                 );
             }
         }
     }
 
+    /*
+     * =========================================================
+     * 게시글 수정 필드 적용
+     * =========================================================
+     */
     private void updatePostFields(
             Post post,
-            PostUpdateRequest request) {
+            PostUpdateRequest request
+    ) {
 
         post.setPostType(
                 request.getPostType()
         );
+
         post.setBreed(
                 request.getBreed()
         );
 
-        if (request.getGender() == null) {
-            post.setGender(Gender.UNKNOWN);
+        if (
+                request.getGender()
+                        == null
+        ) {
+            post.setGender(
+                    Gender.UNKNOWN
+            );
         } else {
             post.setGender(
                     request.getGender()
@@ -540,37 +899,61 @@ public class PostService {
         }
 
         post.setAge(
-                emptyToNull(request.getAge())
+                emptyToNull(
+                        request.getAge()
+                )
         );
+
         post.setColor(
-                emptyToNull(request.getColor())
+                emptyToNull(
+                        request.getColor()
+                )
         );
+
         post.setFeature(
-                emptyToNull(request.getFeature())
+                emptyToNull(
+                        request.getFeature()
+                )
         );
+
         post.setLocation(
                 request.getLocation()
         );
+
         post.setDate(
                 request.getDate()
         );
+
         post.setContact(
-                emptyToNull(request.getContact())
+                emptyToNull(
+                        request.getContact()
+                )
         );
+
         post.setContent(
                 request.getContent()
         );
     }
 
+    /*
+     * =========================================================
+     * 수정 후 실제 이미지 파일 정리
+     * =========================================================
+     */
     private void registerUpdateImageCleanup(
             List<String> newImageUrls,
-            List<String> removedImageUrls) {
+            List<String> removedImageUrls
+    ) {
 
         List<String> newImages =
-                List.copyOf(newImageUrls);
+                List.copyOf(
+                        newImageUrls
+                );
 
         List<String> removedImages =
-                List.copyOf(removedImageUrls);
+                List.copyOf(
+                        removedImageUrls
+                );
 
         TransactionSynchronizationManager
                 .registerSynchronization(
@@ -587,10 +970,13 @@ public class PostService {
 
                             @Override
                             public void afterCompletion(
-                                    int status) {
+                                    int status
+                            ) {
 
-                                if (status
-                                        != STATUS_COMMITTED) {
+                                if (
+                                        status
+                                                != STATUS_COMMITTED
+                                ) {
 
                                     postImageService
                                             .deleteAll(
@@ -602,11 +988,19 @@ public class PostService {
                 );
     }
 
+    /*
+     * =========================================================
+     * 삭제 후 실제 이미지 파일 정리
+     * =========================================================
+     */
     private void registerDeleteImageCleanup(
-            List<String> imageUrls) {
+            List<String> imageUrls
+    ) {
 
         List<String> images =
-                List.copyOf(imageUrls);
+                List.copyOf(
+                        imageUrls
+                );
 
         TransactionSynchronizationManager
                 .registerSynchronization(
@@ -624,45 +1018,64 @@ public class PostService {
                 );
     }
 
+    /*
+     * =========================================================
+     * 목록용 대표 이미지 한 번에 조회
+     * =========================================================
+     */
     private Map<Long, String>
             getRepresentativeImageMap(
-                    List<Long> postIds) {
+                    List<Long> postIds
+            ) {
 
         Map<Long, String> result =
                 new HashMap<>();
 
-        if (postIds.isEmpty()) {
+        if (
+                postIds.isEmpty()
+        ) {
             return result;
         }
 
         List<PostImage> postImages =
                 postImageRepository
-                .findByPostIdInOrderByPostIdAscDisplayOrderAsc(
-                        postIds
-                );
+                        .findByPostIdInOrderByPostIdAscDisplayOrderAsc(
+                                postIds
+                        );
 
-        for (PostImage postImage : postImages) {
+        for (
+                PostImage postImage
+                : postImages
+        ) {
 
             Long postId =
                     postImage
-                    .getPost()
-                    .getId();
+                            .getPost()
+                            .getId();
 
             result.putIfAbsent(
                     postId,
-                    postImage.getImageUrl()
+                    postImage
+                            .getImageUrl()
             );
         }
 
         return result;
     }
 
+    /*
+     * =========================================================
+     * 목록 응답 변환
+     * =========================================================
+     */
     private PostListItemResponse
             toListItemResponse(
                     Post post,
-                    String representativeImage) {
+                    String representativeImage
+            ) {
 
-        User author = post.getAuthor();
+        User author =
+                post.getAuthor();
 
         return new PostListItemResponse(
                 post.getId(),
@@ -680,19 +1093,31 @@ public class PostService {
         );
     }
 
+    /*
+     * =========================================================
+     * 상세 응답 변환
+     * =========================================================
+     */
     private PostResponse toResponse(
             Post post,
-            List<String> imageUrls) {
+            List<String> imageUrls
+    ) {
 
-        User author = post.getAuthor();
+        User author =
+                post.getAuthor();
 
-        String representativeImage = null;
+        String representativeImage =
+                null;
 
-        if (imageUrls != null
-                && !imageUrls.isEmpty()) {
+        if (
+                imageUrls != null &&
+                !imageUrls.isEmpty()
+        ) {
 
             representativeImage =
-                    imageUrls.get(0);
+                    imageUrls.get(
+                            0
+                    );
         }
 
         return new PostResponse(
@@ -718,10 +1143,19 @@ public class PostService {
         );
     }
 
-    private String emptyToNull(String value) {
+    /*
+     * =========================================================
+     * 빈 문자열 → null
+     * =========================================================
+     */
+    private String emptyToNull(
+            String value
+    ) {
 
-        if (value == null
-                || value.isBlank()) {
+        if (
+                value == null ||
+                value.isBlank()
+        ) {
 
             return null;
         }

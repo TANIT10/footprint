@@ -125,19 +125,75 @@ public class NotificationService {
             Long postId,
             Long noticeId
     ) {
-        Notification notification = new Notification();
-        notification.setRecipient(recipient);
-        notification.setType(type);
-        notification.setTitle(title);
-        notification.setMessage(message);
-        notification.setLabel(label);
-        notification.setPostId(postId);
-        notification.setNoticeId(noticeId);
+        Notification notification =
+                new Notification();
+
+        notification.setRecipient(
+                recipient
+        );
+
+        notification.setType(
+                type
+        );
+
+        notification.setTitle(
+                title
+        );
+
+        notification.setMessage(
+                message
+        );
+
+        notification.setLabel(
+                label
+        );
+
+        notification.setPostId(
+                postId
+        );
+
+        notification.setNoticeId(
+                noticeId
+        );
 
         Notification savedNotification =
-                notificationRepository.save(notification);
+                notificationRepository.save(
+                        notification
+                );
 
-        return toResponse(savedNotification);
+        return toResponse(
+                savedNotification
+        );
+    }
+
+    @Transactional
+    public void createAiMatchNotificationIfAbsent(
+            User recipient,
+            Long sightedPostId
+    ) {
+        boolean alreadyExists =
+                notificationRepository
+                        .existsByRecipientUsernameAndTypeAndPostId(
+                                recipient.getUsername(),
+                                NotificationType.AI_MATCH,
+                                sightedPostId
+                        );
+
+        if (alreadyExists) {
+            return;
+        }
+
+        createNotification(
+                recipient,
+                NotificationType.AI_MATCH,
+                "🐾 닮은 발자국을 발견했어요",
+                "찾고 있는 아이와 매우 비슷한 "
+                        + "제보가 등록됐어요. "
+                        + "꼭 확인해 주세요.",
+                "확인 요망",
+                sightedPostId,
+                null
+        );
     }
 
     private NotificationResponse toResponse(

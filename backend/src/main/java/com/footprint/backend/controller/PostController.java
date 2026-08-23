@@ -37,6 +37,7 @@ public class PostController {
         this.postService = postService;
     }
 
+
     @PostMapping(
             consumes =
                     MediaType.MULTIPART_FORM_DATA_VALUE
@@ -44,14 +45,18 @@ public class PostController {
     public ResponseEntity<PostResponse>
             createPost(
                     Authentication authentication,
+
                     @Valid
                     @RequestPart("data")
                     PostCreateRequest request,
+
                     @RequestPart("images")
                     List<MultipartFile> images) {
 
+
         String username =
                 authentication.getName();
+
 
         PostResponse response =
                 postService.createPost(
@@ -60,10 +65,12 @@ public class PostController {
                         images
                 );
 
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
     }
+
 
     @GetMapping
     public ResponseEntity<PostPageResponse>
@@ -73,23 +80,29 @@ public class PostController {
                     )
                     int page) {
 
+
         PostPageResponse response =
                 postService.getPostPage(page);
 
+
         return ResponseEntity.ok(response);
     }
+
 
     @GetMapping("/me")
     public ResponseEntity<PostPageResponse>
             getMyPostPage(
                     Authentication authentication,
+
                     @RequestParam(
                             defaultValue = "0"
                     )
                     int page) {
 
+
         String username =
                 authentication.getName();
+
 
         PostPageResponse response =
                 postService.getMyPostPage(
@@ -97,19 +110,24 @@ public class PostController {
                         page
                 );
 
+
         return ResponseEntity.ok(response);
     }
+
 
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponse>
             getPost(
                     @PathVariable Long postId) {
 
+
         PostResponse response =
                 postService.getPost(postId);
 
+
         return ResponseEntity.ok(response);
     }
+
 
     @PutMapping(
             value = "/{postId}",
@@ -119,18 +137,23 @@ public class PostController {
     public ResponseEntity<PostResponse>
             updatePost(
                     Authentication authentication,
+
                     @PathVariable Long postId,
+
                     @Valid
                     @RequestPart("data")
                     PostUpdateRequest request,
+
                     @RequestPart(
                             value = "newImages",
                             required = false
                     )
                     List<MultipartFile> newImages) {
 
+
         String username =
                 authentication.getName();
+
 
         PostResponse response =
                 postService.updatePost(
@@ -140,22 +163,28 @@ public class PostController {
                         newImages
                 );
 
+
         return ResponseEntity.ok(response);
     }
+
 
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void>
             deletePost(
                     Authentication authentication,
+
                     @PathVariable Long postId) {
+
 
         String username =
                 authentication.getName();
+
 
         postService.deletePost(
                 username,
                 postId
         );
+
 
         return ResponseEntity
                 .noContent()

@@ -3,6 +3,7 @@ import {
   useRef,
   useState,
 } from 'react'
+
 import {
   ArrowLeft,
   X,
@@ -53,92 +54,120 @@ function readProfileImageMap() {
 }
 
 function compressProfileImage(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
+  return new Promise(
+    (resolve, reject) => {
+      const reader =
+        new FileReader()
 
-    reader.onerror = () => {
-      reject(
-        new Error(
-          '사진 파일을 읽지 못했습니다.'
-        )
-      )
-    }
-
-    reader.onload = () => {
-      const image = new Image()
-
-      image.onerror = () => {
+      reader.onerror = () => {
         reject(
           new Error(
-            '사진을 불러오지 못했습니다.'
+            '사진 파일을 읽지 못했습니다.'
           )
         )
       }
 
-      image.onload = () => {
-        const maximumSize = 720
+      reader.onload = () => {
+        const image =
+          new Image()
 
-        const scale = Math.min(
-          1,
-          maximumSize / image.width,
-          maximumSize / image.height
-        )
-
-        const canvas =
-          document.createElement('canvas')
-
-        canvas.width = Math.max(
-          1,
-          Math.round(image.width * scale)
-        )
-
-        canvas.height = Math.max(
-          1,
-          Math.round(image.height * scale)
-        )
-
-        const context =
-          canvas.getContext('2d')
-
-        if (!context) {
+        image.onerror = () => {
           reject(
             new Error(
-              '사진 압축 기능을 사용할 수 없습니다.'
+              '사진을 불러오지 못했습니다.'
             )
           )
-          return
         }
 
-        context.fillStyle = '#ffffff'
-        context.fillRect(
-          0,
-          0,
-          canvas.width,
-          canvas.height
-        )
+        image.onload = () => {
+          const maximumSize =
+            720
 
-        context.drawImage(
-          image,
-          0,
-          0,
-          canvas.width,
-          canvas.height
-        )
+          const scale =
+            Math.min(
+              1,
+              maximumSize /
+                image.width,
+              maximumSize /
+                image.height
+            )
 
-        const compressedImage =
-          canvas.toDataURL(
-            'image/jpeg',
-            0.78
+          const canvas =
+            document.createElement(
+              'canvas'
+            )
+
+          canvas.width =
+            Math.max(
+              1,
+              Math.round(
+                image.width *
+                  scale
+              )
+            )
+
+          canvas.height =
+            Math.max(
+              1,
+              Math.round(
+                image.height *
+                  scale
+              )
+            )
+
+          const context =
+            canvas.getContext(
+              '2d'
+            )
+
+          if (!context) {
+            reject(
+              new Error(
+                '사진 압축 기능을 사용할 수 없습니다.'
+              )
+            )
+
+            return
+          }
+
+          context.fillStyle =
+            '#ffffff'
+
+          context.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
           )
 
-        resolve(compressedImage)
+          context.drawImage(
+            image,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          )
+
+          const compressedImage =
+            canvas.toDataURL(
+              'image/jpeg',
+              0.78
+            )
+
+          resolve(
+            compressedImage
+          )
+        }
+
+        image.src =
+          reader.result
       }
 
-      image.src = reader.result
+      reader.readAsDataURL(
+        file
+      )
     }
-
-    reader.readAsDataURL(file)
-  })
+  )
 }
 
 function MyPage({
@@ -146,6 +175,9 @@ function MyPage({
   username,
   onBack,
   onMyPosts,
+  onSimilarFootprints,
+  hasNewSimilarFootprints = false,
+  similarFootprintNewCount = 0,
   onNotices,
   onNotifications,
   hasUnreadNotification,
@@ -153,17 +185,22 @@ function MyPage({
   onWithdraw,
   onProfileImageChange,
 }) {
-  const fileInputRef = useRef(null)
+  const fileInputRef =
+    useRef(null)
 
-  const [profileImage, setProfileImage] =
-    useState(() => {
-      const profileImageMap =
-        readProfileImageMap()
+  const [
+    profileImage,
+    setProfileImage,
+  ] = useState(() => {
+    const profileImageMap =
+      readProfileImageMap()
 
-      return username
-        ? profileImageMap[username] ?? ''
-        : ''
-    })
+    return username
+      ? profileImageMap[
+          username
+        ] ?? ''
+      : ''
+  })
 
   const [
     isProfileMenuOpen,
@@ -180,10 +217,6 @@ function MyPage({
     setIsProfileImageProcessing,
   ] = useState(false)
 
-  /*
-   * 예전 공통 키에 저장된 프로필 사진이
-   * 있다면 현재 로그인 계정으로 한 번 이전
-   */
   useEffect(() => {
     if (!username) {
       setProfileImage('')
@@ -194,12 +227,17 @@ function MyPage({
       readProfileImageMap()
 
     const savedUserProfileImage =
-      profileImageMap[username]
+      profileImageMap[
+        username
+      ]
 
-    if (savedUserProfileImage) {
+    if (
+      savedUserProfileImage
+    ) {
       setProfileImage(
         savedUserProfileImage
       )
+
       return
     }
 
@@ -208,7 +246,9 @@ function MyPage({
         LEGACY_PROFILE_IMAGE_KEY
       )
 
-    if (!legacyProfileImage) {
+    if (
+      !legacyProfileImage
+    ) {
       setProfileImage('')
       return
     }
@@ -216,7 +256,9 @@ function MyPage({
     try {
       const updatedProfileImageMap = {
         ...profileImageMap,
-        [username]: legacyProfileImage,
+
+        [username]:
+          legacyProfileImage,
       }
 
       localStorage.setItem(
@@ -244,87 +286,120 @@ function MyPage({
         error
       )
     }
-  }, [username, onProfileImageChange])
+  }, [
+    username,
+    onProfileImageChange,
+  ])
 
-  const handleProfileChange = async (
-    event
-  ) => {
-    const file = event.target.files?.[0]
+  const handleProfileChange =
+    async (event) => {
+      const file =
+        event.target
+          .files?.[0]
 
-    event.target.value = ''
+      event.target.value =
+        ''
 
-    if (!file) {
-      return
-    }
-
-    if (!file.type.startsWith('image/')) {
-      window.alert(
-        '이미지 파일만 선택할 수 있어요.'
-      )
-      return
-    }
-
-    if (!username) {
-      window.alert(
-        '로그인 정보를 찾을 수 없어요. 다시 로그인해 주세요.'
-      )
-      return
-    }
-
-    setIsProfileImageProcessing(true)
-
-    try {
-      const compressedImage =
-        await compressProfileImage(file)
-
-      const profileImageMap =
-        readProfileImageMap()
-
-      const updatedProfileImageMap = {
-        ...profileImageMap,
-        [username]: compressedImage,
+      if (!file) {
+        return
       }
 
-      localStorage.setItem(
-        PROFILE_IMAGES_KEY,
-        JSON.stringify(
-          updatedProfileImageMap
+      if (
+        !file.type.startsWith(
+          'image/'
         )
+      ) {
+        window.alert(
+          '이미지 파일만 선택할 수 있어요.'
+        )
+
+        return
+      }
+
+      if (!username) {
+        window.alert(
+          '로그인 정보를 찾을 수 없어요. 다시 로그인해 주세요.'
+        )
+
+        return
+      }
+
+      setIsProfileImageProcessing(
+        true
       )
 
-      setProfileImage(compressedImage)
-      setIsProfileMenuOpen(false)
+      try {
+        const compressedImage =
+          await compressProfileImage(
+            file
+          )
 
-      onProfileImageChange?.(
-        username,
-        compressedImage
-      )
-    } catch (error) {
-      console.error(
-        '프로필 사진 저장 실패:',
-        error
-      )
+        const profileImageMap =
+          readProfileImageMap()
 
-      window.alert(
-        '프로필 사진을 저장하지 못했어요. 다른 사진을 선택해 주세요.'
-      )
-    } finally {
-      setIsProfileImageProcessing(false)
+        const updatedProfileImageMap = {
+          ...profileImageMap,
+
+          [username]:
+            compressedImage,
+        }
+
+        localStorage.setItem(
+          PROFILE_IMAGES_KEY,
+          JSON.stringify(
+            updatedProfileImageMap
+          )
+        )
+
+        setProfileImage(
+          compressedImage
+        )
+
+        setIsProfileMenuOpen(
+          false
+        )
+
+        onProfileImageChange?.(
+          username,
+          compressedImage
+        )
+      } catch (error) {
+        console.error(
+          '프로필 사진 저장 실패:',
+          error
+        )
+
+        window.alert(
+          '프로필 사진을 저장하지 못했어요. 다른 사진을 선택해 주세요.'
+        )
+      } finally {
+        setIsProfileImageProcessing(
+          false
+        )
+      }
     }
-  }
 
-  const handleLargeProfileOpen = () => {
-    setIsProfileMenuOpen(false)
-    setIsLargeProfileOpen(true)
-  }
+  const handleLargeProfileOpen =
+    () => {
+      setIsProfileMenuOpen(
+        false
+      )
 
-  const handleProfileFileOpen = () => {
-    if (isProfileImageProcessing) {
-      return
+      setIsLargeProfileOpen(
+        true
+      )
     }
 
-    fileInputRef.current?.click()
-  }
+  const handleProfileFileOpen =
+    () => {
+      if (
+        isProfileImageProcessing
+      ) {
+        return
+      }
+
+      fileInputRef.current?.click()
+    }
 
   return (
     <div className="my-page">
@@ -342,14 +417,19 @@ function MyPage({
           <button
             className="my-page-notification-button"
             type="button"
-            onClick={onNotifications}
+            onClick={
+              onNotifications
+            }
             aria-label={
               hasUnreadNotification
                 ? '알림, 읽지 않은 알림 있음'
                 : '알림'
             }
           >
-            <img src={bell} alt="" />
+            <img
+              src={bell}
+              alt=""
+            />
 
             {hasUnreadNotification && (
               <span
@@ -366,7 +446,9 @@ function MyPage({
               className="profile-image-button"
               type="button"
               onClick={() =>
-                setIsProfileMenuOpen(true)
+                setIsProfileMenuOpen(
+                  true
+                )
               }
               aria-label="프로필 사진 메뉴 열기"
             >
@@ -388,11 +470,14 @@ function MyPage({
 
             <div className="profile-information">
               <strong className="profile-nickname">
-                {nickname || '닉네임'}
+                {nickname ||
+                  '닉네임'}
               </strong>
 
               <span className="profile-username">
-                @{username || '아이디'}
+                @
+                {username ||
+                  '아이디'}
               </span>
             </div>
           </section>
@@ -403,7 +488,9 @@ function MyPage({
             <button
               className="my-page-menu-button"
               type="button"
-              onClick={onMyPosts}
+              onClick={
+                onMyPosts
+              }
             >
               <span>
                 내가 작성한 게시글
@@ -415,11 +502,34 @@ function MyPage({
             </button>
 
             <button
-              className="my-page-menu-button"
+              className="my-page-menu-button similar-footprints-menu-button"
               type="button"
-              onClick={onNotices}
+              onClick={
+                onSimilarFootprints
+              }
             >
-              <span>공지사항</span>
+              <span className="similar-footprints-menu-label">
+                <span className="similar-footprints-menu-text">
+                  <span>
+                    닮은 발자국 확인하기
+                  </span>
+
+                  <img
+                    className="similar-footprints-menu-paw"
+                    src={footprint}
+                    alt=""
+                  />
+                </span>
+
+                {hasNewSimilarFootprints && (
+                  <span
+                    className="similar-footprints-new-badge"
+                    aria-label={`새 닮은 발자국 ${similarFootprintNewCount}개`}
+                  >
+                    NEW
+                  </span>
+                )}
+              </span>
 
               <span className="menu-arrow">
                 ›
@@ -429,9 +539,29 @@ function MyPage({
             <button
               className="my-page-menu-button"
               type="button"
-              onClick={onInquiry}
+              onClick={
+                onNotices
+              }
             >
-              <span>문의하기</span>
+              <span>
+                공지사항
+              </span>
+
+              <span className="menu-arrow">
+                ›
+              </span>
+            </button>
+
+            <button
+              className="my-page-menu-button"
+              type="button"
+              onClick={
+                onInquiry
+              }
+            >
+              <span>
+                문의하기
+              </span>
 
               <span className="menu-arrow">
                 ›
@@ -441,9 +571,13 @@ function MyPage({
             <button
               className="my-page-menu-button withdraw-button"
               type="button"
-              onClick={onWithdraw}
+              onClick={
+                onWithdraw
+              }
             >
-              <span>탈퇴하기</span>
+              <span>
+                탈퇴하기
+              </span>
 
               <span className="menu-arrow">
                 ›
@@ -463,19 +597,25 @@ function MyPage({
           className="profile-file-input"
           type="file"
           accept="image/*"
-          onChange={handleProfileChange}
+          onChange={
+            handleProfileChange
+          }
         />
 
         {isProfileMenuOpen && (
           <div
             className="profile-modal-background"
             onClick={() =>
-              setIsProfileMenuOpen(false)
+              setIsProfileMenuOpen(
+                false
+              )
             }
           >
             <section
               className="profile-action-sheet"
-              onClick={(event) =>
+              onClick={(
+                event
+              ) =>
                 event.stopPropagation()
               }
               aria-label="프로필 사진 메뉴"
@@ -507,7 +647,9 @@ function MyPage({
                 className="profile-cancel-button"
                 type="button"
                 onClick={() =>
-                  setIsProfileMenuOpen(false)
+                  setIsProfileMenuOpen(
+                    false
+                  )
                 }
                 disabled={
                   isProfileImageProcessing
@@ -523,14 +665,18 @@ function MyPage({
           <div
             className="large-profile-background"
             onClick={() =>
-              setIsLargeProfileOpen(false)
+              setIsLargeProfileOpen(
+                false
+              )
             }
           >
             <button
               className="large-profile-close-button"
               type="button"
               onClick={() =>
-                setIsLargeProfileOpen(false)
+                setIsLargeProfileOpen(
+                  false
+                )
               }
               aria-label="프로필 크게 보기 닫기"
             >
@@ -539,7 +685,9 @@ function MyPage({
 
             <div
               className="large-profile-image-box"
-              onClick={(event) =>
+              onClick={(
+                event
+              ) =>
                 event.stopPropagation()
               }
             >
