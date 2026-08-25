@@ -3,6 +3,11 @@ import {
   useState,
 } from 'react'
 
+import {
+  ArrowUp,
+  Menu,
+} from 'lucide-react'
+
 import './PostList.css'
 
 import resolveMediaUrl from '../utils/mediaUrl'
@@ -35,6 +40,7 @@ function PostList({
   onWrite,
   onPostSelect,
   onMyPage,
+  onCommunity,
   onNotifications,
   hasUnreadNotification,
 }) {
@@ -47,6 +53,19 @@ function PostList({
     currentPage,
     setCurrentPage,
   ] = useState(1)
+
+  /*
+   * 오른쪽 집 모양 메뉴 열림/닫힘
+   */
+  const [
+    isMenuOpen,
+    setIsMenuOpen,
+  ] = useState(false)
+
+  const [
+    showScrollTop,
+    setShowScrollTop,
+  ] = useState(false)
 
   const totalPages = Math.ceil(
     posts.length / postsPerPage
@@ -107,8 +126,61 @@ function PostList({
     )
   }
 
+  /*
+   * 메뉴 안의 기능을 누르면
+   * 메뉴를 먼저 닫고 해당 화면으로 이동
+   */
+  const handleWriteClick = () => {
+    setIsMenuOpen(false)
+    onWrite?.()
+  }
+
+  const handleCommunityClick = () => {
+    setIsMenuOpen(false)
+    onCommunity?.()
+  }
+
+  const handleMyPageClick = () => {
+    setIsMenuOpen(false)
+    onMyPage?.()
+  }
+
+  const handlePostListScroll = (
+    event
+  ) => {
+    setShowScrollTop(
+      event.currentTarget.scrollTop >
+        20
+    )
+  }
+
+  const handleScrollToTop = () => {
+    const postListPage =
+      document.querySelector(
+        '.post-list-page'
+      )
+
+    if (postListPage) {
+      postListPage.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      })
+      return
+    }
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
+  }
+
   return (
-    <div className="post-list-page">
+    <div
+      className="post-list-page"
+      onScroll={
+        handlePostListScroll
+      }
+    >
       <div className="post-list-inner">
         <header className="post-list-header">
           <img
@@ -291,34 +363,114 @@ function PostList({
           )}
         </main>
 
+        {isMenuOpen && (
+          <button
+            className="side-menu-backdrop"
+            type="button"
+            aria-label="메뉴 닫기"
+            onClick={() =>
+              setIsMenuOpen(false)
+            }
+          />
+        )}
+
+        {showScrollTop && (
+          <button
+            className="post-list-scroll-top-button"
+            type="button"
+            onClick={handleScrollToTop}
+            aria-label="맨 위로 이동"
+          >
+            <ArrowUp
+              aria-hidden="true"
+            />
+          </button>
+        )}
+
         <aside
           className="post-side-menu"
           aria-label="빠른 메뉴"
         >
-          <button
-            className="side-menu-button my-page-button"
-            type="button"
-            onClick={onMyPage}
-            aria-label="내 페이지로 이동"
+          <div
+            className={`side-menu-options ${
+              isMenuOpen
+                ? 'side-menu-options-open'
+                : ''
+            }`}
           >
-            내
-            <br />
-            페이지
-          </button>
+            <button
+              className="side-menu-button write-button"
+              type="button"
+              onClick={handleWriteClick}
+              aria-label="게시글 작성"
+              tabIndex={
+                isMenuOpen ? 0 : -1
+              }
+            >
+              <img
+                className="paw-icon"
+                src={footprint}
+                alt=""
+              />
+
+              <span>글쓰기</span>
+            </button>
+
+            <button
+              className="side-menu-button community-button"
+              type="button"
+              onClick={handleCommunityClick}
+              aria-label="커뮤니티로 이동"
+              tabIndex={
+                isMenuOpen ? 0 : -1
+              }
+            >
+              커뮤
+              <br />
+              니티
+            </button>
+
+            <button
+              className="side-menu-button my-page-button"
+              type="button"
+              onClick={handleMyPageClick}
+              aria-label="내 페이지로 이동"
+              tabIndex={
+                isMenuOpen ? 0 : -1
+              }
+            >
+              내
+              <br />
+              페이지
+            </button>
+          </div>
 
           <button
-            className="side-menu-button write-button"
+            className={`side-menu-button home-menu-button ${
+              isMenuOpen
+                ? 'home-menu-button-open'
+                : ''
+            }`}
             type="button"
-            onClick={onWrite}
-            aria-label="게시글 작성"
+            onClick={() =>
+              setIsMenuOpen(
+                (previous) =>
+                  !previous
+              )
+            }
+            aria-label={
+              isMenuOpen
+                ? '빠른 메뉴 닫기'
+                : '빠른 메뉴 열기'
+            }
+            aria-expanded={
+              isMenuOpen
+            }
           >
-            <img
-              className="paw-icon"
-              src={footprint}
-              alt=""
+            <Menu
+              className="home-menu-icon"
+              aria-hidden="true"
             />
-
-            <span>글쓰기</span>
           </button>
         </aside>
       </div>

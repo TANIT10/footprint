@@ -2,7 +2,9 @@ import {
   ArrowLeft,
   Send,
 } from 'lucide-react'
+
 import {
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -20,75 +22,290 @@ function formatMessageTime(createdAt) {
     return ''
   }
 
-  const date = new Date(createdAt)
+  const date =
+    new Date(createdAt)
 
-  if (Number.isNaN(date.getTime())) {
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
     return ''
   }
 
-  return date.toLocaleTimeString('ko-KR', {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  return date.toLocaleTimeString(
+    'ko-KR',
+    {
+      hour: '2-digit',
+      minute: '2-digit',
+    }
+  )
 }
 
 function Inquiry({
   username,
   onBack,
 }) {
-  const [messages, setMessages] =
-    useState([])
+  const [
+    messages,
+    setMessages,
+  ] = useState([])
 
-  const [messageText, setMessageText] =
-    useState('')
+  const [
+    messageText,
+    setMessageText,
+  ] = useState('')
 
-  const [isLoading, setIsLoading] =
-    useState(true)
+  const [
+    isLoading,
+    setIsLoading,
+  ] = useState(true)
 
-  const [isSending, setIsSending] =
-    useState(false)
+  const [
+    isSending,
+    setIsSending,
+  ] = useState(false)
 
-  const [loadError, setLoadError] =
-    useState('')
+  const [
+    loadError,
+    setLoadError,
+  ] = useState('')
 
-  const messageEndRef = useRef(null)
+  const messageEndRef =
+    useRef(null)
 
+  /*
+   * ==========================================
+   * 문의 메시지 조회
+   * ==========================================
+   *
+   * 첫 진입 때는 로딩 표시.
+   * 이후 자동 갱신 때는 화면을 가리지 않고
+   * 조용히 최신 메시지만 가져옵니다.
+   */
+  const loadMessages =
+    useCallback(
+      async (
+        showLoading = false
+      ) => {
+        const token =
+          localStorage.getItem(
+            'token'
+          )
+
+        if (!token) {
+          setLoadError(
+            '로그인 정보를 찾을 수 없어요. 다시 로그인해 주세요.'
+          )
+
+          setIsLoading(
+            false
+          )
+
+          return
+        }
+
+        try {
+          if (showLoading) {
+            setIsLoading(
+              true
+            )
+          }
+
+          const response =
+            await fetch(
+              `${API_BASE_URL}/api/inquiries/messages`,
+              {
+                method: 'GET',
+
+                headers: {
+                  Authorization:
+                    `Bearer ${token}`,
+                },
+              }
+            )
+
+          if (
+            response.status ===
+              401 ||
+            response.status ===
+              403
+          ) {
+            throw new Error(
+              '로그인 시간이 만료됐어요. 다시 로그인해 주세요.'
+            )
+          }
+
+          if (!response.ok) {
+            throw new Error(
+              '문의 내용을 불러오지 못했어요.'
+            )
+          }
+
+          const responseMessages =
+            await response.json()
+
+          setMessages(
+            Array.isArray(
+              responseMessages
+            )
+              ? responseMessages
+              : []
+          )
+
+          setLoadError(
+            ''
+          )
+        } catch (error) {
+          console.error(
+            '문의 내용을 불러오지 못했습니다.',
+            error
+          )
+
+          /*
+           * 자동 갱신 중 잠깐 실패했다고
+           * 기존 채팅을 없애지는 않습니다.
+           */
+          if (showLoading) {
+            setLoadError(
+              error.message ||
+                '문의 내용을 불러오지 못했어요.'
+            )
+          }
+        } finally {
+          if (showLoading) {
+            setIsLoading(
+              false
+            )
+          }
+        }
+      },
+      []
+    )
+
+  /*
+   * ==========================================
+   * 첫 조회 + 실시간 자동 갱신
+   * ==========================================
+   */
   useEffect(() => {
-    const abortController =
-      new AbortController()
+    if (!username) {
+      return undefined
+    }
 
-    const loadMessages = async () => {
+    loadMessages(
+      true
+    )
+
+    const intervalId =
+      window.setInterval(
+        () => {
+          loadMessages(
+            false
+          )
+        },
+        3000
+      )
+
+    const handleWindowFocus =
+      () => {
+        loadMessages(
+          false
+        )
+      }
+
+    window.addEventListener(
+      'focus',
+      handleWindowFocus
+    )
+
+    return () => {
+      window.clearInterval(
+        intervalId
+      )
+
+      window.removeEventListener(
+        'focus',
+        handleWindowFocus
+      )
+    }
+  }, [
+    username,
+    loadMessages,
+  ])
+
+  /*
+   * 새 메시지가 생기면
+   * 가장 아래 메시지로 이동합니다.
+   */
+  useEffect(() => {
+    messageEndRef
+      .current
+      ?.scrollIntoView({
+        behavior:
+          'smooth',
+      })
+  }, [
+    messages,
+  ])
+
+  const handleMessageSend =
+    async () => {
+      const trimmedMessage =
+        messageText.trim()
+
+      if (
+        !trimmedMessage ||
+        isSending
+      ) {
+        return
+      }
+
       const token =
-        localStorage.getItem('token')
+        localStorage.getItem(
+          'token'
+        )
 
       if (!token) {
-        setLoadError(
+        window.alert(
           '로그인 정보를 찾을 수 없어요. 다시 로그인해 주세요.'
         )
-        setIsLoading(false)
+
         return
       }
 
       try {
-        setIsLoading(true)
-        setLoadError('')
-
-        const response = await fetch(
-          `${API_BASE_URL}/api/inquiries/messages`,
-          {
-            method: 'GET',
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-            },
-            signal:
-              abortController.signal,
-          }
+        setIsSending(
+          true
         )
 
+        const response =
+          await fetch(
+            `${API_BASE_URL}/api/inquiries/messages`,
+            {
+              method: 'POST',
+
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+
+                'Content-Type':
+                  'application/json; charset=utf-8',
+              },
+
+              body:
+                JSON.stringify({
+                  content:
+                    trimmedMessage,
+                }),
+            }
+          )
+
         if (
-          response.status === 401 ||
-          response.status === 403
+          response.status ===
+            401 ||
+          response.status ===
+            403
         ) {
           throw new Error(
             '로그인 시간이 만료됐어요. 다시 로그인해 주세요.'
@@ -97,148 +314,75 @@ function Inquiry({
 
         if (!response.ok) {
           throw new Error(
-            '문의 내용을 불러오지 못했어요.'
+            '메시지를 전송하지 못했어요.'
           )
         }
 
-        const responseMessages =
+        const createdMessage =
           await response.json()
 
+        /*
+         * 내가 보낸 메시지는 서버의 다음 3초 조회를
+         * 기다리지 않고 즉시 화면에 추가합니다.
+         */
         setMessages(
-          Array.isArray(responseMessages)
-            ? responseMessages
-            : []
+          (
+            previousMessages
+          ) => {
+            const alreadyExists =
+              previousMessages.some(
+                (
+                  message
+                ) =>
+                  message.id ===
+                  createdMessage.id
+              )
+
+            if (alreadyExists) {
+              return previousMessages
+            }
+
+            return [
+              ...previousMessages,
+              createdMessage,
+            ]
+          }
+        )
+
+        setMessageText(
+          ''
         )
       } catch (error) {
-        if (
-          error.name === 'AbortError'
-        ) {
-          return
-        }
-
         console.error(
-          '문의 내용을 불러오지 못했습니다.',
+          '문의 메시지 전송에 실패했습니다.',
           error
         )
 
-        setLoadError(
+        window.alert(
           error.message ||
-            '문의 내용을 불러오지 못했어요.'
+            '메시지를 전송하지 못했어요.'
         )
       } finally {
-        if (
-          !abortController.signal.aborted
-        ) {
-          setIsLoading(false)
-        }
+        setIsSending(
+          false
+        )
       }
     }
 
-    loadMessages()
-
-    return () => {
-      abortController.abort()
-    }
-  }, [username])
-
-  useEffect(() => {
-    messageEndRef.current?.scrollIntoView({
-      behavior: 'smooth',
-    })
-  }, [messages])
-
-  const handleMessageSend = async () => {
-    const trimmedMessage =
-      messageText.trim()
-
-    if (
-      !trimmedMessage ||
-      isSending
-    ) {
-      return
-    }
-
-    const token =
-      localStorage.getItem('token')
-
-    if (!token) {
-      window.alert(
-        '로그인 정보를 찾을 수 없어요. 다시 로그인해 주세요.'
-      )
-      return
-    }
-
-    try {
-      setIsSending(true)
-
-      const response = await fetch(
-        `${API_BASE_URL}/api/inquiries/messages`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization:
-              `Bearer ${token}`,
-            'Content-Type':
-              'application/json; charset=utf-8',
-          },
-          body: JSON.stringify({
-            content: trimmedMessage,
-          }),
-        }
-      )
-
+  const handleMessageKeyDown =
+    (
+      event
+    ) => {
       if (
-        response.status === 401 ||
-        response.status === 403
+        event.key ===
+          'Enter' &&
+        !event.shiftKey
       ) {
-        throw new Error(
-          '로그인 시간이 만료됐어요. 다시 로그인해 주세요.'
-        )
+        event.preventDefault()
+
+        handleMessageSend()
       }
-
-      if (!response.ok) {
-        throw new Error(
-          '메시지를 전송하지 못했어요.'
-        )
-      }
-
-      const createdMessage =
-        await response.json()
-
-      setMessages(
-        (previousMessages) => [
-          ...previousMessages,
-          createdMessage,
-        ]
-      )
-
-      setMessageText('')
-    } catch (error) {
-      console.error(
-        '문의 메시지 전송에 실패했습니다.',
-        error
-      )
-
-      window.alert(
-        error.message ||
-          '메시지를 전송하지 못했어요.'
-      )
-    } finally {
-      setIsSending(false)
     }
-  }
-
-  const handleMessageKeyDown = (
-    event
-  ) => {
-    if (
-      event.key === 'Enter' &&
-      !event.shiftKey
-    ) {
-      event.preventDefault()
-      handleMessageSend()
-    }
-  }
 
   return (
     <div className="inquiry-page">
@@ -247,7 +391,9 @@ function Inquiry({
           <button
             className="inquiry-back-button"
             type="button"
-            onClick={onBack}
+            onClick={
+              onBack
+            }
             aria-label="마이페이지로 돌아가기"
           >
             <ArrowLeft />
@@ -267,7 +413,9 @@ function Inquiry({
           <section className="inquiry-guide-message">
             <span className="inquiry-guide-icon">
               <img
-                src={footprint}
+                src={
+                  footprint
+                }
                 alt=""
               />
             </span>
@@ -302,64 +450,85 @@ function Inquiry({
 
             {!isLoading &&
               !loadError &&
-              messages.map((message) => {
-                const isAdmin =
-                  message.sender ===
-                  'ADMIN'
+              messages.map(
+                (
+                  message
+                ) => {
+                  const isAdmin =
+                    message.sender ===
+                    'ADMIN'
 
-                return (
-                  <article
-                    className={
-                      isAdmin
-                        ? 'inquiry-admin-message'
-                        : 'inquiry-user-message'
-                    }
-                    key={message.id}
-                  >
-                    {isAdmin ? (
-                      <>
-                        <p className="inquiry-admin-bubble">
-                          {message.content}
-                        </p>
+                  return (
+                    <article
+                      className={
+                        isAdmin
+                          ? 'inquiry-admin-message'
+                          : 'inquiry-user-message'
+                      }
+                      key={
+                        message.id
+                      }
+                    >
+                      {isAdmin ? (
+                        <>
+                          <p className="inquiry-admin-bubble">
+                            {
+                              message.content
+                            }
+                          </p>
 
-                        <span className="inquiry-message-time">
-                          {formatMessageTime(
-                            message.createdAt
-                          )}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <span className="inquiry-message-time">
-                          {formatMessageTime(
-                            message.createdAt
-                          )}
-                        </span>
+                          <span className="inquiry-message-time">
+                            {formatMessageTime(
+                              message.createdAt
+                            )}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="inquiry-message-time">
+                            {formatMessageTime(
+                              message.createdAt
+                            )}
+                          </span>
 
-                        <p className="inquiry-user-bubble">
-                          {message.content}
-                        </p>
-                      </>
-                    )}
-                  </article>
-                )
-              })}
+                          <p className="inquiry-user-bubble">
+                            {
+                              message.content
+                            }
+                          </p>
+                        </>
+                      )}
+                    </article>
+                  )
+                }
+              )}
 
-            <div ref={messageEndRef} />
+            <div
+              ref={
+                messageEndRef
+              }
+            />
           </section>
         </main>
 
         <form
           className="inquiry-input-area"
-          onSubmit={(event) => {
+          onSubmit={(
+            event
+          ) => {
             event.preventDefault()
+
             handleMessageSend()
           }}
         >
           <textarea
             className="inquiry-message-input"
-            value={messageText}
-            onChange={(event) =>
+            value={
+              messageText
+            }
+            onChange={(
+              event
+            ) =>
               setMessageText(
                 event.target.value
               )
@@ -370,7 +539,9 @@ function Inquiry({
             placeholder="메시지를 입력해 주세요."
             rows="1"
             maxLength="1000"
-            disabled={isSending}
+            disabled={
+              isSending
+            }
             aria-label="문의 메시지 입력"
           />
 

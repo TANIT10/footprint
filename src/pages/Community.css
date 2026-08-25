@@ -1,0 +1,845 @@
+.community-page {
+  position: relative;
+
+  width: 100%;
+  height: 100dvh;
+  min-width: 0;
+
+  margin: 0;
+  padding: 0;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  background-color: #ffffff;
+
+  overscroll-behavior-x: none;
+}
+
+.community-inner {
+  position: relative;
+
+  width: 100%;
+  min-height: 100%;
+
+  margin: 0;
+}
+
+.community-header {
+  position: sticky;
+
+  top: 0;
+  left: 0;
+  z-index: 200;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 145px;
+
+  border-bottom: 1px solid #f1eeec;
+
+  background-color: #ffffff;
+
+  box-shadow:
+    0 3px 10px
+    rgba(0, 0, 0, 0.035);
+}
+
+.community-back-button {
+  position: absolute;
+
+  left: 20px;
+  bottom: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  height: 48px;
+
+  padding: 0;
+
+  border: 0;
+
+  background-color: transparent;
+  color: #222222;
+
+  font-size: 31px;
+  font-weight: 500;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.community-title {
+  position: absolute;
+
+  bottom: 40px;
+
+  margin: 0;
+
+  color: #222222;
+
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+/* 통합 알림 버튼 - 기존 커뮤니티 디자인은 건드리지 않고 추가 */
+.community-notification-button {
+  position: absolute;
+
+  right: 20px;
+  bottom: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  height: 48px;
+
+  padding: 0;
+
+  overflow: visible;
+
+  border: 0;
+
+  background-color: transparent;
+
+  cursor: pointer;
+}
+
+.community-notification-icon {
+  position: relative;
+  z-index: 1;
+
+  display: block;
+
+  width: 48px;
+  height: 48px;
+
+  object-fit: contain;
+}
+
+.community-notification-badge {
+  position: absolute;
+
+  top: 3px;
+  right: 3px;
+  z-index: 2;
+
+  width: 11px;
+  height: 11px;
+
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+
+  background-color: #b98b67;
+
+  pointer-events: none;
+}
+
+.community-content {
+  width: 100%;
+  min-width: 0;
+
+  margin: 0;
+  padding: 22px 18px 120px;
+
+  box-sizing: border-box;
+}
+
+.community-search-box {
+  width: 100%;
+
+  margin-bottom: 12px;
+}
+
+.community-search-input {
+  width: 100%;
+  height: 46px;
+
+  padding: 0 16px;
+
+  border: 1px solid #dedede;
+  border-radius: 14px;
+
+  outline: none;
+
+  background-color: #fafafa;
+  color: #222222;
+
+  font-size: 14px;
+
+  box-sizing: border-box;
+}
+
+.community-search-input:focus {
+  border-color: #b98b67;
+
+  background-color: #ffffff;
+}
+
+/* 공지 */
+.community-notice {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  min-height: 48px;
+
+  margin: 0 0 7px;
+  padding: 0 3px;
+
+  border-bottom: 1px solid #eeeeee;
+
+  box-sizing: border-box;
+
+  cursor: pointer;
+}
+
+.community-notice-badge {
+  flex: 0 0 auto;
+
+  margin-right: 9px;
+  padding: 5px 9px;
+
+  border-radius: 5px;
+
+  background-color: #f5f5f5;
+  color: #333333;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.community-notice-title {
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: #333333;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.community-notice-arrow {
+  flex: 0 0 auto;
+
+  margin-left: auto;
+
+  color: #555555;
+
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+/* 게시글 목록 */
+.community-post-list {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+
+  margin: 0;
+  padding: 0;
+}
+
+/*
+ * 한 게시글 카드
+ * 기존처럼 내용은 숨기고
+ * 제목 + 작성자/시간 + 좋아요/댓글 + 오른쪽 사진만 표시
+ */
+.community-post-card {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  min-height: 96px;
+
+  margin: 0;
+  padding: 11px 2px;
+
+  border: 0;
+  border-bottom: 1px solid #eeeeee;
+
+  background-color: #ffffff;
+  color: #222222;
+
+  box-sizing: border-box;
+
+  cursor: pointer;
+}
+
+.community-post-card:active {
+  background-color: #fafafa;
+}
+
+.community-post-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  min-width: 0;
+
+  padding-right: 12px;
+}
+
+.community-post-meta {
+  display: flex;
+  align-items: center;
+
+  min-width: 0;
+
+  margin-bottom: 6px;
+
+  gap: 4px;
+}
+
+.community-post-author {
+  max-width: 120px;
+
+  overflow: hidden;
+
+  color: #777777;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.community-post-meta-divider {
+  color: #aaaaaa;
+
+  font-size: 10px;
+}
+
+.community-post-time {
+  color: #999999;
+
+  font-size: 10px;
+  font-weight: 500;
+
+  white-space: nowrap;
+}
+
+.community-post-title {
+  display: -webkit-box;
+
+  margin: 0;
+
+  overflow: hidden;
+
+  color: #222222;
+
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+
+  word-break: break-word;
+
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.community-post-engagement {
+  display: flex;
+  align-items: center;
+
+  margin-top: 9px;
+
+  gap: 12px;
+}
+
+.community-post-engagement-item {
+  display: flex;
+  align-items: center;
+
+  color: #888888;
+
+  font-size: 11px;
+  font-weight: 500;
+
+  gap: 3px;
+}
+
+.community-post-engagement-item svg {
+  width: 15px;
+  height: 15px;
+
+  stroke-width: 1.7;
+}
+
+/* 오른쪽 대표 사진 */
+.community-post-image-box {
+  flex: 0 0 76px;
+
+  width: 76px;
+  height: 76px;
+
+  overflow: hidden;
+
+  border-radius: 7px;
+
+  background-color: #f2f2f2;
+}
+
+.community-post-image {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+/* 글이 없거나 오류 */
+.community-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  min-height: 330px;
+
+  text-align: center;
+}
+
+.community-empty p {
+  margin: 0;
+
+  color: #444444;
+
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.community-empty span {
+  margin-top: 8px;
+
+  color: #999999;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* 커뮤니티 내 페이지 버튼
+ * 메인 빠른 메뉴의 내 페이지 버튼과 같은 형식
+ */
+.community-my-page-button {
+  position: fixed;
+
+  right: 12px;
+  bottom: calc(
+    100px + env(safe-area-inset-bottom)
+  );
+  z-index: 300;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 64px;
+  height: 64px;
+
+  padding: 0;
+
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+
+  background-color: #b98b67;
+  color: #ffffff;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 4px 10px
+    rgba(0, 0, 0, 0.22);
+}
+
+.community-my-page-button:active {
+  transform: scale(0.95);
+}
+
+/* 글쓰기 버튼 */
+.community-write-button {
+  position: fixed;
+
+  right: 12px;
+  bottom: calc(
+    24px + env(safe-area-inset-bottom)
+  );
+  z-index: 300;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  width: 64px;
+  height: 64px;
+
+  padding: 0;
+
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+
+  background-color: #b98b67;
+  color: #ffffff;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 4px 10px
+    rgba(0, 0, 0, 0.22);
+}
+
+.community-write-icon {
+  width: 47px;
+  height: 47px;
+
+  object-fit: contain;
+
+  filter:
+    brightness(0)
+    invert(1);
+}
+
+.community-write-button span {
+  color: #ffffff;
+
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+
+  transform: translateY(-9px);
+}
+
+.community-write-button:active {
+  transform: scale(0.95);
+}
+
+@media screen and (max-width: 359px) {
+  .community-back-button {
+    left: 16px;
+  }
+
+  .community-notification-button {
+    right: 16px;
+  }
+
+  .community-content {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .community-post-card {
+    min-height: 90px;
+
+    padding-top: 9px;
+    padding-bottom: 9px;
+  }
+
+  .community-post-image-box {
+    flex-basis: 70px;
+
+    width: 70px;
+    height: 70px;
+  }
+
+  .community-post-title {
+    font-size: 14px;
+  }
+
+  .community-my-page-button {
+    right: 8px;
+    bottom: calc(
+      94px + env(safe-area-inset-bottom)
+    );
+
+    width: 58px;
+    height: 58px;
+
+    font-size: 12px;
+  }
+
+  .community-write-button {
+    right: 8px;
+
+    width: 58px;
+    height: 58px;
+  }
+
+  .community-write-icon {
+    width: 43px;
+    height: 43px;
+  }
+
+  .community-write-button span {
+    font-size: 10px;
+  }
+}
+
+@media screen and (min-width: 801px) {
+  .community-inner {
+    max-width: 1126px;
+    min-height: 100%;
+
+    margin: 0 auto;
+  }
+
+  .community-header {
+    height: 190px;
+  }
+
+  .community-back-button {
+    left: 68px;
+    bottom: 58px;
+
+    width: 52px;
+    height: 52px;
+
+    font-size: 34px;
+  }
+
+  .community-title {
+    bottom: 68px;
+
+    font-size: 26px;
+  }
+
+  .community-notification-button {
+    right: 72px;
+    bottom: 58px;
+
+    width: 70px;
+    height: 70px;
+  }
+
+  .community-notification-icon {
+    width: 70px;
+    height: 70px;
+  }
+
+  .community-notification-badge {
+    top: 5px;
+    right: 5px;
+
+    width: 15px;
+    height: 15px;
+
+    border-width: 3px;
+  }
+
+  .community-content {
+    width: 640px;
+
+    margin: 0 auto;
+    padding: 28px 0 140px;
+  }
+
+  .community-search-input {
+    height: 52px;
+
+    font-size: 15px;
+  }
+
+  .community-notice {
+    min-height: 54px;
+  }
+
+  .community-notice-title {
+    font-size: 14px;
+  }
+
+  .community-post-card {
+    min-height: 108px;
+
+    padding: 13px 3px;
+  }
+
+  .community-post-author {
+    font-size: 12px;
+  }
+
+  .community-post-time {
+    font-size: 11px;
+  }
+
+  .community-post-title {
+    font-size: 16px;
+  }
+
+  .community-post-image-box {
+    flex-basis: 84px;
+
+    width: 84px;
+    height: 84px;
+  }
+
+  .community-post-engagement-item {
+    font-size: 12px;
+  }
+
+  .community-post-engagement-item svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .community-my-page-button {
+    right: 24px;
+    bottom: 116px;
+
+    width: 68px;
+    height: 68px;
+
+    font-size: 14px;
+  }
+
+  .community-write-button {
+    right: 24px;
+    bottom: 36px;
+
+    width: 68px;
+    height: 68px;
+  }
+}
+
+/* 무한 스크롤 다음 페이지 감지 지점 */
+.community-load-more-trigger {
+  width: 100%;
+  height: 1px;
+}
+
+/* 다음 게시글을 불러올 때만 보이는 작은 원형 로딩 */
+.community-load-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  min-height: 58px;
+}
+
+.community-load-more-spinner {
+  width: 24px;
+  height: 24px;
+
+  border: 3px solid #eeeeee;
+  border-top-color: #777777;
+  border-radius: 50%;
+
+  box-sizing: border-box;
+
+  animation:
+    community-spinner-rotate
+    0.75s
+    linear
+    infinite;
+}
+
+@keyframes community-spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 충분히 아래로 내렸을 때 나타나는 맨 위 버튼 */
+.community-scroll-top-button {
+  position: fixed;
+
+  left: 18px;
+  bottom: calc(
+    28px + env(safe-area-inset-bottom)
+  );
+  z-index: 300;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 46px;
+  height: 46px;
+
+  padding: 0;
+
+  border: 1px solid #e4e4e4;
+  border-radius: 50%;
+
+  background-color:
+    rgba(255, 255, 255, 0.96);
+  color: #444444;
+
+  font-family: inherit;
+  font-size: 25px;
+  font-weight: 600;
+  line-height: 1;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 3px 10px
+    rgba(0, 0, 0, 0.12);
+}
+
+.community-scroll-top-button:active {
+  transform: scale(0.95);
+}
+
+@media screen and (max-width: 359px) {
+  .community-scroll-top-button {
+    left: 12px;
+    bottom: calc(
+      24px + env(safe-area-inset-bottom)
+    );
+
+    width: 43px;
+    height: 43px;
+
+    font-size: 23px;
+  }
+}
+
+@media screen and (min-width: 801px) {
+  .community-scroll-top-button {
+    left: max(
+      24px,
+      calc(
+        50% - 563px + 24px
+      )
+    );
+    bottom: 36px;
+
+    width: 50px;
+    height: 50px;
+
+    font-size: 27px;
+  }
+}
+
+
+
+.community-scroll-top-button svg {
+  width: 28px;
+  height: 28px;
+
+  stroke-width: 2.4;
+}

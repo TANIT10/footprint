@@ -6,6 +6,7 @@ import {
 
 import {
   ArrowLeft,
+  ShieldCheck,
   X,
 } from 'lucide-react'
 
@@ -182,6 +183,9 @@ function MyPage({
   onNotifications,
   hasUnreadNotification,
   onInquiry,
+  onLogout,
+  isAdmin = false,
+  onAdmin,
   onWithdraw,
   onProfileImageChange,
 }) {
@@ -401,6 +405,79 @@ function MyPage({
       fileInputRef.current?.click()
     }
 
+  const handleProfileReset =
+    () => {
+      if (
+        isProfileImageProcessing
+      ) {
+        return
+      }
+
+      if (!username) {
+        window.alert(
+          '로그인 정보를 찾을 수 없어요. 다시 로그인해 주세요.'
+        )
+
+        return
+      }
+
+      if (!profileImage) {
+        setIsProfileMenuOpen(
+          false
+        )
+
+        return
+      }
+
+      try {
+        const profileImageMap =
+          readProfileImageMap()
+
+        const updatedProfileImageMap = {
+          ...profileImageMap,
+        }
+
+        delete updatedProfileImageMap[
+          username
+        ]
+
+        localStorage.setItem(
+          PROFILE_IMAGES_KEY,
+          JSON.stringify(
+            updatedProfileImageMap
+          )
+        )
+
+        localStorage.removeItem(
+          LEGACY_PROFILE_IMAGE_KEY
+        )
+
+        setProfileImage('')
+
+        setIsProfileMenuOpen(
+          false
+        )
+
+        setIsLargeProfileOpen(
+          false
+        )
+
+        onProfileImageChange?.(
+          username,
+          ''
+        )
+      } catch (error) {
+        console.error(
+          '프로필 사진 기본 이미지 변경 실패:',
+          error
+        )
+
+        window.alert(
+          '기본 프로필 이미지로 변경하지 못했어요.'
+        )
+      }
+    }
+
   return (
     <div className="my-page">
       <div className="my-page-inner">
@@ -569,6 +646,52 @@ function MyPage({
             </button>
 
             <button
+              className="my-page-menu-button"
+              type="button"
+              onClick={
+                onLogout
+              }
+            >
+              <span>
+                로그아웃
+              </span>
+
+              <span className="menu-arrow">
+                ›
+              </span>
+            </button>
+
+            {isAdmin && (
+              <button
+                className="my-page-menu-button"
+                type="button"
+                onClick={
+                  onAdmin
+                }
+              >
+                <span
+                  style={{
+                    display:
+                      'inline-flex',
+                    alignItems:
+                      'center',
+                    gap: '7px',
+                  }}
+                >
+                  <ShieldCheck
+                    size={17}
+                    aria-hidden="true"
+                  />
+                  관리자 페이지
+                </span>
+
+                <span className="menu-arrow">
+                  ›
+                </span>
+              </button>
+            )}
+
+            <button
               className="my-page-menu-button withdraw-button"
               type="button"
               onClick={
@@ -642,6 +765,20 @@ function MyPage({
                   ? '사진 처리 중...'
                   : '프로필 사진 변경'}
               </button>
+
+              {profileImage && (
+                <button
+                  type="button"
+                  onClick={
+                    handleProfileReset
+                  }
+                  disabled={
+                    isProfileImageProcessing
+                  }
+                >
+                  기본 이미지로 변경
+                </button>
+              )}
 
               <button
                 className="profile-cancel-button"

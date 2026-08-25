@@ -1,0 +1,409 @@
+.admin-notice-write-page {
+  width: 100%;
+  min-height: 100dvh;
+
+  background-color: #ffffff;
+  color: #222222;
+}
+
+.admin-notice-write-page,
+.admin-notice-write-page * {
+  box-sizing: border-box;
+}
+
+.admin-notice-write-header {
+  position: sticky;
+
+  top: 0;
+  z-index: 200;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 145px;
+
+  border-bottom: 1px solid #f1eeec;
+
+  background-color: #ffffff;
+
+  box-shadow:
+    0 3px 10px
+    rgba(0, 0, 0, 0.035);
+}
+
+.admin-notice-write-header h1 {
+  position: absolute;
+
+  bottom: 40px;
+
+  margin: 0;
+
+  color: #222222;
+
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.admin-notice-write-header > button {
+  position: absolute;
+
+  left: 20px;
+  bottom: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  height: 48px;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  background-color: transparent;
+  color: #222222;
+
+  cursor: pointer;
+}
+
+.admin-notice-write-header > button svg {
+  width: 29px;
+  height: 29px;
+
+  stroke-width: 2;
+}
+
+.admin-notice-write-content {
+  width: 100%;
+
+  padding:
+    22px
+    18px
+    120px;
+}
+
+.admin-notice-write-section {
+  width: 100%;
+
+  margin-bottom: 18px;
+  padding: 18px;
+
+  border: 1px solid #eeeeee;
+  border-radius: 16px;
+
+  background-color: #ffffff;
+}
+
+.admin-notice-write-field {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+}
+
+.admin-notice-write-field > span {
+  margin-bottom: 9px;
+
+  color: #333333;
+
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.admin-notice-write-field input,
+.admin-notice-write-field textarea {
+  width: 100%;
+
+  border: 1px solid #dedede;
+  border-radius: 12px;
+
+  outline: none;
+
+  background-color: #ffffff;
+  color: #222222;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  box-sizing: border-box;
+}
+
+.admin-notice-write-field input {
+  height: 50px;
+
+  padding: 0 14px;
+}
+
+.admin-notice-write-field textarea {
+  min-height: 300px;
+
+  padding: 14px;
+
+  resize: vertical;
+
+  line-height: 1.65;
+}
+
+.admin-notice-write-field input:focus,
+.admin-notice-write-field textarea:focus {
+  border-color: #b98b67;
+}
+
+.admin-notice-write-field small {
+  align-self: flex-end;
+
+  margin-top: 7px;
+
+  color: #999999;
+
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.admin-notice-important-toggle {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+
+  padding: 0;
+
+  border: 0;
+
+  background-color: transparent;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  gap: 11px;
+}
+
+.admin-notice-important-check {
+  display: flex;
+  flex: 0 0 28px;
+  align-items: center;
+  justify-content: center;
+
+  width: 28px;
+  height: 28px;
+
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+
+  background-color: #ffffff;
+  color: #ffffff;
+}
+
+.admin-notice-important-toggle.active
+  .admin-notice-important-check {
+  border-color: #b98b67;
+
+  background-color: #b98b67;
+}
+
+.admin-notice-important-check svg {
+  width: 17px;
+  height: 17px;
+
+  stroke-width: 3;
+}
+
+.admin-notice-important-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-notice-important-text strong {
+  color: #333333;
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.admin-notice-important-text small {
+  margin-top: 4px;
+
+  color: #999999;
+
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.admin-notice-write-actions {
+  display: grid;
+
+  width: 100%;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(
+        0,
+        1fr
+      )
+    );
+
+  gap: 10px;
+}
+
+.admin-notice-write-cancel-button,
+.admin-notice-write-submit-button {
+  height: 52px;
+
+  border-radius: 14px;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+.admin-notice-write-cancel-button {
+  border: 1px solid #dedede;
+
+  background-color: #ffffff;
+  color: #555555;
+}
+
+.admin-notice-write-submit-button {
+  border: 0;
+
+  background-color: #b98b67;
+  color: #ffffff;
+}
+
+.admin-notice-write-page button:disabled,
+.admin-notice-write-page input:disabled,
+.admin-notice-write-page textarea:disabled {
+  opacity: 0.55;
+
+  cursor: default;
+}
+
+.admin-notice-write-loading,
+.admin-notice-write-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  min-height: 100dvh;
+
+  padding: 30px;
+
+  color: #777777;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  text-align: center;
+}
+
+.admin-notice-write-loading span {
+  width: 28px;
+  height: 28px;
+
+  border: 3px solid #eeeeee;
+  border-top-color: #777777;
+  border-radius: 50%;
+
+  animation:
+    admin-notice-write-spin
+    0.75s
+    linear
+    infinite;
+}
+
+.admin-notice-write-loading p {
+  margin: 12px 0 0;
+}
+
+@keyframes admin-notice-write-spin {
+  to {
+    transform: rotate(
+      360deg
+    );
+  }
+}
+
+@media screen and (max-width: 359px) {
+  .admin-notice-write-header > button {
+    left: 16px;
+  }
+
+  .admin-notice-write-content {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .admin-notice-write-section {
+    padding: 15px;
+  }
+}
+
+@media screen and (min-width: 801px) {
+  .admin-notice-write-header {
+    height: 190px;
+  }
+
+  .admin-notice-write-header h1 {
+    bottom: 68px;
+
+    font-size: 26px;
+  }
+
+  .admin-notice-write-header > button {
+    left: calc(
+      50% - 495px
+    );
+    bottom: 58px;
+
+    width: 52px;
+    height: 52px;
+  }
+
+  .admin-notice-write-header > button svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .admin-notice-write-content {
+    width: 640px;
+
+    margin: 0 auto;
+
+    padding:
+      30px
+      0
+      140px;
+  }
+
+  .admin-notice-write-section {
+    padding: 22px;
+  }
+
+  .admin-notice-write-field input {
+    height: 54px;
+
+    font-size: 15px;
+  }
+
+  .admin-notice-write-field textarea {
+    min-height: 360px;
+
+    font-size: 15px;
+  }
+
+  .admin-notice-write-cancel-button,
+  .admin-notice-write-submit-button {
+    height: 56px;
+
+    font-size: 15px;
+  }
+}

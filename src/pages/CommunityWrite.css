@@ -1,0 +1,477 @@
+/* 커뮤니티 글쓰기 전체 화면 */
+.community-write-page {
+  position: relative;
+
+  width: 100%;
+  height: 100dvh;
+  min-width: 0;
+
+  margin: 0;
+  padding: 0;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  background-color: #ffffff;
+}
+
+/*
+ * 기존 화면들과 통일된 고정 상단 영역
+ */
+.community-write-header {
+  position: sticky;
+
+  top: 0;
+  left: 0;
+  z-index: 200;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 145px;
+
+  border-bottom: 1px solid #f1eeec;
+
+  background-color: #ffffff;
+
+  box-shadow:
+    0 3px 10px
+    rgba(0, 0, 0, 0.035);
+
+  box-sizing: border-box;
+}
+
+/* 뒤로가기 */
+.community-write-back-button {
+  position: absolute;
+
+  left: 20px;
+  bottom: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  height: 48px;
+
+  padding: 0;
+
+  border: 0;
+
+  background-color: transparent;
+  color: #222222;
+
+  cursor: pointer;
+}
+
+/* 뒤로가기 아이콘 */
+.community-write-back-button svg {
+  width: 29px;
+  height: 29px;
+
+  stroke-width: 2;
+}
+
+/* 상단 제목 */
+.community-write-header-title {
+  position: absolute;
+
+  bottom: 39px;
+
+  margin: 0;
+
+  color: #222222;
+
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+/* 입력 전체 영역 */
+.community-write-content {
+  width: 100%;
+
+  padding: 24px 18px 120px;
+
+  box-sizing: border-box;
+}
+
+/* 각 입력 카드 */
+.community-write-section {
+  width: 100%;
+
+  margin-bottom: 22px;
+  padding: 20px;
+
+  border: 1px solid #eeeeee;
+  border-radius: 16px;
+
+  background-color: #ffffff;
+
+  box-sizing: border-box;
+}
+
+/* 사진 제목 줄 */
+.community-section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+}
+
+.community-section-title-row h2 {
+  margin: 0;
+
+  color: #222222;
+
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.community-section-title-row > span {
+  color: #999999;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* 설명 */
+.community-field-guide {
+  margin: 8px 0 14px;
+
+  color: #888888;
+
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* 입력 라벨 */
+.community-write-field {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+}
+
+.community-write-field > span {
+  margin-bottom: 9px;
+
+  color: #333333;
+
+  font-size: 14px;
+  font-weight: 800;
+}
+
+/* 제목 */
+.community-write-field input {
+  width: 100%;
+  height: 50px;
+
+  padding: 0 14px;
+
+  border: 1px solid #dedede;
+  border-radius: 12px;
+
+  outline: none;
+
+  background-color: #ffffff;
+  color: #222222;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  box-sizing: border-box;
+}
+
+/* 내용 */
+.community-write-field textarea {
+  width: 100%;
+  min-height: 260px;
+
+  padding: 14px;
+
+  resize: vertical;
+
+  border: 1px solid #dedede;
+  border-radius: 12px;
+
+  outline: none;
+
+  background-color: #ffffff;
+  color: #222222;
+
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+
+  box-sizing: border-box;
+}
+
+.community-write-field input:focus,
+.community-write-field textarea:focus {
+  border-color: #b98b67;
+}
+
+/* 글자 수 */
+.community-write-field small {
+  align-self: flex-end;
+
+  margin-top: 7px;
+
+  color: #999999;
+
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* 실제 파일 input 숨김 */
+.community-hidden-file-input {
+  display: none;
+}
+
+/* 사진 목록 */
+.community-image-upload-list {
+  display: flex;
+  flex-wrap: wrap;
+
+  width: 100%;
+
+  gap: 10px;
+}
+
+/* 사진 미리보기 */
+.community-image-preview-box {
+  position: relative;
+
+  width: 82px;
+  height: 82px;
+
+  overflow: hidden;
+
+  border-radius: 11px;
+
+  background-color: #f3f3f3;
+}
+
+.community-image-preview-box img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+/* 사진 삭제 */
+.community-image-delete-button {
+  position: absolute;
+
+  top: 4px;
+  right: 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 24px;
+  height: 24px;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  background-color:
+    rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+
+  cursor: pointer;
+}
+
+.community-image-delete-button svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* 사진 추가 */
+.community-image-add-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  width: 82px;
+  height: 82px;
+
+  padding: 0;
+
+  border: 1px dashed #cfcfcf;
+  border-radius: 11px;
+
+  background-color: #fafafa;
+  color: #777777;
+
+  cursor: pointer;
+}
+
+.community-image-add-button svg {
+  width: 23px;
+  height: 23px;
+}
+
+.community-image-add-button span {
+  margin-top: 5px;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* 하단 버튼 */
+.community-write-actions {
+  display: grid;
+
+  width: 100%;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 10px;
+}
+
+/* 취소 */
+.community-write-cancel-button {
+  height: 52px;
+
+  border: 1px solid #dedede;
+  border-radius: 14px;
+
+  background-color: #ffffff;
+  color: #555555;
+
+  font-size: 15px;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+/* 완료 */
+.community-write-submit-button {
+  height: 52px;
+
+  border: 0;
+  border-radius: 14px;
+
+  background-color: #b98b67;
+  color: #ffffff;
+
+  font-size: 15px;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+.community-write-cancel-button:disabled,
+.community-write-submit-button:disabled,
+.community-image-add-button:disabled,
+.community-image-delete-button:disabled,
+.community-write-back-button:disabled {
+  opacity: 0.55;
+
+  cursor: default;
+}
+
+/* 좁은 휴대폰 */
+@media screen and (max-width: 359px) {
+  .community-write-back-button {
+    left: 16px;
+  }
+
+  .community-write-content {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .community-write-section {
+    padding: 17px;
+  }
+
+  .community-image-preview-box,
+  .community-image-add-button {
+    width: 74px;
+    height: 74px;
+  }
+}
+
+/* PC */
+@media screen and (min-width: 801px) {
+  .community-write-header {
+    height: 190px;
+  }
+
+  .community-write-back-button {
+    left: calc(
+      50% - 495px
+    );
+    bottom: 58px;
+
+    width: 52px;
+    height: 52px;
+  }
+
+  .community-write-back-button svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .community-write-header-title {
+    bottom: 67px;
+
+    font-size: 26px;
+  }
+
+  .community-write-content {
+    width: 640px;
+
+    margin: 0 auto;
+
+    padding: 32px 0 140px;
+  }
+
+  .community-write-section {
+    margin-bottom: 26px;
+
+    padding: 24px;
+
+    border-radius: 18px;
+  }
+
+  .community-write-field input {
+    height: 54px;
+
+    font-size: 15px;
+  }
+
+  .community-write-field textarea {
+    min-height: 320px;
+
+    font-size: 15px;
+  }
+
+  .community-image-preview-box,
+  .community-image-add-button {
+    width: 96px;
+    height: 96px;
+  }
+
+  .community-write-cancel-button,
+  .community-write-submit-button {
+    height: 56px;
+
+    font-size: 16px;
+  }
+}

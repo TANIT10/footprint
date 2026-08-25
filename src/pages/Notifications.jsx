@@ -3,7 +3,9 @@ import {
   CheckCheck,
   CircleAlert,
   CircleCheckBig,
+  Heart,
   MessageCircle,
+  ShieldAlert,
 } from 'lucide-react'
 
 import './Notifications.css'
@@ -22,12 +24,25 @@ function NotificationIcon({ type }) {
     )
   }
 
-  if (type === 'COMMENT') {
+  if (
+    type === 'COMMENT' ||
+    type === 'COMMUNITY_COMMENT'
+  ) {
     return <MessageCircle />
+  }
+
+  if (
+    type === 'COMMUNITY_LIKE'
+  ) {
+    return <Heart />
   }
 
   if (type === 'NOTICE') {
     return <CircleAlert />
+  }
+
+  if (type === 'SYSTEM') {
+    return <ShieldAlert />
   }
 
   return <CircleCheckBig />
@@ -38,88 +53,157 @@ function formatNotificationTime(createdAt) {
     return ''
   }
 
-  const createdTime = new Date(createdAt)
-  const currentTime = new Date()
+  const createdTime =
+    new Date(createdAt)
 
-  const differenceInSeconds = Math.max(
-    0,
-    Math.floor(
-      (currentTime.getTime() -
-        createdTime.getTime()) /
-        1000
+  const currentTime =
+    new Date()
+
+  const differenceInSeconds =
+    Math.max(
+      0,
+      Math.floor(
+        (
+          currentTime.getTime() -
+          createdTime.getTime()
+        ) /
+          1000
+      )
     )
-  )
 
-  if (differenceInSeconds < 60) {
+  if (
+    differenceInSeconds < 60
+  ) {
     return '방금 전'
   }
 
-  const differenceInMinutes = Math.floor(
-    differenceInSeconds / 60
-  )
+  const differenceInMinutes =
+    Math.floor(
+      differenceInSeconds /
+        60
+    )
 
-  if (differenceInMinutes < 60) {
+  if (
+    differenceInMinutes < 60
+  ) {
     return `${differenceInMinutes}분 전`
   }
 
-  const differenceInHours = Math.floor(
-    differenceInMinutes / 60
-  )
+  const differenceInHours =
+    Math.floor(
+      differenceInMinutes /
+        60
+    )
 
-  if (differenceInHours < 24) {
+  if (
+    differenceInHours < 24
+  ) {
     return `${differenceInHours}시간 전`
   }
 
-  const differenceInDays = Math.floor(
-    differenceInHours / 24
-  )
+  const differenceInDays =
+    Math.floor(
+      differenceInHours /
+        24
+    )
 
-  if (differenceInDays === 1) {
+  if (
+    differenceInDays === 1
+  ) {
     return '어제'
   }
 
-  if (differenceInDays < 7) {
+  if (
+    differenceInDays < 7
+  ) {
     return `${differenceInDays}일 전`
   }
 
-  return createdTime.toLocaleDateString('ko-KR')
+  return createdTime
+    .toLocaleDateString(
+      'ko-KR'
+    )
 }
 
 function Notifications({
   notifications = [],
   onBack,
   onPostSelect,
+  onCommunityPostSelect,
   onNoticeSelect,
+  onInquirySelect,
   onNotificationRead,
   onAllNotificationsRead,
 }) {
   const hasUnreadNotification =
     notifications.some(
-      (notification) => !notification.isRead
+      (notification) =>
+        !notification.isRead
     )
 
-  const handleNotificationSelect = (
-    selectedNotification
-  ) => {
-    onNotificationRead?.(selectedNotification.id)
-
-    if (
-      selectedNotification.type === 'NOTICE' &&
-      selectedNotification.noticeId
-    ) {
-      onNoticeSelect?.(
-        selectedNotification.noticeId
+  const handleNotificationSelect =
+    (
+      selectedNotification
+    ) => {
+      onNotificationRead?.(
+        selectedNotification.id
       )
-      return
-    }
 
-    if (
-      selectedNotification.postId &&
-      onPostSelect
-    ) {
-      onPostSelect(selectedNotification.postId)
+      if (
+        selectedNotification.type ===
+        'SYSTEM'
+      ) {
+        return
+      }
+
+      if (
+        selectedNotification.type ===
+        'INQUIRY_REPLY'
+      ) {
+        onInquirySelect?.()
+
+        return
+      }
+
+      if (
+        selectedNotification.type ===
+          'NOTICE' &&
+        selectedNotification.noticeId
+      ) {
+        onNoticeSelect?.(
+          selectedNotification.noticeId
+        )
+
+        return
+      }
+
+      if (
+        (
+          selectedNotification.type ===
+            'COMMUNITY_COMMENT' ||
+          selectedNotification.type ===
+            'COMMUNITY_LIKE'
+        ) &&
+        selectedNotification
+          .communityPostId
+      ) {
+        onCommunityPostSelect?.(
+          selectedNotification
+            .communityPostId
+        )
+
+        return
+      }
+
+      if (
+        selectedNotification.postId &&
+        onPostSelect
+      ) {
+        onPostSelect(
+          selectedNotification.postId
+        )
+      }
     }
-  }
 
   return (
     <div className="notifications-page">
@@ -142,22 +226,30 @@ function Notifications({
             <button
               className="notifications-read-all-button"
               type="button"
-              onClick={onAllNotificationsRead}
+              onClick={
+                onAllNotificationsRead
+              }
             >
               <CheckCheck />
-              <span>전체 읽음</span>
+
+              <span>
+                전체 읽음
+              </span>
             </button>
           )}
         </header>
 
         <main className="notifications-content">
-          {notifications.length > 0 ? (
+          {notifications.length >
+          0 ? (
             <section
               className="notification-list"
               aria-label="알림 목록"
             >
               {notifications.map(
-                (notification) => (
+                (
+                  notification
+                ) => (
                   <button
                     className={`notification-item ${
                       notification.isRead
@@ -165,7 +257,9 @@ function Notifications({
                         : 'unread'
                     }`}
                     type="button"
-                    key={notification.id}
+                    key={
+                      notification.id
+                    }
                     onClick={() =>
                       handleNotificationSelect(
                         notification
@@ -176,17 +270,23 @@ function Notifications({
                       className={`notification-type-icon ${notification.type.toLowerCase()}`}
                     >
                       <NotificationIcon
-                        type={notification.type}
+                        type={
+                          notification.type
+                        }
                       />
                     </span>
 
                     <span className="notification-information">
                       <strong className="notification-item-title">
-                        {notification.title}
+                        {
+                          notification.title
+                        }
                       </strong>
 
                       <span className="notification-message">
-                        {notification.message}
+                        {
+                          notification.message
+                        }
                       </span>
 
                       <span className="notification-time">
@@ -205,7 +305,9 @@ function Notifications({
                       )}
 
                       <span className="notification-label">
-                        {notification.label}
+                        {
+                          notification.label
+                        }
                       </span>
                     </span>
                   </button>
@@ -214,7 +316,9 @@ function Notifications({
             </section>
           ) : (
             <section className="notifications-empty">
-              <p>아직 도착한 알림이 없어요.</p>
+              <p>
+                아직 도착한 알림이 없어요.
+              </p>
 
               <span>
                 새로운 발자국이 발견되면 알려드릴게요.

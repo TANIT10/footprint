@@ -1,0 +1,380 @@
+.admin-report-detail-page {
+  width: 100%;
+  min-height: 100dvh;
+  background-color: #ffffff;
+  color: #222222;
+}
+
+.admin-report-detail-page,
+.admin-report-detail-page * {
+  box-sizing: border-box;
+}
+
+.admin-report-detail-header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 145px;
+  border-bottom: 1px solid #f1eeec;
+  background-color: #ffffff;
+  box-shadow:
+    0 3px 10px
+    rgba(0, 0, 0, 0.035);
+}
+
+.admin-report-detail-header h1 {
+  position: absolute;
+  bottom: 40px;
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.admin-report-detail-header > button {
+  position: absolute;
+  left: 20px;
+  bottom: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  color: #222222;
+  cursor: pointer;
+}
+
+.admin-report-detail-header > button svg {
+  width: 29px;
+  height: 29px;
+}
+
+.admin-report-detail-content {
+  width: 100%;
+  padding: 22px 18px 120px;
+}
+
+.admin-report-detail-card,
+.admin-report-detail-section,
+.admin-report-danger-section {
+  width: 100%;
+  padding: 18px;
+  border: 1px solid #eeeeee;
+  border-radius: 16px;
+  background-color: #ffffff;
+}
+
+.admin-report-detail-section,
+.admin-report-danger-section {
+  margin-top: 16px;
+}
+
+.admin-report-detail-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-report-detail-heading > svg {
+  width: 30px;
+  height: 30px;
+  color: #d55b45;
+}
+
+.admin-report-detail-heading > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-report-detail-heading strong {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.admin-report-detail-heading span {
+  margin-top: 4px;
+  color: #8f6548;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.admin-report-detail-list {
+  margin: 20px 0 0;
+}
+
+.admin-report-detail-list > div {
+  display: grid;
+  grid-template-columns:
+    82px
+    minmax(0, 1fr);
+  padding: 11px 0;
+  border-bottom: 1px solid #f1f1f1;
+  gap: 10px;
+}
+
+.admin-report-detail-list > div:last-child {
+  border-bottom: 0;
+}
+
+.admin-report-detail-list dt {
+  color: #999999;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.admin-report-detail-list dd {
+  margin: 0;
+  color: #444444;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.admin-report-open-post-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 46px;
+  margin-top: 16px;
+  border: 1px solid #dedede;
+  border-radius: 12px;
+  background-color: #ffffff;
+  color: #444444;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  gap: 7px;
+}
+
+.admin-report-open-post-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.admin-report-detail-section h2,
+.admin-report-danger-section h2 {
+  margin: 0 0 13px;
+  color: #333333;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.admin-report-status-actions {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(
+        0,
+        1fr
+      )
+    );
+  gap: 7px;
+}
+
+.admin-report-status-actions button,
+.admin-warning-button,
+.admin-clear-suspension-button,
+.admin-suspension-buttons button {
+  min-height: 44px;
+  padding: 0 8px;
+  border: 1px solid #dedede;
+  border-radius: 11px;
+  background-color: #ffffff;
+  color: #444444;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-user-status-card {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 13px;
+  border-radius: 12px;
+  background-color: #faf8f6;
+  gap: 10px;
+}
+
+.admin-user-status-card > svg {
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  color: #8f6548;
+}
+
+.admin-user-status-card > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.admin-user-status-card strong {
+  color: #333333;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.admin-user-status-card span {
+  margin-top: 4px;
+  color: #888888;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.admin-warning-button,
+.admin-clear-suspension-button {
+  width: 100%;
+}
+
+.admin-warning-button {
+  border-color: #d9b77e;
+  color: #9a6d21;
+}
+
+.admin-suspension-buttons {
+  display: grid;
+  width: 100%;
+  margin-top: 8px;
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(
+        0,
+        1fr
+      )
+    );
+  gap: 8px;
+}
+
+.admin-suspension-buttons button {
+  color: #ba4e4e;
+}
+
+.admin-clear-suspension-button {
+  margin-top: 8px;
+  color: #4e6e9e;
+}
+
+.admin-report-danger-section button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 48px;
+  border: 1px solid #efcaca;
+  border-radius: 12px;
+  background-color: #fffafa;
+  color: #d64949;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  gap: 7px;
+}
+
+.admin-report-danger-section button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.admin-report-detail-page button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.admin-report-detail-loading,
+.admin-report-detail-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding: 30px;
+  color: #777777;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.admin-report-detail-loading span {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #eeeeee;
+  border-top-color: #777777;
+  border-radius: 50%;
+  animation:
+    admin-report-detail-spin
+    0.75s
+    linear
+    infinite;
+}
+
+.admin-report-detail-loading p {
+  margin: 12px 0 0;
+}
+
+@keyframes admin-report-detail-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media screen and (max-width: 359px) {
+  .admin-report-detail-header > button {
+    left: 16px;
+  }
+
+  .admin-report-detail-content {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .admin-report-detail-card,
+  .admin-report-detail-section,
+  .admin-report-danger-section {
+    padding: 15px;
+  }
+}
+
+@media screen and (min-width: 801px) {
+  .admin-report-detail-header {
+    height: 190px;
+  }
+
+  .admin-report-detail-header h1 {
+    bottom: 68px;
+    font-size: 26px;
+  }
+
+  .admin-report-detail-header > button {
+    left: calc(
+      50% - 495px
+    );
+    bottom: 58px;
+    width: 52px;
+    height: 52px;
+  }
+
+  .admin-report-detail-header > button svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .admin-report-detail-content {
+    width: 640px;
+    margin: 0 auto;
+    padding: 30px 0 140px;
+  }
+}

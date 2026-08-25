@@ -110,6 +110,64 @@
     45px;
 }
 
+/* =========================================
+ * 내 게시글 종류 탭
+ * ========================================= */
+.my-posts-tabs {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+  width: 100%;
+
+  margin-bottom: 20px;
+
+  border-bottom: 1px solid #eeeeee;
+}
+
+.my-posts-tab-button {
+  position: relative;
+
+  height: 46px;
+
+  padding: 0 6px;
+
+  border: 0;
+
+  background-color: #ffffff;
+  color: #999999;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.my-posts-tab-button.active {
+  color: #6f513c;
+}
+
+.my-posts-tab-button.active::after {
+  position: absolute;
+
+  right: 18px;
+  bottom: -1px;
+  left: 18px;
+
+  height: 3px;
+
+  border-radius: 3px 3px 0 0;
+
+  background-color: #b98b67;
+
+  content: '';
+}
+
 /* 게시글 카드와 메뉴 버튼 */
 .my-post-card-wrapper {
   position: relative;
@@ -164,6 +222,151 @@
 .my-post-menu-button svg {
   width: 21px;
   height: 21px;
+}
+
+/* =========================================
+ * 커뮤니티 글 탭
+ * 기존 발자국 카드 스타일과 완전히 분리
+ * ========================================= */
+.my-community-post-list {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+}
+
+.my-community-post-item {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  min-height: 96px;
+
+  padding: 11px 2px;
+
+  border: 0;
+  border-bottom: 1px solid #eeeeee;
+
+  background-color: #ffffff;
+  color: #222222;
+
+  font-family: inherit;
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.my-community-post-item:active {
+  background-color: #fafafa;
+}
+
+.my-community-post-information {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  min-width: 0;
+
+  padding-right: 12px;
+}
+
+.my-community-post-meta {
+  display: flex;
+  align-items: center;
+
+  min-width: 0;
+
+  margin-bottom: 6px;
+
+  color: #888888;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  gap: 4px;
+}
+
+.my-community-post-meta > span:first-child {
+  max-width: 120px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.my-community-post-meta time {
+  color: #999999;
+
+  font-size: 10px;
+
+  white-space: nowrap;
+}
+
+.my-community-post-title {
+  display: -webkit-box;
+
+  overflow: hidden;
+
+  color: #222222;
+
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+
+  word-break: break-word;
+
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.my-community-post-engagement {
+  display: flex;
+  align-items: center;
+
+  margin-top: 9px;
+
+  color: #888888;
+
+  gap: 12px;
+}
+
+.my-community-post-engagement > span {
+  display: flex;
+  align-items: center;
+
+  font-size: 11px;
+
+  gap: 3px;
+}
+
+.my-community-post-engagement svg {
+  width: 15px;
+  height: 15px;
+
+  stroke-width: 1.7;
+}
+
+.my-community-post-image-box {
+  flex: 0 0 76px;
+
+  width: 76px;
+  height: 76px;
+
+  overflow: hidden;
+
+  border-radius: 7px;
+
+  background-color: #f2f2f2;
+}
+
+.my-community-post-image-box img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
 }
 
 /* 작성한 게시글이 없을 때 */
@@ -273,6 +476,24 @@
     padding-right: 14px;
     padding-left: 14px;
   }
+
+  .my-community-post-item {
+    min-height: 90px;
+
+    padding-top: 9px;
+    padding-bottom: 9px;
+  }
+
+  .my-community-post-image-box {
+    flex-basis: 70px;
+
+    width: 70px;
+    height: 70px;
+  }
+
+  .my-community-post-title {
+    font-size: 14px;
+  }
 }
 
 /* PC 화면 */
@@ -315,6 +536,16 @@
       60px;
   }
 
+  .my-posts-tabs {
+    margin-bottom: 26px;
+  }
+
+  .my-posts-tab-button {
+    height: 50px;
+
+    font-size: 15px;
+  }
+
   .my-post-menu-button {
     top: 12px;
     right: 10px;
@@ -326,5 +557,39 @@
   .my-post-menu-button svg {
     width: 24px;
     height: 24px;
+  }
+
+  .my-community-post-item {
+    min-height: 108px;
+
+    padding: 13px 3px;
+  }
+
+  .my-community-post-meta {
+    font-size: 12px;
+  }
+
+  .my-community-post-meta time {
+    font-size: 11px;
+  }
+
+  .my-community-post-title {
+    font-size: 16px;
+  }
+
+  .my-community-post-image-box {
+    flex-basis: 84px;
+
+    width: 84px;
+    height: 84px;
+  }
+
+  .my-community-post-engagement > span {
+    font-size: 12px;
+  }
+
+  .my-community-post-engagement svg {
+    width: 16px;
+    height: 16px;
   }
 }

@@ -1,0 +1,404 @@
+.admin-reports-page {
+  width: 100%;
+  min-height: 100dvh;
+
+  background-color: #ffffff;
+  color: #222222;
+}
+
+.admin-reports-page,
+.admin-reports-page * {
+  box-sizing: border-box;
+}
+
+.admin-reports-header {
+  position: sticky;
+
+  top: 0;
+  z-index: 200;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 145px;
+
+  border-bottom: 1px solid #f1eeec;
+
+  background-color: #ffffff;
+
+  box-shadow:
+    0 3px 10px
+    rgba(0, 0, 0, 0.035);
+}
+
+.admin-reports-header h1 {
+  position: absolute;
+
+  bottom: 40px;
+
+  margin: 0;
+
+  color: #222222;
+
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.admin-reports-back-button {
+  position: absolute;
+
+  left: 20px;
+  bottom: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  height: 48px;
+
+  padding: 0;
+
+  border: 0;
+
+  background-color: transparent;
+  color: #222222;
+
+  cursor: pointer;
+}
+
+.admin-reports-back-button svg {
+  width: 29px;
+  height: 29px;
+
+  stroke-width: 2;
+}
+
+.admin-reports-content {
+  width: 100%;
+
+  padding:
+    20px
+    18px
+    110px;
+}
+
+.admin-report-status-tabs {
+  display: grid;
+
+  width: 100%;
+
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(
+        0,
+        1fr
+      )
+    );
+
+  padding: 4px;
+
+  border-radius: 13px;
+
+  background-color: #f5f5f5;
+
+  gap: 4px;
+}
+
+.admin-report-status-tabs button {
+  min-width: 0;
+  height: 38px;
+
+  padding: 0 4px;
+
+  border: 0;
+  border-radius: 10px;
+
+  background-color: transparent;
+  color: #888888;
+
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.admin-report-status-tabs button.active {
+  background-color: #ffffff;
+  color: #7c573e;
+
+  font-weight: 800;
+
+  box-shadow:
+    0 2px 6px
+    rgba(
+      0,
+      0,
+      0,
+      0.07
+    );
+}
+
+.admin-report-list {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+
+  margin-top: 18px;
+
+  gap: 11px;
+}
+
+.admin-report-card {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+
+  padding: 16px;
+
+  border: 1px solid #eeeeee;
+  border-radius: 15px;
+
+  background-color: #ffffff;
+  color: #222222;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  gap: 10px;
+}
+
+.admin-report-card:active {
+  background-color: #fafafa;
+}
+
+.admin-report-information {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  min-width: 0;
+}
+
+.admin-report-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+
+  gap: 8px;
+}
+
+.admin-report-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 48px;
+  height: 24px;
+
+  padding: 0 8px;
+
+  border-radius: 7px;
+
+  background-color: #f5f1ee;
+  color: #8f6548;
+
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.admin-report-top-row time {
+  color: #aaaaaa;
+
+  font-size: 10px;
+  font-weight: 500;
+
+  white-space: nowrap;
+}
+
+.admin-report-post-title {
+  display: block;
+
+  margin-top: 11px;
+
+  overflow: hidden;
+
+  color: #292929;
+
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.4;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-report-reason {
+  margin-top: 7px;
+
+  color: #d55b45;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-report-user {
+  margin-top: 11px;
+
+  color: #666666;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.admin-report-reporter {
+  margin-top: 4px;
+
+  color: #999999;
+
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.admin-report-arrow {
+  flex: 0 0 21px;
+
+  width: 21px;
+  height: 21px;
+
+  color: #999999;
+}
+
+.admin-reports-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  min-height: 330px;
+
+  color: #999999;
+
+  text-align: center;
+
+  gap: 12px;
+}
+
+.admin-reports-message p {
+  margin: 0;
+
+  color: #777777;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.admin-reports-message svg {
+  width: 27px;
+  height: 27px;
+
+  stroke-width: 1.8;
+}
+
+.admin-reports-spinner {
+  width: 26px;
+  height: 26px;
+
+  border: 3px solid #eeeeee;
+  border-top-color: #777777;
+  border-radius: 50%;
+
+  animation:
+    admin-report-spin
+    0.75s
+    linear
+    infinite;
+}
+
+@keyframes admin-report-spin {
+  to {
+    transform: rotate(
+      360deg
+    );
+  }
+}
+
+@media screen and (max-width: 359px) {
+  .admin-reports-back-button {
+    left: 16px;
+  }
+
+  .admin-reports-content {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .admin-report-status-tabs button {
+    font-size: 10px;
+  }
+
+  .admin-report-card {
+    padding: 14px;
+  }
+}
+
+@media screen and (min-width: 801px) {
+  .admin-reports-header {
+    height: 190px;
+  }
+
+  .admin-reports-header h1 {
+    bottom: 68px;
+
+    font-size: 26px;
+  }
+
+  .admin-reports-back-button {
+    left: calc(
+      50% - 495px
+    );
+    bottom: 58px;
+
+    width: 52px;
+    height: 52px;
+  }
+
+  .admin-reports-back-button svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .admin-reports-content {
+    width: 640px;
+
+    margin: 0 auto;
+
+    padding:
+      28px
+      0
+      130px;
+  }
+
+  .admin-report-status-tabs button {
+    height: 42px;
+
+    font-size: 12px;
+  }
+
+  .admin-report-card {
+    padding: 18px;
+  }
+
+  .admin-report-post-title {
+    font-size: 16px;
+  }
+}

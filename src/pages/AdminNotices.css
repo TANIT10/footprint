@@ -1,0 +1,348 @@
+.admin-notices-page {
+  width: 100%;
+  min-height: 100dvh;
+
+  background-color: #ffffff;
+  color: #222222;
+}
+
+.admin-notices-page,
+.admin-notices-page * {
+  box-sizing: border-box;
+}
+
+.admin-notices-header {
+  position: sticky;
+
+  top: 0;
+  z-index: 200;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 145px;
+
+  border-bottom: 1px solid #f1eeec;
+
+  background-color: #ffffff;
+
+  box-shadow:
+    0 3px 10px
+    rgba(0, 0, 0, 0.035);
+}
+
+.admin-notices-header h1 {
+  position: absolute;
+
+  bottom: 40px;
+
+  margin: 0;
+
+  color: #222222;
+
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.admin-notices-back-button,
+.admin-notices-create-button {
+  position: absolute;
+
+  bottom: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  height: 48px;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  background-color: transparent;
+  color: #222222;
+
+  cursor: pointer;
+}
+
+.admin-notices-back-button {
+  left: 20px;
+}
+
+.admin-notices-create-button {
+  right: 20px;
+}
+
+.admin-notices-back-button svg,
+.admin-notices-create-button svg {
+  width: 29px;
+  height: 29px;
+
+  stroke-width: 2;
+}
+
+.admin-notices-create-button:active,
+.admin-notices-back-button:active {
+  background-color: #f7f7f7;
+}
+
+.admin-notices-content {
+  width: 100%;
+
+  padding:
+    20px
+    18px
+    110px;
+}
+
+.admin-notices-list {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+
+  gap: 10px;
+}
+
+.admin-notice-card {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+
+  padding: 16px;
+
+  border: 1px solid #eeeeee;
+  border-radius: 15px;
+
+  background-color: #ffffff;
+  color: #222222;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  gap: 10px;
+}
+
+.admin-notice-card:active {
+  background-color: #fafafa;
+}
+
+.admin-notice-information {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  min-width: 0;
+}
+
+.admin-notice-title-row {
+  display: flex;
+  align-items: center;
+
+  min-width: 0;
+
+  gap: 7px;
+}
+
+.admin-notice-title-row strong {
+  overflow: hidden;
+
+  color: #292929;
+
+  font-size: 15px;
+  font-weight: 800;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-notice-important-badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+
+  height: 23px;
+
+  padding: 0 7px;
+
+  border-radius: 7px;
+
+  background-color: #fff0e7;
+  color: #d56b35;
+
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.admin-notice-summary {
+  display: -webkit-box;
+
+  margin-top: 8px;
+
+  overflow: hidden;
+
+  color: #777777;
+
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.admin-notice-information time {
+  margin-top: 9px;
+
+  color: #aaaaaa;
+
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.admin-notice-arrow {
+  flex: 0 0 21px;
+
+  width: 21px;
+  height: 21px;
+
+  color: #999999;
+}
+
+.admin-notices-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  min-height: 330px;
+
+  padding: 30px 20px;
+
+  text-align: center;
+}
+
+.admin-notices-message p {
+  margin: 0;
+
+  color: #666666;
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.admin-notices-message span:not(.admin-notices-spinner) {
+  margin-top: 7px;
+
+  color: #999999;
+
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.admin-notices-spinner {
+  width: 27px;
+  height: 27px;
+
+  margin-bottom: 12px;
+
+  border: 3px solid #eeeeee;
+  border-top-color: #777777;
+  border-radius: 50%;
+
+  animation:
+    admin-notices-spin
+    0.75s
+    linear
+    infinite;
+}
+
+@keyframes admin-notices-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media screen and (max-width: 359px) {
+  .admin-notices-back-button {
+    left: 16px;
+  }
+
+  .admin-notices-create-button {
+    right: 16px;
+  }
+
+  .admin-notices-content {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .admin-notice-card {
+    padding: 14px;
+  }
+}
+
+@media screen and (min-width: 801px) {
+  .admin-notices-header {
+    height: 190px;
+  }
+
+  .admin-notices-header h1 {
+    bottom: 68px;
+
+    font-size: 26px;
+  }
+
+  .admin-notices-back-button {
+    left: calc(
+      50% - 495px
+    );
+    bottom: 58px;
+
+    width: 52px;
+    height: 52px;
+  }
+
+  .admin-notices-create-button {
+    right: calc(
+      50% - 495px
+    );
+    bottom: 58px;
+
+    width: 52px;
+    height: 52px;
+  }
+
+  .admin-notices-back-button svg,
+  .admin-notices-create-button svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .admin-notices-content {
+    width: 640px;
+
+    margin: 0 auto;
+
+    padding:
+      28px
+      0
+      130px;
+  }
+
+  .admin-notice-card {
+    padding: 18px;
+  }
+
+  .admin-notice-title-row strong {
+    font-size: 16px;
+  }
+}

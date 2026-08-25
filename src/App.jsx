@@ -20,6 +20,19 @@ import Withdraw from './pages/Withdraw'
 import UserProfile from './pages/UserProfile'
 import LoadingScreen from './pages/LoadingScreen'
 import SimilarFootprints from './pages/SimilarFootprints'
+import Community from './pages/Community'
+import CommunityWrite from './pages/CommunityWrite'
+import CommunityDetail from './pages/CommunityDetail'
+import AdminPage from './pages/AdminPage'
+import AdminReports from './pages/AdminReports'
+import AdminReportDetail from './pages/AdminReportDetail'
+import AdminNotices from './pages/AdminNotices'
+import AdminNoticeWrite from './pages/AdminNoticeWrite'
+import AdminNoticeDetail from './pages/AdminNoticeDetail'
+import AdminInquiries from './pages/AdminInquiries'
+import AdminInquiryDetail from './pages/AdminInquiryDetail'
+
+
 
 const CURRENT_NICKNAME_KEY =
   'footprint-current-nickname'
@@ -215,6 +228,21 @@ function App() {
   ] = useState(null)
 
   const [
+    selectedCommunityPostId,
+    setSelectedCommunityPostId,
+  ] = useState(null)
+
+  const [
+    editingCommunityPost,
+    setEditingCommunityPost,
+  ] = useState(null)
+
+  const [
+    communityDetailBackPage,
+    setCommunityDetailBackPage,
+  ] = useState('community')
+
+  const [
     detailBackPage,
     setDetailBackPage,
   ] = useState('postList')
@@ -225,9 +253,34 @@ function App() {
   ] = useState('noticeList')
 
   const [
+    noticeListBackPage,
+    setNoticeListBackPage,
+  ] = useState('myPage')
+
+  const [
     notificationBackPage,
     setNotificationBackPage,
   ] = useState('postList')
+
+  const [
+    isAdmin,
+    setIsAdmin,
+  ] = useState(false)
+
+  const [
+    selectedAdminReportId,
+    setSelectedAdminReportId,
+  ] = useState(null)
+
+  const [
+    selectedAdminNoticeId,
+    setSelectedAdminNoticeId,
+  ] = useState(null)
+
+  const [
+    selectedAdminInquiry,
+    setSelectedAdminInquiry,
+  ] = useState(null)
 
   const [
     currentNickname,
@@ -279,6 +332,11 @@ function App() {
   ] = useState([])
 
   const [
+    myCommunityPosts,
+    setMyCommunityPosts,
+  ] = useState([])
+
+  const [
     notifications,
     setNotifications,
   ] = useState([])
@@ -296,6 +354,94 @@ function App() {
       ...EMPTY_SIMILAR_FOOTPRINT_NEW_SUMMARY,
     }
   )
+
+  const checkAdminAccess =
+    useCallback(
+      async (
+        username
+      ) => {
+        const token =
+          localStorage.getItem(
+            'token'
+          )
+
+        if (
+          !token ||
+          !username
+        ) {
+          setIsAdmin(
+            false
+          )
+
+          return false
+        }
+
+        try {
+          const response =
+            await fetch(
+              `${API_BASE_URL}/api/admin/community/users/${encodeURIComponent(
+                username
+              )}`,
+              {
+                method: 'GET',
+
+                headers: {
+                  Authorization:
+                    `Bearer ${token}`,
+                },
+              }
+            )
+
+          if (
+            response.status ===
+            403
+          ) {
+            setIsAdmin(
+              false
+            )
+
+            return false
+          }
+
+          if (
+            response.status ===
+            401
+          ) {
+            setIsAdmin(
+              false
+            )
+
+            return false
+          }
+
+          if (!response.ok) {
+            setIsAdmin(
+              false
+            )
+
+            return false
+          }
+
+          setIsAdmin(
+            true
+          )
+
+          return true
+        } catch (error) {
+          console.error(
+            '관리자 권한 확인 실패:',
+            error
+          )
+
+          setIsAdmin(
+            false
+          )
+
+          return false
+        }
+      },
+      []
+    )
 
   const loadPosts =
     useCallback(async () => {
@@ -442,6 +588,83 @@ function App() {
           error.message ||
             '내 게시글을 불러오지 못했어요.'
         )
+
+        return []
+      }
+    }, [])
+
+  const loadMyCommunityPosts =
+    useCallback(async () => {
+      const token =
+        localStorage.getItem(
+          'token'
+        )
+
+      if (!token) {
+        setMyCommunityPosts([])
+        return []
+      }
+
+      try {
+        const response =
+          await fetch(
+            `${API_BASE_URL}/api/community/posts/my?page=0`,
+            {
+              method: 'GET',
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+              },
+            }
+          )
+
+        if (
+          response.status ===
+            401 ||
+          response.status ===
+            403
+        ) {
+          throw new Error(
+            '로그인 시간이 만료됐습니다. 다시 로그인해 주세요.'
+          )
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            await readErrorMessage(
+              response,
+              '내 커뮤니티 글을 불러오지 못했습니다.'
+            )
+          )
+        }
+
+        const postPage =
+          await response.json()
+
+        const loadedPosts =
+          Array.isArray(
+            postPage.content
+          )
+            ? postPage.content
+            : []
+
+        setMyCommunityPosts(
+          loadedPosts
+        )
+
+        return loadedPosts
+      } catch (error) {
+        console.error(
+          '내 커뮤니티 글 조회 실패:',
+          error
+        )
+
+        window.alert(
+          error.message ||
+            '내 커뮤니티 글을 불러오지 못했어요.'
+        )
+
+        setMyCommunityPosts([])
 
         return []
       }
@@ -784,6 +1007,23 @@ function App() {
     )
 
   useEffect(() => {
+    if (!currentUsername) {
+      setIsAdmin(
+        false
+      )
+
+      return
+    }
+
+    checkAdminAccess(
+      currentUsername
+    )
+  }, [
+    currentUsername,
+    checkAdminAccess,
+  ])
+
+  useEffect(() => {
     if (
       page ===
         'postList' ||
@@ -803,10 +1043,12 @@ function App() {
       'myPosts'
     ) {
       loadMyPosts()
+      loadMyCommunityPosts()
     }
   }, [
     page,
     loadMyPosts,
+    loadMyCommunityPosts,
   ])
 
   useEffect(() => {
@@ -855,41 +1097,34 @@ function App() {
   ])
 
   /*
-   * 새로운 봤어요 게시글이 다른 사용자에 의해 등록돼도
-   * 현재 사용자가 새로고침하지 않아도 알림/NEW가 갱신되도록
-   * 메인 화면에서 가벼운 상태 조회만 주기적으로 실행한다.
+   * 로그인 중에는 어느 화면에 있더라도
+   * 새 알림을 자동으로 갱신합니다.
    *
-   * 여기서는 AI를 다시 돌리지 않는다.
-   * 알림/NEW DB 상태만 조회하므로 기존 AI 재계산보다 훨씬 가볍다.
+   * 관리자 경고/정지 같은 SYSTEM 알림도
+   * 새로고침 없이 최대 약 3초 안에 반영됩니다.
    */
   useEffect(() => {
     if (!currentUsername) {
       return undefined
     }
 
-    const shouldRefreshLiveStatus =
-      page === 'postList' ||
-      page === 'myPage' ||
-      page === 'notifications'
+    const refreshNotifications =
+      () => {
+        loadNotifications()
+      }
 
-    if (!shouldRefreshLiveStatus) {
-      return undefined
-    }
-
-    const refreshLiveStatus = () => {
-      loadNotifications()
-      loadSimilarFootprintNewSummary()
-    }
+    refreshNotifications()
 
     const intervalId =
       window.setInterval(
-        refreshLiveStatus,
-        5000
+        refreshNotifications,
+        3000
       )
 
-    const handleWindowFocus = () => {
-      refreshLiveStatus()
-    }
+    const handleWindowFocus =
+      () => {
+        refreshNotifications()
+      }
 
     window.addEventListener(
       'focus',
@@ -910,6 +1145,45 @@ function App() {
     currentUsername,
     page,
     loadNotifications,
+  ])
+
+  /*
+   * 닮은 발자국 NEW 상태는 필요한 화면에서만
+   * 기존처럼 가볍게 갱신합니다.
+   */
+  useEffect(() => {
+    if (!currentUsername) {
+      return undefined
+    }
+
+    const shouldRefreshSimilarStatus =
+      page === 'postList' ||
+      page === 'myPage' ||
+      page === 'notifications'
+
+    if (!shouldRefreshSimilarStatus) {
+      return undefined
+    }
+
+    const refreshSimilarStatus =
+      () => {
+        loadSimilarFootprintNewSummary()
+      }
+
+    const intervalId =
+      window.setInterval(
+        refreshSimilarStatus,
+        5000
+      )
+
+    return () => {
+      window.clearInterval(
+        intervalId
+      )
+    }
+  }, [
+    currentUsername,
+    page,
     loadSimilarFootprintNewSummary,
   ])
 
@@ -1003,6 +1277,10 @@ function App() {
 
       setProfileImages(
         readProfileImageMap()
+      )
+
+      await checkAdminAccess(
+        username
       )
 
       setPage('loading')
@@ -1755,6 +2033,29 @@ function App() {
       )
     }
 
+  const handleNoticeSelectFromCommunity =
+    (noticeId) => {
+      if (!noticeId) {
+        window.alert(
+          '선택한 공지사항을 찾을 수 없어요.'
+        )
+
+        return
+      }
+
+      setSelectedNoticeId(
+        noticeId
+      )
+
+      setNoticeDetailBackPage(
+        'community'
+      )
+
+      setPage(
+        'noticeDetail'
+      )
+    }
+
   const handleNoticeSelectFromNotification =
     (noticeId) => {
       if (!noticeId) {
@@ -1778,6 +2079,13 @@ function App() {
       )
     }
 
+  const handleInquirySelectFromNotification =
+    () => {
+      setPage(
+        'inquiry'
+      )
+    }
+
   const handleNotificationsFromPostList =
     () => {
       setNotificationBackPage(
@@ -1797,6 +2105,42 @@ function App() {
 
       setPage(
         'notifications'
+      )
+    }
+
+  const handleNotificationsFromCommunity =
+    () => {
+      setNotificationBackPage(
+        'community'
+      )
+
+      setPage(
+        'notifications'
+      )
+    }
+
+  const handleCommunityPostSelectFromNotification =
+    (
+      communityPostId
+    ) => {
+      if (!communityPostId) {
+        window.alert(
+          '연결된 커뮤니티 게시글을 찾을 수 없어요.'
+        )
+
+        return
+      }
+
+      setSelectedCommunityPostId(
+        communityPostId
+      )
+
+      setCommunityDetailBackPage(
+        'notifications'
+      )
+
+      setPage(
+        'communityDetail'
       )
     }
 
@@ -2445,6 +2789,62 @@ function App() {
       }
     }
 
+  const handleLogout =
+    () => {
+      const shouldLogout =
+        window.confirm(
+          '로그아웃할까요?'
+        )
+
+      if (!shouldLogout) {
+        return
+      }
+
+      localStorage.removeItem(
+        'token'
+      )
+
+      localStorage.removeItem(
+        CURRENT_NICKNAME_KEY
+      )
+
+      localStorage.removeItem(
+        CURRENT_USERNAME_KEY
+      )
+
+      setCurrentNickname('')
+      setCurrentUsername('')
+
+      setPosts([])
+      setMyPosts([])
+      setMyCommunityPosts([])
+      setNotifications([])
+
+      setSelectedPostId(null)
+      setSelectedPost(null)
+      setSelectedNoticeId(null)
+      setSelectedCommunityPostId(null)
+      setEditingCommunityPost(null)
+      setSelectedProfile(null)
+      setSelectedAdminReportId(null)
+      setSelectedAdminNoticeId(null)
+      setSelectedAdminInquiry(null)
+
+      setSimilarFootprintGroups(
+        []
+      )
+
+      setSimilarFootprintNewSummary({
+        ...EMPTY_SIMILAR_FOOTPRINT_NEW_SUMMARY,
+      })
+
+      setIsAdmin(false)
+
+      setPage(
+        'login'
+      )
+    }
+
   const handleWithdrawSuccess =
     () => {
       const withdrawnUsername =
@@ -2452,8 +2852,21 @@ function App() {
 
       setPosts([])
       setMyPosts([])
+      setMyCommunityPosts([])
       setSelectedPost(null)
       setNotifications([])
+      setIsAdmin(false)
+      setSelectedAdminReportId(
+        null
+      )
+
+      setSelectedAdminNoticeId(
+        null
+      )
+
+      setSelectedAdminInquiry(
+        null
+      )
 
       setSimilarFootprintGroups(
         []
@@ -2634,6 +3047,12 @@ function App() {
           )
         }
 
+        onCommunity={() =>
+          setPage(
+            'community'
+          )
+        }
+
         onNotifications={
           handleNotificationsFromPostList
         }
@@ -2641,6 +3060,180 @@ function App() {
         hasUnreadNotification={
           hasUnreadNotification
         }
+      />
+    )
+  }
+
+  if (
+    page === 'community'
+  ) {
+    return (
+      <Community
+        onBack={() =>
+          setPage(
+            'postList'
+          )
+        }
+
+        onWrite={() => {
+          setEditingCommunityPost(
+            null
+          )
+
+          setPage(
+            'communityWrite'
+          )
+        }}
+
+        onPostSelect={(
+          communityPostId
+        ) => {
+          setSelectedCommunityPostId(
+            communityPostId
+          )
+
+          setCommunityDetailBackPage(
+            'community'
+          )
+
+          setPage(
+            'communityDetail'
+          )
+        }}
+
+        onNotifications={
+          handleNotificationsFromCommunity
+        }
+
+        onNoticeSelect={
+          handleNoticeSelectFromCommunity
+        }
+
+        onMyPage={() =>
+          setPage(
+            'myPage'
+          )
+        }
+
+        hasUnreadNotification={
+          hasUnreadNotification
+        }
+      />
+    )
+  }
+
+  if (
+    page === 'communityDetail' &&
+    selectedCommunityPostId
+  ) {
+    return (
+      <CommunityDetail
+        postId={
+          selectedCommunityPostId
+        }
+
+        profileImages={
+          profileImages
+        }
+
+        onBack={() =>
+          setPage(
+            communityDetailBackPage
+          )
+        }
+
+        onEdit={(
+          communityPost
+        ) => {
+          setEditingCommunityPost(
+            communityPost
+          )
+
+          setPage(
+            'communityEdit'
+          )
+        }}
+      />
+    )
+  }
+
+  if (
+    page === 'communityWrite'
+  ) {
+    return (
+      <CommunityWrite
+        onBack={() => {
+          setEditingCommunityPost(
+            null
+          )
+
+          setPage(
+            'community'
+          )
+        }}
+
+        onComplete={(
+          savedPost
+        ) => {
+          setEditingCommunityPost(
+            null
+          )
+
+          if (savedPost?.id) {
+            setSelectedCommunityPostId(
+              savedPost.id
+            )
+          }
+
+          setPage(
+            'community'
+          )
+        }}
+      />
+    )
+  }
+
+  if (
+    page === 'communityEdit' &&
+    editingCommunityPost
+  ) {
+    return (
+      <CommunityWrite
+        key={
+          editingCommunityPost.id
+        }
+
+        editingPost={
+          editingCommunityPost
+        }
+
+        onBack={() => {
+          setEditingCommunityPost(
+            null
+          )
+
+          setPage(
+            'communityDetail'
+          )
+        }}
+
+        onComplete={(
+          updatedPost
+        ) => {
+          if (updatedPost?.id) {
+            setSelectedCommunityPostId(
+              updatedPost.id
+            )
+          }
+
+          setEditingCommunityPost(
+            null
+          )
+
+          setPage(
+            'communityDetail'
+          )
+        }}
       />
     )
   }
@@ -2855,11 +3448,15 @@ function App() {
             .totalNewCount
         }
 
-        onNotices={() =>
+        onNotices={() => {
+          setNoticeListBackPage(
+            'myPage'
+          )
+
           setPage(
             'noticeList'
           )
-        }
+        }}
 
         onNotifications={
           handleNotificationsFromMyPage
@@ -2875,6 +3472,20 @@ function App() {
           )
         }
 
+        onLogout={
+          handleLogout
+        }
+
+        isAdmin={
+          isAdmin
+        }
+
+        onAdmin={() =>
+          setPage(
+            'admin'
+          )
+        }
+
         onWithdraw={() =>
           setPage(
             'withdraw'
@@ -2884,6 +3495,364 @@ function App() {
         onProfileImageChange={
           handleProfileImageChange
         }
+      />
+    )
+  }
+
+  if (
+    page === 'admin'
+  ) {
+    if (!isAdmin) {
+      return (
+        <MyPage
+          nickname={
+            currentNickname
+          }
+
+          username={
+            currentUsername
+          }
+
+          onBack={() =>
+            setPage(
+              'postList'
+            )
+          }
+
+          onMyPosts={() =>
+            setPage(
+              'myPosts'
+            )
+          }
+
+          onSimilarFootprints={
+            handleSimilarFootprintsOpen
+          }
+
+          hasNewSimilarFootprints={
+            similarFootprintNewSummary
+              .hasNew
+          }
+
+          similarFootprintNewCount={
+            similarFootprintNewSummary
+              .totalNewCount
+          }
+
+          onNotices={() =>
+            setPage(
+              'noticeList'
+            )
+          }
+
+          onNotifications={
+            handleNotificationsFromMyPage
+          }
+
+          hasUnreadNotification={
+            hasUnreadNotification
+          }
+
+          onInquiry={() =>
+            setPage(
+              'inquiry'
+            )
+          }
+
+          onLogout={
+            handleLogout
+          }
+
+          isAdmin={
+            false
+          }
+
+          onWithdraw={() =>
+            setPage(
+              'withdraw'
+            )
+          }
+
+          onProfileImageChange={
+            handleProfileImageChange
+          }
+        />
+      )
+    }
+
+    return (
+      <AdminPage
+        onBack={() =>
+          setPage(
+            'myPage'
+          )
+        }
+
+        onReports={() =>
+          setPage(
+            'adminReports'
+          )
+        }
+
+        onInquiries={() => {
+          setSelectedAdminInquiry(
+            null
+          )
+
+          setPage(
+            'adminInquiries'
+          )
+        }}
+
+        onNotices={() => {
+          setSelectedAdminNoticeId(
+            null
+          )
+
+          setPage(
+            'adminNotices'
+          )
+        }}
+      />
+    )
+  }
+
+  if (
+    page === 'adminReports' &&
+    isAdmin
+  ) {
+    return (
+      <AdminReports
+        onBack={() =>
+          setPage(
+            'admin'
+          )
+        }
+
+        onReportSelect={(
+          reportId
+        ) => {
+          setSelectedAdminReportId(
+            reportId
+          )
+
+          setPage(
+            'adminReportDetail'
+          )
+        }}
+      />
+    )
+  }
+
+  if (
+    page === 'adminReportDetail' &&
+    isAdmin &&
+    selectedAdminReportId
+  ) {
+    return (
+      <AdminReportDetail
+        reportId={
+          selectedAdminReportId
+        }
+
+        onBack={() =>
+          setPage(
+            'adminReports'
+          )
+        }
+
+        onPostSelect={(
+          communityPostId
+        ) => {
+          if (!communityPostId) {
+            return
+          }
+
+          setSelectedCommunityPostId(
+            communityPostId
+          )
+
+          setCommunityDetailBackPage(
+            'adminReportDetail'
+          )
+
+          setPage(
+            'communityDetail'
+          )
+        }}
+      />
+    )
+  }
+
+  if (
+    page === 'adminInquiries' &&
+    isAdmin
+  ) {
+    return (
+      <AdminInquiries
+        onBack={() =>
+          setPage(
+            'admin'
+          )
+        }
+
+        onConversationSelect={(
+          conversation
+        ) => {
+          setSelectedAdminInquiry(
+            conversation
+          )
+
+          setPage(
+            'adminInquiryDetail'
+          )
+        }}
+      />
+    )
+  }
+
+  if (
+    page === 'adminInquiryDetail' &&
+    isAdmin &&
+    selectedAdminInquiry
+  ) {
+    return (
+      <AdminInquiryDetail
+        conversation={
+          selectedAdminInquiry
+        }
+
+        onBack={() =>
+          setPage(
+            'adminInquiries'
+          )
+        }
+      />
+    )
+  }
+
+  if (
+    page === 'adminNotices' &&
+    isAdmin
+  ) {
+    return (
+      <AdminNotices
+        onBack={() =>
+          setPage(
+            'admin'
+          )
+        }
+
+        onCreate={() => {
+          setSelectedAdminNoticeId(
+            null
+          )
+
+          setPage(
+            'adminNoticeWrite'
+          )
+        }}
+
+        onNoticeSelect={(
+          noticeId
+        ) => {
+          setSelectedAdminNoticeId(
+            noticeId
+          )
+
+          setPage(
+            'adminNoticeDetail'
+          )
+        }}
+      />
+    )
+  }
+
+  if (
+    page === 'adminNoticeDetail' &&
+    isAdmin &&
+    selectedAdminNoticeId
+  ) {
+    return (
+      <AdminNoticeDetail
+        noticeId={
+          selectedAdminNoticeId
+        }
+
+        onBack={() =>
+          setPage(
+            'adminNotices'
+          )
+        }
+
+        onEdit={(
+          noticeId
+        ) => {
+          setSelectedAdminNoticeId(
+            noticeId
+          )
+
+          setPage(
+            'adminNoticeWrite'
+          )
+        }}
+
+        onDeleted={() => {
+          setSelectedAdminNoticeId(
+            null
+          )
+
+          setPage(
+            'adminNotices'
+          )
+        }}
+      />
+    )
+  }
+
+  if (
+    page === 'adminNoticeWrite' &&
+    isAdmin
+  ) {
+    return (
+      <AdminNoticeWrite
+        noticeId={
+          selectedAdminNoticeId
+        }
+
+        onBack={() =>
+          setPage(
+            selectedAdminNoticeId
+              ? 'adminNoticeDetail'
+              : 'adminNotices'
+          )
+        }
+
+        onComplete={(
+          savedNotice
+        ) => {
+          if (
+            savedNotice?.id
+          ) {
+            setSelectedAdminNoticeId(
+              savedNotice.id
+            )
+
+            setPage(
+              'adminNoticeDetail'
+            )
+
+            return
+          }
+
+          setSelectedAdminNoticeId(
+            null
+          )
+
+          setPage(
+            'adminNotices'
+          )
+        }}
       />
     )
   }
@@ -2933,6 +3902,10 @@ function App() {
           myPosts
         }
 
+        communityPosts={
+          myCommunityPosts
+        }
+
         currentUsername={
           currentUsername
         }
@@ -2954,6 +3927,22 @@ function App() {
         onPostEdit={
           handlePostEdit
         }
+
+        onCommunityPostSelect={(
+          communityPostId
+        ) => {
+          setSelectedCommunityPostId(
+            communityPostId
+          )
+
+          setCommunityDetailBackPage(
+            'myPosts'
+          )
+
+          setPage(
+            'communityDetail'
+          )
+        }}
       />
     )
   }
@@ -2966,7 +3955,7 @@ function App() {
       <NoticeList
         onBack={() =>
           setPage(
-            'myPage'
+            noticeListBackPage
           )
         }
 
@@ -3017,8 +4006,16 @@ function App() {
           handlePostSelectFromNotification
         }
 
+        onCommunityPostSelect={
+          handleCommunityPostSelectFromNotification
+        }
+
         onNoticeSelect={
           handleNoticeSelectFromNotification
+        }
+
+        onInquirySelect={
+          handleInquirySelectFromNotification
         }
 
         onNotificationRead={

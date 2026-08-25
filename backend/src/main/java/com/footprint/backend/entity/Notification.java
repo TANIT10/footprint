@@ -70,9 +70,24 @@ public class Notification {
     @Column(length = 50)
     private String label;
 
+    /*
+     * 기존 찾아요 / 봤어요 게시글 연결용
+     */
     @Column(name = "post_id")
     private Long postId;
 
+    /*
+     * 커뮤니티 게시글 연결용
+     *
+     * 기존 postId를 재사용하지 않고
+     * 커뮤니티 게시글 ID를 별도로 저장합니다.
+     */
+    @Column(name = "community_post_id")
+    private Long communityPostId;
+
+    /*
+     * 공지사항 연결용
+     */
     @Column(name = "notice_id")
     private Long noticeId;
 
@@ -97,13 +112,18 @@ public class Notification {
 
     @PrePersist
     public void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        this.createdAt =
+                LocalDateTime.now();
     }
 
     public void markAsRead() {
+
         if (!this.read) {
+
             this.read = true;
-            this.readAt = LocalDateTime.now();
+
+            this.readAt =
+                    LocalDateTime.now();
         }
     }
 
@@ -115,56 +135,88 @@ public class Notification {
         return recipient;
     }
 
-    public void setRecipient(User recipient) {
-        this.recipient = recipient;
+    public void setRecipient(
+            User recipient
+    ) {
+        this.recipient =
+                recipient;
     }
 
     public NotificationType getType() {
         return type;
     }
 
-    public void setType(NotificationType type) {
-        this.type = type;
+    public void setType(
+            NotificationType type
+    ) {
+        this.type =
+                type;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setTitle(
+            String title
+    ) {
+        this.title =
+                title;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setMessage(
+            String message
+    ) {
+        this.message =
+                message;
     }
 
     public String getLabel() {
         return label;
     }
 
-    public void setLabel(String label) {
-        this.label = label;
+    public void setLabel(
+            String label
+    ) {
+        this.label =
+                label;
     }
 
     public Long getPostId() {
         return postId;
     }
 
-    public void setPostId(Long postId) {
-        this.postId = postId;
+    public void setPostId(
+            Long postId
+    ) {
+        this.postId =
+                postId;
+    }
+
+    public Long getCommunityPostId() {
+        return communityPostId;
+    }
+
+    public void setCommunityPostId(
+            Long communityPostId
+    ) {
+        this.communityPostId =
+                communityPostId;
     }
 
     public Long getNoticeId() {
         return noticeId;
     }
 
-    public void setNoticeId(Long noticeId) {
-        this.noticeId = noticeId;
+    public void setNoticeId(
+            Long noticeId
+    ) {
+        this.noticeId =
+                noticeId;
     }
 
     public boolean isRead() {
