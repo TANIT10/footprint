@@ -38,7 +38,7 @@ public class NoticeController {
      *
      * 대표공지가 없으면 응답 body가 null입니다.
      */
-    @GetMapping("/banner")
+    @GetMapping("/featured")
     public ResponseEntity<NoticeResponse> getFeaturedNotice() {
 
         NoticeResponse featuredNotice =

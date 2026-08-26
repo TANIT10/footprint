@@ -107,7 +107,7 @@ function PostList({
         try {
           const response =
             await fetch(
-              `${API_BASE_URL}/api/notices/banner`,
+              `${API_BASE_URL}/api/notices/featured`,
               {
                 method: 'GET',
 
