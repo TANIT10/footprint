@@ -29,6 +29,12 @@ const POST_TYPES = [
   },
 ]
 
+function createClientId() {
+  return `${Date.now()}-${Math.random()
+    .toString(36)
+    .slice(2)}`
+}
+
 function PostWrite({
   onBack,
   onComplete,
@@ -174,7 +180,7 @@ function PostWrite({
 
     const newImages = filesToAdd.map(
       (file) => ({
-        id: `${file.name}-${file.lastModified}-${crypto.randomUUID()}`,
+        id: `${file.name}-${file.lastModified}-${createClientId()}`,
         file,
         originalUrl: '',
         previewUrl:

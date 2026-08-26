@@ -164,6 +164,153 @@
   font-weight: 500;
 }
 
+/* 공지 이미지 업로드 */
+
+.admin-notice-image-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+
+  margin-bottom: 8px;
+}
+
+.admin-notice-image-title-row strong {
+  color: #333333;
+
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.admin-notice-image-title-row span {
+  color: #999999;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.admin-notice-image-guide {
+  margin: 0 0 13px;
+
+  color: #999999;
+
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.admin-notice-hidden-file-input {
+  display: none;
+}
+
+.admin-notice-image-list {
+  display: grid;
+
+  width: 100%;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(
+        0,
+        1fr
+      )
+    );
+
+  gap: 10px;
+}
+
+.admin-notice-image-preview,
+.admin-notice-image-add-button {
+  position: relative;
+
+  width: 100%;
+  aspect-ratio: 1 / 1;
+
+  overflow: hidden;
+
+  border-radius: 12px;
+}
+
+.admin-notice-image-preview {
+  border: 1px solid #eeeeee;
+
+  background-color: #f8f8f8;
+}
+
+.admin-notice-image-preview img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+.admin-notice-image-delete-button {
+  position: absolute;
+
+  top: 6px;
+  right: 6px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 28px;
+  height: 28px;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  background-color:
+    rgba(0, 0, 0, 0.62);
+
+  color: #ffffff;
+
+  cursor: pointer;
+}
+
+.admin-notice-image-delete-button svg {
+  width: 16px;
+  height: 16px;
+
+  stroke-width: 2.4;
+}
+
+.admin-notice-image-add-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px dashed #d8d0ca;
+
+  background-color: #fbfaf9;
+  color: #8d7b6d;
+
+  font-family: inherit;
+
+  cursor: pointer;
+
+  gap: 6px;
+}
+
+.admin-notice-image-add-button svg {
+  width: 24px;
+  height: 24px;
+
+  stroke-width: 1.8;
+}
+
+.admin-notice-image-add-button span {
+  font-size: 11px;
+  font-weight: 700;
+}
+
 .admin-notice-important-toggle {
   display: flex;
   align-items: center;
@@ -344,6 +491,10 @@
 
   .admin-notice-write-section {
     padding: 15px;
+  }
+
+  .admin-notice-image-list {
+    gap: 8px;
   }
 }
 

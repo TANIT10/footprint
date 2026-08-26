@@ -1,23 +1,40 @@
 import {
   ArrowLeft,
   Check,
+  Plus,
+  X,
 } from 'lucide-react'
 
 import {
   useEffect,
+  useRef,
   useState,
 } from 'react'
 
 import './AdminNoticeWrite.css'
 
+import resolveMediaUrl from '../utils/mediaUrl'
+
 const API_BASE_URL =
   ''
+
+function createClientId() {
+  return `${Date.now()}-${Math.random()
+    .toString(36)
+    .slice(2)}`
+}
 
 function AdminNoticeWrite({
   noticeId = null,
   onBack,
   onComplete,
 }) {
+  const fileInputRef =
+    useRef(null)
+
+  const imagesRef =
+    useRef([])
+
   const isEditMode =
     Boolean(noticeId)
 
@@ -37,6 +54,11 @@ function AdminNoticeWrite({
   ] = useState(false)
 
   const [
+    images,
+    setImages,
+  ] = useState([])
+
+  const [
     isLoading,
     setIsLoading,
   ] = useState(
@@ -52,6 +74,25 @@ function AdminNoticeWrite({
     loadError,
     setLoadError,
   ] = useState('')
+
+  useEffect(() => {
+    imagesRef.current =
+      images
+  }, [images])
+
+  useEffect(() => {
+    return () => {
+      imagesRef.current.forEach(
+        (image) => {
+          if (!image.isExisting) {
+            URL.revokeObjectURL(
+              image.previewUrl
+            )
+          }
+        }
+      )
+    }
+  }, [])
 
   useEffect(() => {
     if (!isEditMode) {
@@ -127,6 +168,33 @@ function AdminNoticeWrite({
               notice.important
             )
           )
+
+          const savedImages =
+            Array.isArray(
+              notice.imageUrls
+            )
+              ? notice.imageUrls
+              : []
+
+          setImages(
+            savedImages.map(
+              (
+                imageUrl,
+                index
+              ) => ({
+                id:
+                  `existing-notice-image-${index}`,
+                file: null,
+                originalUrl:
+                  imageUrl,
+                previewUrl:
+                  resolveMediaUrl(
+                    imageUrl
+                  ),
+                isExisting: true,
+              })
+            )
+          )
         } catch (error) {
           if (
             error.name ===
@@ -166,6 +234,136 @@ function AdminNoticeWrite({
     isEditMode,
     noticeId,
   ])
+
+  const handleImageButtonClick =
+    () => {
+      fileInputRef.current?.click()
+    }
+
+  const handleImageChange =
+    (event) => {
+      const selectedFiles =
+        Array.from(
+          event.target.files ?? []
+        )
+
+      const remainingCount =
+        3 - images.length
+
+      if (remainingCount <= 0) {
+        event.target.value = ''
+        return
+      }
+
+      const allowedTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/webp',
+        'image/gif',
+      ]
+
+      const imageFiles =
+        selectedFiles.filter(
+          (file) =>
+            allowedTypes.includes(
+              file.type
+            )
+        )
+
+      if (
+        imageFiles.length !==
+        selectedFiles.length
+      ) {
+        window.alert(
+          'JPG, PNG, WEBP, GIF 이미지만 등록할 수 있어요.'
+        )
+      }
+
+      const maximumFileSize =
+        5 * 1024 * 1024
+
+      const validImageFiles =
+        imageFiles.filter(
+          (file) =>
+            file.size <=
+            maximumFileSize
+        )
+
+      if (
+        validImageFiles.length !==
+        imageFiles.length
+      ) {
+        window.alert(
+          '사진 한 장의 크기는 5MB 이하여야 해요.'
+        )
+      }
+
+      const filesToAdd =
+        validImageFiles.slice(
+          0,
+          remainingCount
+        )
+
+      const newImages =
+        filesToAdd.map(
+          (file) => ({
+            id:
+              `${file.name}-${file.lastModified}-${createClientId()}`,
+            file,
+            originalUrl: '',
+            previewUrl:
+              URL.createObjectURL(
+                file
+              ),
+            isExisting: false,
+          })
+        )
+
+      setImages(
+        (previousImages) => [
+          ...previousImages,
+          ...newImages,
+        ]
+      )
+
+      if (
+        validImageFiles.length >
+        remainingCount
+      ) {
+        window.alert(
+          '공지 사진은 최대 3장까지만 등록할 수 있어요.'
+        )
+      }
+
+      event.target.value = ''
+    }
+
+  const handleImageDelete =
+    (imageId) => {
+      setImages(
+        (previousImages) => {
+          const imageToDelete =
+            previousImages.find(
+              (image) =>
+                image.id === imageId
+            )
+
+          if (
+            imageToDelete &&
+            !imageToDelete.isExisting
+          ) {
+            URL.revokeObjectURL(
+              imageToDelete.previewUrl
+            )
+          }
+
+          return previousImages.filter(
+            (image) =>
+              image.id !== imageId
+          )
+        }
+      )
+    }
 
   const handleSubmit =
     async () => {
@@ -210,6 +408,72 @@ function AdminNoticeWrite({
         return
       }
 
+      const multipartData =
+        new FormData()
+
+      multipartData.append(
+        'data',
+        new Blob(
+          [
+            JSON.stringify({
+              title:
+                normalizedTitle,
+              content:
+                normalizedContent,
+              important,
+            }),
+          ],
+          {
+            type:
+              'application/json',
+          }
+        )
+      )
+
+      if (isEditMode) {
+        images
+          .filter(
+            (image) =>
+              image.isExisting
+          )
+          .forEach(
+            (image) => {
+              multipartData.append(
+                'existingImageUrls',
+                image.originalUrl
+              )
+            }
+          )
+
+        images
+          .filter(
+            (image) =>
+              !image.isExisting
+          )
+          .forEach(
+            (image) => {
+              multipartData.append(
+                'newImages',
+                image.file
+              )
+            }
+          )
+      } else {
+        images
+          .filter(
+            (image) =>
+              !image.isExisting
+          )
+          .forEach(
+            (image) => {
+              multipartData.append(
+                'images',
+                image.file
+              )
+            }
+          )
+      }
+
       try {
         setIsSaving(
           true
@@ -229,21 +493,10 @@ function AdminNoticeWrite({
               headers: {
                 Authorization:
                   `Bearer ${token}`,
-
-                'Content-Type':
-                  'application/json',
               },
 
               body:
-                JSON.stringify({
-                  title:
-                    normalizedTitle,
-
-                  content:
-                    normalizedContent,
-
-                  important,
-                }),
+                multipartData,
             }
           )
 
@@ -399,6 +652,81 @@ function AdminNoticeWrite({
               {title.length}/100
             </small>
           </label>
+        </section>
+
+        <section className="admin-notice-write-section">
+          <div className="admin-notice-image-title-row">
+            <strong>
+              사진
+            </strong>
+
+            <span>
+              {images.length}/3
+            </span>
+          </div>
+
+          <p className="admin-notice-image-guide">
+            사진은 선택 사항이며 최대 3장까지 등록할 수 있어요.
+          </p>
+
+          <input
+            className="admin-notice-hidden-file-input"
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            multiple
+            onChange={handleImageChange}
+            disabled={isSaving}
+          />
+
+          <div className="admin-notice-image-list">
+            {images.map(
+              (
+                image,
+                index
+              ) => (
+                <div
+                  className="admin-notice-image-preview"
+                  key={image.id}
+                >
+                  <img
+                    src={image.previewUrl}
+                    alt={`공지 사진 ${index + 1}`}
+                  />
+
+                  <button
+                    className="admin-notice-image-delete-button"
+                    type="button"
+                    onClick={() =>
+                      handleImageDelete(
+                        image.id
+                      )
+                    }
+                    disabled={isSaving}
+                    aria-label={`공지 사진 ${index + 1} 삭제`}
+                  >
+                    <X />
+                  </button>
+                </div>
+              )
+            )}
+
+            {images.length < 3 && (
+              <button
+                className="admin-notice-image-add-button"
+                type="button"
+                onClick={handleImageButtonClick}
+                disabled={isSaving}
+                aria-label="공지 사진 추가"
+              >
+                <Plus />
+
+                <span>
+                  사진 추가
+                </span>
+              </button>
+            )}
+          </div>
         </section>
 
         <section className="admin-notice-write-section">

@@ -6,6 +6,8 @@ import {
 
 import './NoticeDetail.css'
 
+import resolveMediaUrl from '../utils/mediaUrl'
+
 const API_BASE_URL =
   ''
 
@@ -141,6 +143,13 @@ function NoticeDetail({
     }
   }, [noticeId])
 
+  const imageUrls =
+    Array.isArray(
+      notice?.imageUrls
+    )
+      ? notice.imageUrls
+      : []
+
   return (
     <div className="notice-detail-page">
       <div className="notice-detail-inner">
@@ -195,6 +204,31 @@ function NoticeDetail({
               </header>
 
               <div className="notice-detail-divider" />
+
+              {imageUrls.length > 0 && (
+                <section
+                  className="notice-detail-images"
+                  aria-label="공지 이미지"
+                >
+                  {imageUrls.map(
+                    (
+                      imageUrl,
+                      index
+                    ) => (
+                      <img
+                        className="notice-detail-image"
+                        key={`${imageUrl}-${index}`}
+                        src={resolveMediaUrl(
+                          imageUrl
+                        )}
+                        alt={`공지 이미지 ${
+                          index + 1
+                        }`}
+                      />
+                    )
+                  )}
+                </section>
+              )}
 
               <p className="notice-detail-body">
                 {notice.content}

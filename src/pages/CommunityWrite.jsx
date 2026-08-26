@@ -17,6 +17,12 @@ import resolveMediaUrl from '../utils/mediaUrl'
 const API_BASE_URL =
   ''
 
+function createClientId() {
+  return `${Date.now()}-${Math.random()
+    .toString(36)
+    .slice(2)}`
+}
+
 function CommunityWrite({
   onBack,
   onComplete,
@@ -186,7 +192,7 @@ function CommunityWrite({
         filesToAdd.map(
           (file) => ({
             id:
-              `${file.name}-${file.lastModified}-${crypto.randomUUID()}`,
+              `${file.name}-${file.lastModified}-${createClientId()}`,
 
             file,
 
