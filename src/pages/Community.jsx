@@ -105,7 +105,7 @@ function Community({
         try {
           const response =
             await fetch(
-              `${API_BASE_URL}/api/notices/featured`,
+              `${API_BASE_URL}/api/notices/banner`,
               {
                 method: 'GET',
 
