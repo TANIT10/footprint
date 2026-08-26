@@ -20,10 +20,8 @@ import jakarta.persistence.Table;
         name = "notices",
         indexes = {
                 @Index(
-                        name =
-                                "idx_notices_important_created",
-                        columnList =
-                                "is_important, created_at"
+                        name = "idx_notices_important_created",
+                        columnList = "is_important, created_at"
                 )
         }
 )
@@ -62,6 +60,12 @@ public class Notice {
             nullable = false
     )
     private boolean important = false;
+
+    @Column(
+            name = "is_featured",
+            nullable = false
+    )
+    private boolean featured = false;
 
     @Column(
             name = "created_at",
@@ -104,7 +108,9 @@ public class Notice {
         return author;
     }
 
-    public void setAuthor(User author) {
+    public void setAuthor(
+            User author
+    ) {
         this.author = author;
     }
 
@@ -112,7 +118,9 @@ public class Notice {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(
+            String title
+    ) {
         this.title = title;
     }
 
@@ -121,8 +129,8 @@ public class Notice {
     }
 
     public void setContent(
-            String content) {
-
+            String content
+    ) {
         this.content = content;
     }
 
@@ -131,9 +139,19 @@ public class Notice {
     }
 
     public void setImportant(
-            boolean important) {
-
+            boolean important
+    ) {
         this.important = important;
+    }
+
+    public boolean isFeatured() {
+        return featured;
+    }
+
+    public void setFeatured(
+            boolean featured
+    ) {
+        this.featured = featured;
     }
 
     public LocalDateTime getCreatedAt() {

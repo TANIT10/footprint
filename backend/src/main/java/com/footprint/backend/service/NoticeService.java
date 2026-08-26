@@ -37,7 +37,9 @@ public class NoticeService {
         this.userRepository = userRepository;
     }
 
-    public NoticePageResponse getNotices(int page) {
+    public NoticePageResponse getNotices(
+            int page
+    ) {
         if (page < 0) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -54,7 +56,8 @@ public class NoticeService {
                 );
 
         List<NoticeListItemResponse> notices =
-                noticePage.getContent()
+                noticePage
+                        .getContent()
                         .stream()
                         .map(this::toListItemResponse)
                         .toList();
@@ -72,9 +75,18 @@ public class NoticeService {
     public NoticeResponse getNotice(
             Long noticeId
     ) {
-        Notice notice = findNotice(noticeId);
+        Notice notice =
+                findNotice(noticeId);
 
         return toResponse(notice);
+    }
+
+    public NoticeResponse getFeaturedNotice() {
+
+        return noticeRepository
+                .findFirstByFeaturedTrue()
+                .map(this::toResponse)
+                .orElse(null);
     }
 
     @Transactional
@@ -92,17 +104,24 @@ public class NoticeService {
                                 )
                         );
 
-        Notice notice = new Notice();
+        Notice notice =
+                new Notice();
+
         notice.setAuthor(author);
+
         notice.setTitle(
                 request.title().trim()
         );
+
         notice.setContent(
                 request.content().trim()
         );
+
         notice.setImportant(
                 request.important()
         );
+
+        notice.setFeatured(false);
 
         Notice savedNotice =
                 noticeRepository.save(notice);
@@ -115,14 +134,17 @@ public class NoticeService {
             Long noticeId,
             NoticeUpdateRequest request
     ) {
-        Notice notice = findNotice(noticeId);
+        Notice notice =
+                findNotice(noticeId);
 
         notice.setTitle(
                 request.title().trim()
         );
+
         notice.setContent(
                 request.content().trim()
         );
+
         notice.setImportant(
                 request.important()
         );
@@ -131,10 +153,31 @@ public class NoticeService {
     }
 
     @Transactional
+    public NoticeResponse setFeaturedNotice(
+            Long noticeId
+    ) {
+        Notice notice =
+                findNotice(noticeId);
+
+        noticeRepository.clearFeatured();
+
+        notice.setFeatured(true);
+
+        return toResponse(notice);
+    }
+
+    @Transactional
+    public void clearFeaturedNotice() {
+
+        noticeRepository.clearFeatured();
+    }
+
+    @Transactional
     public void deleteNotice(
             Long noticeId
     ) {
-        Notice notice = findNotice(noticeId);
+        Notice notice =
+                findNotice(noticeId);
 
         noticeRepository.delete(notice);
     }
@@ -152,10 +195,9 @@ public class NoticeService {
                 );
     }
 
-    private NoticeListItemResponse
-            toListItemResponse(
-                    Notice notice
-            ) {
+    private NoticeListItemResponse toListItemResponse(
+            Notice notice
+    ) {
         return new NoticeListItemResponse(
                 notice.getId(),
                 notice.getTitle(),

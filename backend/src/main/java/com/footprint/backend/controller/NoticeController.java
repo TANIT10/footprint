@@ -17,21 +17,39 @@ public class NoticeController {
 
     private final NoticeService noticeService;
 
-    public NoticeController(NoticeService noticeService) {
-        this.noticeService = noticeService;
+    public NoticeController(
+            NoticeService noticeService
+    ) {
+        this.noticeService =
+                noticeService;
     }
 
     @GetMapping
     public ResponseEntity<NoticePageResponse> getNotices(
             @RequestParam(defaultValue = "0") int page
     ) {
-        return ResponseEntity.ok(noticeService.getNotices(page));
+        return ResponseEntity.ok(
+                noticeService.getNotices(page)
+        );
+    }
+
+    @GetMapping("/banner")
+    public ResponseEntity<NoticeResponse> getFeaturedNotice() {
+
+        NoticeResponse featuredNotice =
+                noticeService.getFeaturedNotice();
+
+        return ResponseEntity.ok(
+                featuredNotice
+        );
     }
 
     @GetMapping("/{noticeId}")
     public ResponseEntity<NoticeResponse> getNotice(
             @PathVariable Long noticeId
     ) {
-        return ResponseEntity.ok(noticeService.getNotice(noticeId));
+        return ResponseEntity.ok(
+                noticeService.getNotice(noticeId)
+        );
     }
 }

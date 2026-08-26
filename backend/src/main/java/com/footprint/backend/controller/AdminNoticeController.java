@@ -24,8 +24,11 @@ public class AdminNoticeController {
 
     private final NoticeService noticeService;
 
-    public AdminNoticeController(NoticeService noticeService) {
-        this.noticeService = noticeService;
+    public AdminNoticeController(
+            NoticeService noticeService
+    ) {
+        this.noticeService =
+                noticeService;
     }
 
     @PostMapping
@@ -33,10 +36,11 @@ public class AdminNoticeController {
             Authentication authentication,
             @Valid @RequestBody NoticeCreateRequest request
     ) {
-        NoticeResponse response = noticeService.createNotice(
-                authentication.getName(),
-                request
-        );
+        NoticeResponse response =
+                noticeService.createNotice(
+                        authentication.getName(),
+                        request
+                );
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -49,16 +53,44 @@ public class AdminNoticeController {
             @Valid @RequestBody NoticeUpdateRequest request
     ) {
         return ResponseEntity.ok(
-                noticeService.updateNotice(noticeId, request)
+                noticeService.updateNotice(
+                        noticeId,
+                        request
+                )
         );
+    }
+
+    @PutMapping("/{noticeId}/featured")
+    public ResponseEntity<NoticeResponse> setFeaturedNotice(
+            @PathVariable Long noticeId
+    ) {
+        return ResponseEntity.ok(
+                noticeService.setFeaturedNotice(
+                        noticeId
+                )
+        );
+    }
+
+    @DeleteMapping("/featured")
+    public ResponseEntity<Void> clearFeaturedNotice() {
+
+        noticeService.clearFeaturedNotice();
+
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 
     @DeleteMapping("/{noticeId}")
     public ResponseEntity<Void> deleteNotice(
             @PathVariable Long noticeId
     ) {
-        noticeService.deleteNotice(noticeId);
+        noticeService.deleteNotice(
+                noticeId
+        );
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 }
