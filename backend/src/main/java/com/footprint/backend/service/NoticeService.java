@@ -48,12 +48,13 @@ public class NoticeService {
         }
 
         Page<Notice> noticePage =
-                noticeRepository.findAllByOrderByImportantDescCreatedAtDesc(
-                        PageRequest.of(
-                                page,
-                                NOTICE_PAGE_SIZE
-                        )
-                );
+                noticeRepository
+                        .findAllByOrderByImportantDescCreatedAtDesc(
+                                PageRequest.of(
+                                        page,
+                                        NOTICE_PAGE_SIZE
+                                )
+                        );
 
         List<NoticeListItemResponse> notices =
                 noticePage
@@ -75,10 +76,9 @@ public class NoticeService {
     public NoticeResponse getNotice(
             Long noticeId
     ) {
-        Notice notice =
-                findNotice(noticeId);
-
-        return toResponse(notice);
+        return toResponse(
+                findNotice(noticeId)
+        );
     }
 
     public NoticeResponse getFeaturedNotice() {
@@ -123,10 +123,11 @@ public class NoticeService {
 
         notice.setFeatured(false);
 
-        Notice savedNotice =
-                noticeRepository.save(notice);
-
-        return toResponse(savedNotice);
+        return toResponse(
+                noticeRepository.save(
+                        notice
+                )
+        );
     }
 
     @Transactional
@@ -176,10 +177,9 @@ public class NoticeService {
     public void deleteNotice(
             Long noticeId
     ) {
-        Notice notice =
-                findNotice(noticeId);
-
-        noticeRepository.delete(notice);
+        noticeRepository.delete(
+                findNotice(noticeId)
+        );
     }
 
     private Notice findNotice(
@@ -205,6 +205,7 @@ public class NoticeService {
                         notice.getContent()
                 ),
                 notice.isImportant(),
+                notice.isFeatured(),
                 notice.getCreatedAt(),
                 notice.getUpdatedAt()
         );
@@ -218,6 +219,7 @@ public class NoticeService {
                 notice.getTitle(),
                 notice.getContent(),
                 notice.isImportant(),
+                notice.isFeatured(),
                 notice.getCreatedAt(),
                 notice.getUpdatedAt()
         );
