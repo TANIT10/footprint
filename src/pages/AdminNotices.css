@@ -346,3 +346,79 @@
     font-size: 16px;
   }
 }
+
+/* ========================================
+   대표 공지
+   ======================================== */
+
+.admin-notice-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-notice-featured-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  padding: 3px 7px;
+
+  border-radius: 6px;
+
+  background: #fff4df;
+
+  color: #b9782f;
+
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.admin-notice-featured-button {
+  width: 100%;
+  min-height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  padding: 8px 12px;
+
+  border: 1px solid #e7ded6;
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  color: #7d6a5b;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.admin-notice-featured-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.admin-notice-featured-button.active {
+  background: #fff8ec;
+  border-color: #e5c58e;
+
+  color: #a76d25;
+}
+
+.admin-notice-featured-button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}

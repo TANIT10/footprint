@@ -20,6 +20,8 @@ import missingStatus from '../assets/MISSING.png'
 import sightedStatus from '../assets/SIGHTED.png'
 import returnedStatus from '../assets/RETURNED.png'
 
+const API_BASE_URL = ''
+
 const POST_TYPE_INFO = {
   MISSING: {
     label: '찾아요',
@@ -42,11 +44,10 @@ function PostList({
   onMyPage,
   onCommunity,
   onNotifications,
+  onNoticeList,
+  onNoticeSelect,
   hasUnreadNotification,
 }) {
-  /*
-   * 게시글은 한 페이지에 최대 50개 표시
-   */
   const postsPerPage = 50
 
   const [
@@ -54,9 +55,6 @@ function PostList({
     setCurrentPage,
   ] = useState(1)
 
-  /*
-   * 오른쪽 집 모양 메뉴 열림/닫힘
-   */
   const [
     isMenuOpen,
     setIsMenuOpen,
@@ -66,6 +64,11 @@ function PostList({
     showScrollTop,
     setShowScrollTop,
   ] = useState(false)
+
+  const [
+    featuredNotice,
+    setFeaturedNotice,
+  ] = useState(null)
 
   const totalPages = Math.ceil(
     posts.length / postsPerPage
@@ -79,6 +82,92 @@ function PostList({
     startIndex,
     startIndex + postsPerPage
   )
+
+  /*
+   * =========================================
+   * 대표 공지 조회
+   * =========================================
+   */
+  useEffect(() => {
+    const abortController =
+      new AbortController()
+
+    const loadFeaturedNotice =
+      async () => {
+        const token =
+          localStorage.getItem(
+            'token'
+          )
+
+        if (!token) {
+          setFeaturedNotice(null)
+          return
+        }
+
+        try {
+          const response =
+            await fetch(
+              `${API_BASE_URL}/api/notices/featured`,
+              {
+                method: 'GET',
+
+                headers: {
+                  Authorization:
+                    `Bearer ${token}`,
+                },
+
+                signal:
+                  abortController.signal,
+              }
+            )
+
+          if (!response.ok) {
+            setFeaturedNotice(null)
+            return
+          }
+
+          const text =
+            await response.text()
+
+          if (!text) {
+            setFeaturedNotice(null)
+            return
+          }
+
+          const notice =
+            JSON.parse(text)
+
+          if (!notice?.id) {
+            setFeaturedNotice(null)
+            return
+          }
+
+          setFeaturedNotice(
+            notice
+          )
+        } catch (error) {
+          if (
+            error.name ===
+            'AbortError'
+          ) {
+            return
+          }
+
+          console.error(
+            '대표 공지 조회 실패:',
+            error
+          )
+
+          setFeaturedNotice(null)
+        }
+      }
+
+    loadFeaturedNotice()
+
+    return () => {
+      abortController.abort()
+    }
+  }, [])
 
   useEffect(() => {
     if (totalPages === 0) {
@@ -94,14 +183,12 @@ function PostList({
     totalPages,
   ])
 
-  /*
-   * 페이지 번호를 누르면 해당 페이지로 이동한 뒤
-   * 게시글 목록 맨 위로 부드럽게 올라감
-   */
   const handlePageChange = (
     pageNumber
   ) => {
-    setCurrentPage(pageNumber)
+    setCurrentPage(
+      pageNumber
+    )
 
     window.requestAnimationFrame(
       () => {
@@ -115,6 +202,7 @@ function PostList({
             top: 0,
             behavior: 'smooth',
           })
+
           return
         }
 
@@ -126,10 +214,6 @@ function PostList({
     )
   }
 
-  /*
-   * 메뉴 안의 기능을 누르면
-   * 메뉴를 먼저 닫고 해당 화면으로 이동
-   */
   const handleWriteClick = () => {
     setIsMenuOpen(false)
     onWrite?.()
@@ -149,8 +233,8 @@ function PostList({
     event
   ) => {
     setShowScrollTop(
-      event.currentTarget.scrollTop >
-        20
+      event.currentTarget
+        .scrollTop > 20
     )
   }
 
@@ -165,6 +249,7 @@ function PostList({
         top: 0,
         behavior: 'smooth',
       })
+
       return
     }
 
@@ -172,6 +257,28 @@ function PostList({
       top: 0,
       behavior: 'smooth',
     })
+  }
+
+  /*
+   * 대표 공지 배너 클릭
+   *
+   * 특정 공지 상세가 아니라
+   * 공지사항 목록으로 이동합니다.
+   */
+  const handleNoticeOpen = () => {
+    if (onNoticeList) {
+      onNoticeList()
+      return
+    }
+
+    if (
+      featuredNotice?.id &&
+      onNoticeSelect
+    ) {
+      onNoticeSelect(
+        featuredNotice.id
+      )
+    }
   }
 
   return (
@@ -192,7 +299,9 @@ function PostList({
           <button
             className="notification-button"
             type="button"
-            onClick={onNotifications}
+            onClick={
+              onNotifications
+            }
             aria-label={
               hasUnreadNotification
                 ? '알림, 읽지 않은 알림 있음'
@@ -215,11 +324,53 @@ function PostList({
         </header>
 
         <main className="post-list-content">
+          {featuredNotice && (
+            <section
+              className="post-list-notice"
+              role="button"
+              tabIndex={0}
+              onClick={
+                handleNoticeOpen
+              }
+              onKeyDown={(
+                event
+              ) => {
+                if (
+                  event.key === 'Enter' ||
+                  event.key === ' '
+                ) {
+                  event.preventDefault()
+
+                  handleNoticeOpen()
+                }
+              }}
+              aria-label={`${featuredNotice.title} 공지사항 목록 보기`}
+            >
+              <span className="post-list-notice-badge">
+                공지
+              </span>
+
+              <strong className="post-list-notice-title">
+                {featuredNotice.title}
+              </strong>
+
+              <span
+                className="post-list-notice-arrow"
+                aria-hidden="true"
+              >
+                ›
+              </span>
+            </section>
+          )}
+
           {posts.length > 0 ? (
             <>
               <div className="post-grid">
                 {visiblePosts.map(
-                  (post, index) => {
+                  (
+                    post,
+                    index
+                  ) => {
                     const typeInfo =
                       POST_TYPE_INFO[
                         post.postType
@@ -328,7 +479,9 @@ function PostList({
                               : ''
                           }
                           type="button"
-                          key={pageNumber}
+                          key={
+                            pageNumber
+                          }
                           onClick={() =>
                             handlePageChange(
                               pageNumber
@@ -369,7 +522,9 @@ function PostList({
             type="button"
             aria-label="메뉴 닫기"
             onClick={() =>
-              setIsMenuOpen(false)
+              setIsMenuOpen(
+                false
+              )
             }
           />
         )}
@@ -378,7 +533,9 @@ function PostList({
           <button
             className="post-list-scroll-top-button"
             type="button"
-            onClick={handleScrollToTop}
+            onClick={
+              handleScrollToTop
+            }
             aria-label="맨 위로 이동"
           >
             <ArrowUp
@@ -401,10 +558,14 @@ function PostList({
             <button
               className="side-menu-button write-button"
               type="button"
-              onClick={handleWriteClick}
+              onClick={
+                handleWriteClick
+              }
               aria-label="게시글 작성"
               tabIndex={
-                isMenuOpen ? 0 : -1
+                isMenuOpen
+                  ? 0
+                  : -1
               }
             >
               <img
@@ -413,16 +574,22 @@ function PostList({
                 alt=""
               />
 
-              <span>글쓰기</span>
+              <span>
+                글쓰기
+              </span>
             </button>
 
             <button
               className="side-menu-button community-button"
               type="button"
-              onClick={handleCommunityClick}
+              onClick={
+                handleCommunityClick
+              }
               aria-label="커뮤니티로 이동"
               tabIndex={
-                isMenuOpen ? 0 : -1
+                isMenuOpen
+                  ? 0
+                  : -1
               }
             >
               커뮤
@@ -433,10 +600,14 @@ function PostList({
             <button
               className="side-menu-button my-page-button"
               type="button"
-              onClick={handleMyPageClick}
+              onClick={
+                handleMyPageClick
+              }
               aria-label="내 페이지로 이동"
               tabIndex={
-                isMenuOpen ? 0 : -1
+                isMenuOpen
+                  ? 0
+                  : -1
               }
             >
               내

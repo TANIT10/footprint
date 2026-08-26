@@ -24,6 +24,12 @@ import jakarta.persistence.Table;
                                 "idx_notices_important_created",
                         columnList =
                                 "is_important, created_at"
+                ),
+                @Index(
+                        name =
+                                "idx_notices_featured",
+                        columnList =
+                                "is_featured"
                 )
         }
 )
@@ -61,7 +67,22 @@ public class Notice {
             name = "is_important",
             nullable = false
     )
-    private boolean important = false;
+    private boolean important =
+            false;
+
+    /*
+     * 메인/커뮤니티 상단에 보여줄
+     * 대표 공지 여부
+     *
+     * 대표 공지는 서비스에서
+     * 최대 1개만 유지합니다.
+     */
+    @Column(
+            name = "is_featured",
+            nullable = false
+    )
+    private boolean featured =
+            false;
 
     @Column(
             name = "created_at",
@@ -104,16 +125,22 @@ public class Notice {
         return author;
     }
 
-    public void setAuthor(User author) {
-        this.author = author;
+    public void setAuthor(
+            User author
+    ) {
+        this.author =
+                author;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setTitle(
+            String title
+    ) {
+        this.title =
+                title;
     }
 
     public String getContent() {
@@ -121,9 +148,10 @@ public class Notice {
     }
 
     public void setContent(
-            String content) {
-
-        this.content = content;
+            String content
+    ) {
+        this.content =
+                content;
     }
 
     public boolean isImportant() {
@@ -131,9 +159,21 @@ public class Notice {
     }
 
     public void setImportant(
-            boolean important) {
+            boolean important
+    ) {
+        this.important =
+                important;
+    }
 
-        this.important = important;
+    public boolean isFeatured() {
+        return featured;
+    }
+
+    public void setFeatured(
+            boolean featured
+    ) {
+        this.featured =
+                featured;
     }
 
     public LocalDateTime getCreatedAt() {

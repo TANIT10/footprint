@@ -33,11 +33,21 @@ public class NoticeService {
             NoticeRepository noticeRepository,
             UserRepository userRepository
     ) {
-        this.noticeRepository = noticeRepository;
-        this.userRepository = userRepository;
+        this.noticeRepository =
+                noticeRepository;
+
+        this.userRepository =
+                userRepository;
     }
 
-    public NoticePageResponse getNotices(int page) {
+    /*
+     * ==========================================
+     * 공지사항 목록 조회
+     * ==========================================
+     */
+    public NoticePageResponse getNotices(
+            int page
+    ) {
         if (page < 0) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -46,17 +56,21 @@ public class NoticeService {
         }
 
         Page<Notice> noticePage =
-                noticeRepository.findAllByOrderByImportantDescCreatedAtDesc(
-                        PageRequest.of(
-                                page,
-                                NOTICE_PAGE_SIZE
-                        )
-                );
+                noticeRepository
+                        .findAllByOrderByImportantDescCreatedAtDesc(
+                                PageRequest.of(
+                                        page,
+                                        NOTICE_PAGE_SIZE
+                                )
+                        );
 
         List<NoticeListItemResponse> notices =
-                noticePage.getContent()
+                noticePage
+                        .getContent()
                         .stream()
-                        .map(this::toListItemResponse)
+                        .map(
+                                this::toListItemResponse
+                        )
                         .toList();
 
         return new NoticePageResponse(
@@ -69,14 +83,52 @@ public class NoticeService {
         );
     }
 
+    /*
+     * ==========================================
+     * 공지사항 상세 조회
+     * ==========================================
+     */
     public NoticeResponse getNotice(
             Long noticeId
     ) {
-        Notice notice = findNotice(noticeId);
+        Notice notice =
+                findNotice(
+                        noticeId
+                );
 
-        return toResponse(notice);
+        return toResponse(
+                notice
+        );
     }
 
+    /*
+     * ==========================================
+     * 대표 공지 조회
+     * ==========================================
+     *
+     * 대표 공지가 없는 경우에는
+     * null을 반환합니다.
+     *
+     * 프론트에서는 null일 경우
+     * 상단 공지 배너를 숨기면 됩니다.
+     */
+    public NoticeResponse getFeaturedNotice() {
+
+        return noticeRepository
+                .findFirstByFeaturedTrue()
+                .map(
+                        this::toResponse
+                )
+                .orElse(
+                        null
+                );
+    }
+
+    /*
+     * ==========================================
+     * 관리자 공지사항 작성
+     * ==========================================
+     */
     @Transactional
     public NoticeResponse createNotice(
             String username,
@@ -84,74 +136,188 @@ public class NoticeService {
     ) {
         User author =
                 userRepository
-                        .findByUsername(username)
-                        .orElseThrow(() ->
-                                new ResponseStatusException(
-                                        HttpStatus.UNAUTHORIZED,
-                                        "로그인한 사용자를 찾을 수 없습니다."
-                                )
+                        .findByUsername(
+                                username
+                        )
+                        .orElseThrow(
+                                () ->
+                                        new ResponseStatusException(
+                                                HttpStatus.UNAUTHORIZED,
+                                                "로그인한 사용자를 찾을 수 없습니다."
+                                        )
                         );
 
-        Notice notice = new Notice();
-        notice.setAuthor(author);
+        Notice notice =
+                new Notice();
+
+        notice.setAuthor(
+                author
+        );
+
         notice.setTitle(
-                request.title().trim()
+                request
+                        .title()
+                        .trim()
         );
+
         notice.setContent(
-                request.content().trim()
+                request
+                        .content()
+                        .trim()
         );
+
         notice.setImportant(
-                request.important()
+                request
+                        .important()
+        );
+
+        /*
+         * 새 공지는 자동으로
+         * 대표 공지가 되지 않습니다.
+         */
+        notice.setFeatured(
+                false
         );
 
         Notice savedNotice =
-                noticeRepository.save(notice);
+                noticeRepository
+                        .save(
+                                notice
+                        );
 
-        return toResponse(savedNotice);
+        return toResponse(
+                savedNotice
+        );
     }
 
+    /*
+     * ==========================================
+     * 관리자 공지사항 수정
+     * ==========================================
+     */
     @Transactional
     public NoticeResponse updateNotice(
             Long noticeId,
             NoticeUpdateRequest request
     ) {
-        Notice notice = findNotice(noticeId);
+        Notice notice =
+                findNotice(
+                        noticeId
+                );
 
         notice.setTitle(
-                request.title().trim()
-        );
-        notice.setContent(
-                request.content().trim()
-        );
-        notice.setImportant(
-                request.important()
+                request
+                        .title()
+                        .trim()
         );
 
-        return toResponse(notice);
+        notice.setContent(
+                request
+                        .content()
+                        .trim()
+        );
+
+        notice.setImportant(
+                request
+                        .important()
+        );
+
+        /*
+         * 공지 수정 시 대표 여부는
+         * 그대로 유지합니다.
+         */
+        return toResponse(
+                notice
+        );
     }
 
+    /*
+     * ==========================================
+     * 대표 공지 설정
+     * ==========================================
+     *
+     * 기존 대표 공지를 모두 해제한 뒤
+     * 선택한 공지만 대표로 지정합니다.
+     */
+    @Transactional
+    public NoticeResponse setFeaturedNotice(
+            Long noticeId
+    ) {
+        Notice notice =
+                findNotice(
+                        noticeId
+                );
+
+        noticeRepository
+                .clearFeatured();
+
+        notice.setFeatured(
+                true
+        );
+
+        return toResponse(
+                notice
+        );
+    }
+
+    /*
+     * ==========================================
+     * 대표 공지 해제
+     * ==========================================
+     */
+    @Transactional
+    public void clearFeaturedNotice() {
+
+        noticeRepository
+                .clearFeatured();
+    }
+
+    /*
+     * ==========================================
+     * 공지사항 삭제
+     * ==========================================
+     */
     @Transactional
     public void deleteNotice(
             Long noticeId
     ) {
-        Notice notice = findNotice(noticeId);
+        Notice notice =
+                findNotice(
+                        noticeId
+                );
 
-        noticeRepository.delete(notice);
+        noticeRepository
+                .delete(
+                        notice
+                );
     }
 
+    /*
+     * ==========================================
+     * 공지사항 찾기
+     * ==========================================
+     */
     private Notice findNotice(
             Long noticeId
     ) {
         return noticeRepository
-                .findById(noticeId)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "공지사항을 찾을 수 없습니다."
-                        )
+                .findById(
+                        noticeId
+                )
+                .orElseThrow(
+                        () ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND,
+                                        "공지사항을 찾을 수 없습니다."
+                                )
                 );
     }
 
+    /*
+     * ==========================================
+     * 공지 목록 응답 변환
+     * ==========================================
+     */
     private NoticeListItemResponse
             toListItemResponse(
                     Notice notice
@@ -163,11 +329,17 @@ public class NoticeService {
                         notice.getContent()
                 ),
                 notice.isImportant(),
+                notice.isFeatured(),
                 notice.getCreatedAt(),
                 notice.getUpdatedAt()
         );
     }
 
+    /*
+     * ==========================================
+     * 공지 상세 응답 변환
+     * ==========================================
+     */
     private NoticeResponse toResponse(
             Notice notice
     ) {
@@ -176,11 +348,17 @@ public class NoticeService {
                 notice.getTitle(),
                 notice.getContent(),
                 notice.isImportant(),
+                notice.isFeatured(),
                 notice.getCreatedAt(),
                 notice.getUpdatedAt()
         );
     }
 
+    /*
+     * ==========================================
+     * 공지 목록용 요약문 생성
+     * ==========================================
+     */
     private String createSummary(
             String content
     ) {

@@ -1,5 +1,5 @@
 const API_BASE_URL =
-  'http://localhost:8080'
+  ''
 
 function resolveMediaUrl(imageUrl) {
   if (!imageUrl) {

@@ -15,7 +15,7 @@ import './Inquiry.css'
 import footprint from '../assets/footprint.png'
 
 const API_BASE_URL =
-  'http://localhost:8080'
+  ''
 
 function formatMessageTime(createdAt) {
   if (!createdAt) {

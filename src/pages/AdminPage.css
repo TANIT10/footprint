@@ -262,7 +262,7 @@
   justify-content: center;
   flex-direction: column;
 
-  min-height: 92px;
+  min-height: 145px;
 
   border: 1px solid #eeeeee;
   border-radius: 15px;
@@ -354,7 +354,7 @@
   }
 
   .admin-menu-card {
-    min-height: 92px;
+    min-height: 145px;
 
     padding: 17px;
   }

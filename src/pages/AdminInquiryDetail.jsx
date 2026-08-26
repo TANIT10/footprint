@@ -13,7 +13,7 @@ import {
 import './AdminInquiryDetail.css'
 
 const API_BASE_URL =
-  'http://localhost:8080'
+  ''
 
 function formatMessageTime(
   createdAt
