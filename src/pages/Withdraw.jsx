@@ -61,7 +61,7 @@ function Withdraw({
 
     try {
       const response = await fetch(
-        '/api/users/me',
+        'http://localhost:8080/api/users/me',
         {
           method: 'DELETE',
           headers: {

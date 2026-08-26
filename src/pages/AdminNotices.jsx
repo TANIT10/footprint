@@ -2,7 +2,6 @@ import {
   ArrowLeft,
   ChevronRight,
   Plus,
-  Star,
 } from 'lucide-react'
 
 import {
@@ -12,7 +11,8 @@ import {
 
 import './AdminNotices.css'
 
-const API_BASE_URL = ''
+const API_BASE_URL =
+  'http://localhost:8080'
 
 function formatNoticeDate(
   createdAt
@@ -22,7 +22,9 @@ function formatNoticeDate(
   }
 
   const date =
-    new Date(createdAt)
+    new Date(
+      createdAt
+    )
 
   if (
     Number.isNaN(
@@ -62,11 +64,6 @@ function AdminNotices({
     setLoadError,
   ] = useState('')
 
-  const [
-    changingFeaturedId,
-    setChangingFeaturedId,
-  ] = useState(null)
-
   useEffect(() => {
     const abortController =
       new AbortController()
@@ -83,14 +80,21 @@ function AdminNotices({
             '로그인 정보를 찾을 수 없어요.'
           )
 
-          setIsLoading(false)
+          setIsLoading(
+            false
+          )
 
           return
         }
 
         try {
-          setIsLoading(true)
-          setLoadError('')
+          setIsLoading(
+            true
+          )
+
+          setLoadError(
+            ''
+          )
 
           const response =
             await fetch(
@@ -109,7 +113,8 @@ function AdminNotices({
             )
 
           if (
-            response.status === 401
+            response.status ===
+            401
           ) {
             throw new Error(
               '로그인 시간이 만료됐어요.'
@@ -117,7 +122,8 @@ function AdminNotices({
           }
 
           if (
-            response.status === 403
+            response.status ===
+            403
           ) {
             throw new Error(
               '관리자 권한을 확인할 수 없어요.'
@@ -163,7 +169,9 @@ function AdminNotices({
               .signal
               .aborted
           ) {
-            setIsLoading(false)
+            setIsLoading(
+              false
+            )
           }
         }
       }
@@ -175,255 +183,15 @@ function AdminNotices({
     }
   }, [])
 
-  /*
-   * =========================================
-   * 대표 공지 설정
-   * =========================================
-   */
-  const handleSetFeatured =
-    async (
-      event,
-      notice
-    ) => {
-      /*
-       * 카드 클릭 이벤트가 같이 실행되어
-       * 공지 상세로 이동하는 것을 막습니다.
-       */
-      event.stopPropagation()
-
-      if (
-        changingFeaturedId !==
-        null
-      ) {
-        return
-      }
-
-      if (notice.featured) {
-        return
-      }
-
-      const token =
-        localStorage.getItem(
-          'token'
-        )
-
-      if (!token) {
-        window.alert(
-          '로그인 정보를 찾을 수 없어요.'
-        )
-
-        return
-      }
-
-      const confirmed =
-        window.confirm(
-          `"${notice.title}" 공지를 상단 대표 공지로 설정할까요?`
-        )
-
-      if (!confirmed) {
-        return
-      }
-
-      try {
-        setChangingFeaturedId(
-          notice.id
-        )
-
-        const response =
-          await fetch(
-            `${API_BASE_URL}/api/admin/notices/${notice.id}/featured`,
-            {
-              method: 'PUT',
-
-              headers: {
-                Authorization:
-                  `Bearer ${token}`,
-              },
-            }
-          )
-
-        if (
-          response.status === 401
-        ) {
-          throw new Error(
-            '로그인 시간이 만료됐어요.'
-          )
-        }
-
-        if (
-          response.status === 403
-        ) {
-          throw new Error(
-            '관리자 권한이 필요해요.'
-          )
-        }
-
-        if (!response.ok) {
-          throw new Error(
-            '대표 공지를 설정하지 못했어요.'
-          )
-        }
-
-        /*
-         * 서버 저장 성공 후
-         * 화면에서도 선택된 공지만 featured=true
-         */
-        setNotices(
-          (previousNotices) =>
-            previousNotices.map(
-              (
-                previousNotice
-              ) => ({
-                ...previousNotice,
-
-                featured:
-                  previousNotice.id ===
-                  notice.id,
-              })
-            )
-        )
-
-        window.alert(
-          '대표 공지로 설정했어요.'
-        )
-      } catch (error) {
-        console.error(
-          '대표 공지 설정 실패:',
-          error
-        )
-
-        window.alert(
-          error.message ||
-            '대표 공지를 설정하지 못했어요.'
-        )
-      } finally {
-        setChangingFeaturedId(
-          null
-        )
-      }
-    }
-
-  /*
-   * =========================================
-   * 대표 공지 해제
-   * =========================================
-   */
-  const handleClearFeatured =
-    async (
-      event,
-      notice
-    ) => {
-      event.stopPropagation()
-
-      if (
-        changingFeaturedId !==
-        null
-      ) {
-        return
-      }
-
-      const token =
-        localStorage.getItem(
-          'token'
-        )
-
-      if (!token) {
-        window.alert(
-          '로그인 정보를 찾을 수 없어요.'
-        )
-
-        return
-      }
-
-      const confirmed =
-        window.confirm(
-          `"${notice.title}" 공지를 대표 공지에서 해제할까요?`
-        )
-
-      if (!confirmed) {
-        return
-      }
-
-      try {
-        setChangingFeaturedId(
-          notice.id
-        )
-
-        const response =
-          await fetch(
-            `${API_BASE_URL}/api/admin/notices/featured`,
-            {
-              method: 'DELETE',
-
-              headers: {
-                Authorization:
-                  `Bearer ${token}`,
-              },
-            }
-          )
-
-        if (
-          response.status === 401
-        ) {
-          throw new Error(
-            '로그인 시간이 만료됐어요.'
-          )
-        }
-
-        if (
-          response.status === 403
-        ) {
-          throw new Error(
-            '관리자 권한이 필요해요.'
-          )
-        }
-
-        if (!response.ok) {
-          throw new Error(
-            '대표 공지를 해제하지 못했어요.'
-          )
-        }
-
-        setNotices(
-          (previousNotices) =>
-            previousNotices.map(
-              (
-                previousNotice
-              ) => ({
-                ...previousNotice,
-
-                featured: false,
-              })
-            )
-        )
-
-        window.alert(
-          '대표 공지를 해제했어요.'
-        )
-      } catch (error) {
-        console.error(
-          '대표 공지 해제 실패:',
-          error
-        )
-
-        window.alert(
-          error.message ||
-            '대표 공지를 해제하지 못했어요.'
-        )
-      } finally {
-        setChangingFeaturedId(
-          null
-        )
-      }
-    }
-
   return (
     <div className="admin-notices-page">
       <header className="admin-notices-header">
         <button
           className="admin-notices-back-button"
           type="button"
-          onClick={onBack}
+          onClick={
+            onBack
+          }
           aria-label="관리자 페이지로 돌아가기"
         >
           <ArrowLeft />
@@ -436,7 +204,9 @@ function AdminNotices({
         <button
           className="admin-notices-create-button"
           type="button"
-          onClick={onCreate}
+          onClick={
+            onCreate
+          }
           aria-label="새 공지사항 작성"
         >
           <Plus />
@@ -464,95 +234,50 @@ function AdminNotices({
             aria-label="관리자 공지사항 목록"
           >
             {notices.map(
-              (notice) => (
-                <div
-                  className="admin-notice-card-wrapper"
-                  key={notice.id}
-                >
-                  <button
-                    className="admin-notice-card"
-                    type="button"
-                    onClick={() =>
-                      onNoticeSelect?.(
-                        notice.id
-                      )
-                    }
-                  >
-                    <span className="admin-notice-information">
-                      <span className="admin-notice-title-row">
-                        {notice.important && (
-                          <span className="admin-notice-important-badge">
-                            중요
-                          </span>
-                        )}
-
-                        {notice.featured && (
-                          <span className="admin-notice-featured-badge">
-                            대표
-                          </span>
-                        )}
-
-                        <strong>
-                          {notice.title}
-                        </strong>
-                      </span>
-
-                      <span className="admin-notice-summary">
-                        {notice.summary}
-                      </span>
-
-                      <time>
-                        {formatNoticeDate(
-                          notice.createdAt
-                        )}
-                      </time>
-                    </span>
-
-                    <ChevronRight
-                      className="admin-notice-arrow"
-                      aria-hidden="true"
-                    />
-                  </button>
-
-                  <button
-                    className={`admin-notice-featured-button ${
-                      notice.featured
-                        ? 'active'
-                        : ''
-                    }`}
-                    type="button"
-                    onClick={(
-                      event
-                    ) =>
-                      notice.featured
-                        ? handleClearFeatured(
-                            event,
-                            notice
-                          )
-                        : handleSetFeatured(
-                            event,
-                            notice
-                          )
-                    }
-                    disabled={
-                      changingFeaturedId !==
-                      null
-                    }
-                  >
-                    <Star
-                      aria-hidden="true"
-                    />
-
-                    <span>
-                      {changingFeaturedId ===
+              (
+                notice
+              ) => (
+                <button
+                  className="admin-notice-card"
+                  type="button"
+                  key={
+                    notice.id
+                  }
+                  onClick={() =>
+                    onNoticeSelect?.(
                       notice.id
-                        ? '변경 중...'
-                        : notice.featured
-                          ? '대표 공지 해제'
-                          : '대표로 설정'}
+                    )
+                  }
+                >
+                  <span className="admin-notice-information">
+                    <span className="admin-notice-title-row">
+                      {notice.important && (
+                        <span className="admin-notice-important-badge">
+                          중요
+                        </span>
+                      )}
+
+                      <strong>
+                        {notice.title}
+                      </strong>
                     </span>
-                  </button>
-                </div>
+
+                    <span className="admin-notice-summary">
+                      {notice.summary}
+                    </span>
+
+                    <time>
+                      {formatNoticeDate(
+                        notice.createdAt
+                      )}
+                    </time>
+                  </span>
+
+                  <ChevronRight
+                    className="admin-notice-arrow"
+                    aria-hidden="true"
+                  />
+                </button>
               )
             )}
           </section>

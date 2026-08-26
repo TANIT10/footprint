@@ -24,11 +24,8 @@ public class AdminNoticeController {
 
     private final NoticeService noticeService;
 
-    public AdminNoticeController(
-            NoticeService noticeService
-    ) {
-        this.noticeService =
-                noticeService;
+    public AdminNoticeController(NoticeService noticeService) {
+        this.noticeService = noticeService;
     }
 
     @PostMapping
@@ -36,11 +33,10 @@ public class AdminNoticeController {
             Authentication authentication,
             @Valid @RequestBody NoticeCreateRequest request
     ) {
-        NoticeResponse response =
-                noticeService.createNotice(
-                        authentication.getName(),
-                        request
-                );
+        NoticeResponse response = noticeService.createNotice(
+                authentication.getName(),
+                request
+        );
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -53,52 +49,16 @@ public class AdminNoticeController {
             @Valid @RequestBody NoticeUpdateRequest request
     ) {
         return ResponseEntity.ok(
-                noticeService.updateNotice(
-                        noticeId,
-                        request
-                )
+                noticeService.updateNotice(noticeId, request)
         );
-    }
-
-    /*
-     * 선택한 공지를 대표공지로 설정
-     *
-     * 기존 대표공지는 자동으로 해제됩니다.
-     */
-    @PutMapping("/{noticeId}/featured")
-    public ResponseEntity<NoticeResponse> setFeaturedNotice(
-            @PathVariable Long noticeId
-    ) {
-        return ResponseEntity.ok(
-                noticeService.setFeaturedNotice(
-                        noticeId
-                )
-        );
-    }
-
-    /*
-     * 현재 대표공지 해제
-     */
-    @DeleteMapping("/featured")
-    public ResponseEntity<Void> clearFeaturedNotice() {
-
-        noticeService.clearFeaturedNotice();
-
-        return ResponseEntity
-                .noContent()
-                .build();
     }
 
     @DeleteMapping("/{noticeId}")
     public ResponseEntity<Void> deleteNotice(
             @PathVariable Long noticeId
     ) {
-        noticeService.deleteNotice(
-                noticeId
-        );
+        noticeService.deleteNotice(noticeId);
 
-        return ResponseEntity
-                .noContent()
-                .build();
+        return ResponseEntity.noContent().build();
     }
 }

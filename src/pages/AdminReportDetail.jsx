@@ -15,7 +15,7 @@ import {
 import './AdminReportDetail.css'
 
 const API_BASE_URL =
-  ''
+  'http://localhost:8080'
 
 const REPORT_REASON_INFO = {
   ABUSE: '욕설·비방·괴롭힘',

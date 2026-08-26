@@ -7,7 +7,6 @@ public record NoticeResponse(
         String title,
         String content,
         boolean important,
-        boolean featured,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

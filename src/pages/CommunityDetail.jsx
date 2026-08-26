@@ -19,7 +19,7 @@ import footprint from '../assets/footprint.png'
 import resolveMediaUrl from '../utils/mediaUrl'
 
 const API_BASE_URL =
-  ''
+  'http://localhost:8080'
 
 function CommunityDetail({
   postId,

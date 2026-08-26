@@ -133,7 +133,7 @@ function Signup({ onBack }) {
         })
 
       const response = await fetch(
-        `/api/users/check-username?${query}`
+        `http://localhost:8080/api/users/check-username?${query}`
       )
 
       if (!response.ok) {
@@ -212,7 +212,7 @@ function Signup({ onBack }) {
           })
 
         const response = await fetch(
-          `/api/users/check-nickname?${query}`
+          `http://localhost:8080/api/users/check-nickname?${query}`
         )
 
         if (!response.ok) {
@@ -321,7 +321,7 @@ function Signup({ onBack }) {
 
     try {
       const response = await fetch(
-        '/api/users/signup',
+        'http://localhost:8080/api/users/signup',
         {
           method: 'POST',
           headers: {

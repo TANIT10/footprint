@@ -7,7 +7,6 @@ public record NoticeListItemResponse(
         String title,
         String summary,
         boolean important,
-        boolean featured,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
