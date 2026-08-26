@@ -588,3 +588,113 @@
     padding: 27px 0;
   }
 }
+
+/*
+ * 모바일 날짜 입력칸
+ *
+ * 테두리 / 배경 / focus 효과는
+ * 기존 .post-write-field input 스타일을 그대로 사용.
+ */
+@media screen and (max-width: 800px) {
+  .post-date-input-wrapper {
+    position: relative;
+
+    width: 100%;
+  }
+
+  .post-date-input-wrapper
+    input[type="date"] {
+    position: relative;
+    z-index: 2;
+
+    width: 100%;
+    height: 50px;
+    min-height: 50px;
+
+    padding: 0 14px;
+
+    font-size: 14px;
+    line-height: 50px;
+
+    text-align: left;
+
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .post-date-input-wrapper
+    input[type="date"]::-webkit-date-and-time-value {
+    min-height: 0;
+
+    padding: 0;
+
+    text-align: left;
+  }
+
+  /*
+   * 날짜를 고르기 전 표시되는 안내문구.
+   * 기존 input placeholder와 정확히 같은 색.
+   */
+  .post-date-placeholder {
+    position: absolute;
+
+    top: 50%;
+    left: 14px;
+    z-index: 3;
+
+    color: #b9b1ab;
+
+    font-family:
+    Arial,
+    Helvetica,
+    "Apple SD Gothic Neo",
+    "Noto Sans KR",
+    sans-serif;
+
+    font-size: 14px;
+
+    pointer-events: none;
+
+    transform: translateY(-50%);
+  }
+
+  /*
+   * 직접 표시하는 달력 아이콘
+   */
+  .post-date-calendar-icon {
+    position: absolute;
+
+    top: 50%;
+    right: 14px;
+    z-index: 4;
+
+    width: 17px;
+    height: 17px;
+
+    color: #342e2a;
+
+    pointer-events: none;
+
+    transform: translateY(-50%);
+  }
+
+  /*
+   * 브라우저 기본 달력 버튼은 투명하게 만들되
+   * 클릭 영역은 유지.
+   */
+  .post-date-input-wrapper
+    input[type="date"]::-webkit-calendar-picker-indicator {
+    position: absolute;
+
+    right: 12px;
+
+    width: 22px;
+    height: 22px;
+
+    margin: 0;
+
+    opacity: 0;
+
+    cursor: pointer;
+  }
+}

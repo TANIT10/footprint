@@ -5,6 +5,7 @@ import {
 } from 'react'
 import {
   ArrowLeft,
+  CalendarDays,
   Plus,
   X,
 } from 'lucide-react'
@@ -612,13 +613,26 @@ function PostWrite({
             <label className="post-write-field">
               <span>날짜 *</span>
 
-              <input
-                type="date"
-                name="date"
-                value={formData.date}
-                onChange={handleInputChange}
-                disabled={isSubmitting}
-              />
+              <div className="post-date-input-wrapper">
+                {!formData.date && (
+                  <span className="post-date-placeholder">
+                    ex. 연도-월-일
+                  </span>
+                )}
+
+                <input
+                  type="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                />
+
+                <CalendarDays
+                  className="post-date-calendar-icon"
+                  aria-hidden="true"
+                />
+              </div>
             </label>
 
             <label className="post-write-field">
