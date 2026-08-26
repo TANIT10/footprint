@@ -3057,6 +3057,16 @@ function App() {
           handleNotificationsFromPostList
         }
 
+        onNoticeList={() => {
+          setNoticeListBackPage(
+            'postList'
+          )
+
+          setPage(
+            'noticeList'
+          )
+        }}
+
         hasUnreadNotification={
           hasUnreadNotification
         }
@@ -3108,6 +3118,16 @@ function App() {
         onNoticeSelect={
           handleNoticeSelectFromCommunity
         }
+
+        onNoticeList={() => {
+          setNoticeListBackPage(
+            'community'
+          )
+
+          setPage(
+            'noticeList'
+          )
+        }}
 
         onMyPage={() =>
           setPage(

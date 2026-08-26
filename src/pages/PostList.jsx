@@ -42,6 +42,7 @@ function PostList({
   onMyPage,
   onCommunity,
   onNotifications,
+  onNoticeList,
   hasUnreadNotification,
 }) {
   /*
@@ -66,6 +67,90 @@ function PostList({
     showScrollTop,
     setShowScrollTop,
   ] = useState(false)
+
+  const [
+    featuredNotice,
+    setFeaturedNotice,
+  ] = useState(null)
+
+  useEffect(() => {
+    const abortController =
+      new AbortController()
+
+    const loadFeaturedNotice =
+      async () => {
+        const token =
+          localStorage.getItem(
+            'token'
+          )
+
+        if (!token) {
+          setFeaturedNotice(null)
+          return
+        }
+
+        try {
+          const response =
+            await fetch(
+              `/api/notices/banner`,
+              {
+                method: 'GET',
+
+                headers: {
+                  Authorization:
+                    `Bearer ${token}`,
+                },
+
+                signal:
+                  abortController.signal,
+              }
+            )
+
+          if (!response.ok) {
+            setFeaturedNotice(null)
+            return
+          }
+
+          const text =
+            await response.text()
+
+          if (!text) {
+            setFeaturedNotice(null)
+            return
+          }
+
+          const notice =
+            JSON.parse(text)
+
+          if (!notice?.id) {
+            setFeaturedNotice(null)
+            return
+          }
+
+          setFeaturedNotice(notice)
+        } catch (error) {
+          if (
+            error.name ===
+            'AbortError'
+          ) {
+            return
+          }
+
+          console.error(
+            '대표 공지 조회 실패:',
+            error
+          )
+
+          setFeaturedNotice(null)
+        }
+      }
+
+    loadFeaturedNotice()
+
+    return () => {
+      abortController.abort()
+    }
+  }, [])
 
   const totalPages = Math.ceil(
     posts.length / postsPerPage
@@ -174,6 +259,10 @@ function PostList({
     })
   }
 
+  const handleNoticeOpen = () => {
+    onNoticeList?.()
+  }
+
   return (
     <div
       className="post-list-page"
@@ -215,6 +304,44 @@ function PostList({
         </header>
 
         <main className="post-list-content">
+          {featuredNotice && (
+            <section
+              className="post-list-notice"
+              role="button"
+              tabIndex={0}
+              onClick={
+                handleNoticeOpen
+              }
+              onKeyDown={(
+                event
+              ) => {
+                if (
+                  event.key === 'Enter' ||
+                  event.key === ' '
+                ) {
+                  event.preventDefault()
+
+                  handleNoticeOpen()
+                }
+              }}
+              aria-label={`${featuredNotice.title} 공지사항 목록 보기`}
+            >
+              <span className="post-list-notice-badge">
+                공지
+              </span>
+
+              <strong className="post-list-notice-title">
+                {featuredNotice.title}
+              </strong>
+
+              <span
+                className="post-list-notice-arrow"
+                aria-hidden="true"
+              >
+                ›
+              </span>
+            </section>
+          )}
           {posts.length > 0 ? (
             <>
               <div className="post-grid">

@@ -27,6 +27,7 @@ function Community({
   onPostSelect,
   onNotifications,
   onNoticeSelect,
+  onNoticeList,
   onMyPage,
   hasUnreadNotification = false,
 }) {
@@ -51,9 +52,9 @@ function Community({
   ] = useState('')
 
   const [
-    isNoticeOpening,
-    setIsNoticeOpening,
-  ] = useState(false)
+    featuredNotice,
+    setFeaturedNotice,
+  ] = useState(null)
 
   const [
     currentPage,
@@ -80,6 +81,85 @@ function Community({
 
   const communityPageRef =
     useRef(null)
+
+  useEffect(() => {
+    const abortController =
+      new AbortController()
+
+    const loadFeaturedNotice =
+      async () => {
+        const token =
+          localStorage.getItem(
+            'token'
+          )
+
+        if (!token) {
+          setFeaturedNotice(null)
+          return
+        }
+
+        try {
+          const response =
+            await fetch(
+              `${API_BASE_URL}/api/notices/banner`,
+              {
+                method: 'GET',
+
+                headers: {
+                  Authorization:
+                    `Bearer ${token}`,
+                },
+
+                signal:
+                  abortController.signal,
+              }
+            )
+
+          if (!response.ok) {
+            setFeaturedNotice(null)
+            return
+          }
+
+          const text =
+            await response.text()
+
+          if (!text) {
+            setFeaturedNotice(null)
+            return
+          }
+
+          const notice =
+            JSON.parse(text)
+
+          if (!notice?.id) {
+            setFeaturedNotice(null)
+            return
+          }
+
+          setFeaturedNotice(notice)
+        } catch (error) {
+          if (
+            error.name ===
+            'AbortError'
+          ) {
+            return
+          }
+
+          console.error(
+            '대표 공지 조회 실패:',
+            error
+          )
+
+          setFeaturedNotice(null)
+        }
+      }
+
+    loadFeaturedNotice()
+
+    return () => {
+      abortController.abort()
+    }
+  }, [])
 
   useEffect(() => {
     const timerId =
@@ -445,134 +525,9 @@ function Community({
       )
     }
 
-  const handleCommunityNoticeOpen =
-    async () => {
-      if (isNoticeOpening) {
-        return
-      }
-
-      const token =
-        localStorage.getItem(
-          'token'
-        )
-
-      if (!token) {
-        window.alert(
-          '로그인이 필요합니다.'
-        )
-
-        return
-      }
-
-      try {
-        setIsNoticeOpening(
-          true
-        )
-
-        const response =
-          await fetch(
-            `${API_BASE_URL}/api/notices?page=0`,
-            {
-              method: 'GET',
-
-              headers: {
-                Authorization:
-                  `Bearer ${token}`,
-              },
-            }
-          )
-
-        if (
-          response.status === 401 ||
-          response.status === 403
-        ) {
-          throw new Error(
-            '로그인 시간이 만료됐어요. 다시 로그인해 주세요.'
-          )
-        }
-
-        if (!response.ok) {
-          throw new Error(
-            '커뮤니티 이용 안내를 불러오지 못했어요.'
-          )
-        }
-
-        const noticePage =
-          await response.json()
-
-        const notices =
-          Array.isArray(
-            noticePage.notices
-          )
-            ? noticePage.notices
-            : []
-
-        const exactCommunityNotice =
-          notices.find(
-            (notice) =>
-              notice?.title
-                ?.trim() ===
-              '발자국 커뮤니티 이용 안내'
-          )
-
-        const similarCommunityNotice =
-          notices.find(
-            (notice) => {
-              const normalizedTitle =
-                notice?.title
-                  ?.trim()
-                  ?.replace(
-                    /\\s+/g,
-                    ''
-                  ) ?? ''
-
-              return (
-                normalizedTitle.includes(
-                  '커뮤니티'
-                ) &&
-                (
-                  normalizedTitle.includes(
-                    '이용'
-                  ) ||
-                  normalizedTitle.includes(
-                    '안내'
-                  )
-                )
-              )
-            }
-          )
-
-        const communityNotice =
-          exactCommunityNotice ||
-          similarCommunityNotice
-
-        if (!communityNotice?.id) {
-          window.alert(
-            '커뮤니티 이용 안내 공지를 아직 찾을 수 없어요. 공지사항에 해당 안내 글이 등록되어 있는지 확인해 주세요.'
-          )
-
-          return
-        }
-
-        onNoticeSelect?.(
-          communityNotice.id
-        )
-      } catch (error) {
-        console.error(
-          '커뮤니티 이용 안내 조회 실패:',
-          error
-        )
-
-        window.alert(
-          error.message ||
-            '커뮤니티 이용 안내를 불러오지 못했어요.'
-        )
-      } finally {
-        setIsNoticeOpening(
-          false
-        )
-      }
-    }
+  const handleNoticeOpen = () => {
+    onNoticeList?.()
+  }
 
   const handlePostKeyDown = (
     event,
@@ -662,45 +617,44 @@ function Community({
             />
           </div>
 
-          <section
-            className="community-notice"
-            role="button"
-            tabIndex={0}
-            onClick={
-              handleCommunityNoticeOpen
-            }
-            onKeyDown={(
-              event
-            ) => {
-              if (
-                event.key === 'Enter' ||
-                event.key === ' '
-              ) {
-                event.preventDefault()
-
-                handleCommunityNoticeOpen()
+          {featuredNotice && (
+            <section
+              className="community-notice"
+              role="button"
+              tabIndex={0}
+              onClick={
+                handleNoticeOpen
               }
-            }}
-            aria-label="발자국 커뮤니티 이용 안내 보기"
-            aria-disabled={
-              isNoticeOpening
-            }
-          >
-            <span className="community-notice-badge">
-              공지
-            </span>
+              onKeyDown={(
+                event
+              ) => {
+                if (
+                  event.key === 'Enter' ||
+                  event.key === ' '
+                ) {
+                  event.preventDefault()
 
-            <strong className="community-notice-title">
-              발자국 커뮤니티 이용 안내
-            </strong>
-
-            <span
-              className="community-notice-arrow"
-              aria-hidden="true"
+                  handleNoticeOpen()
+                }
+              }}
+              aria-label={`${featuredNotice.title} 공지사항 목록 보기`}
             >
-              ›
-            </span>
-          </section>
+              <span className="community-notice-badge">
+                공지
+              </span>
+
+              <strong className="community-notice-title">
+                {featuredNotice.title}
+              </strong>
+
+              <span
+                className="community-notice-arrow"
+                aria-hidden="true"
+              >
+                ›
+              </span>
+            </section>
+          )}
 
           {loadError ? (
             <section className="community-empty">
