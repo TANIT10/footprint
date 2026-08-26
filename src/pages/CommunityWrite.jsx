@@ -15,7 +15,7 @@ import './CommunityWrite.css'
 import resolveMediaUrl from '../utils/mediaUrl'
 
 const API_BASE_URL =
-  'http://localhost:8080'
+  ''
 
 function CommunityWrite({
   onBack,

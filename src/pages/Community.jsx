@@ -19,7 +19,7 @@ import bell from '../assets/bell.png'
 import resolveMediaUrl from '../utils/mediaUrl'
 
 const API_BASE_URL =
-  'http://localhost:8080'
+  ''
 
 function Community({
   onBack,

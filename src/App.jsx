@@ -44,7 +44,7 @@ const PROFILE_IMAGES_KEY =
   'footprint-profile-images'
 
 const API_BASE_URL =
-  'http://localhost:8080'
+  ''
 
 const EMPTY_SIMILAR_FOOTPRINT_NEW_SUMMARY = {
   hasNew: false,

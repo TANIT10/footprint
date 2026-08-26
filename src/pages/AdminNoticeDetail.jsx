@@ -12,7 +12,7 @@ import {
 import './AdminNoticeDetail.css'
 
 const API_BASE_URL =
-  'http://localhost:8080'
+  ''
 
 function formatDateTime(value) {
   if (!value) {

@@ -12,7 +12,7 @@ import {
 import './AdminReports.css'
 
 const API_BASE_URL =
-  'http://localhost:8080'
+  ''
 
 const REPORT_STATUS_INFO = {
   PENDING: {
