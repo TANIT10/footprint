@@ -834,6 +834,142 @@
   }
 }
 
+
+
+/*
+ * =========================================================
+ * 모바일 게시글 사진 조작
+ *
+ * 기존 사진/인디케이터/PC 화살표 로직은 유지하고,
+ * 모바일에서만 화살표를 숨기고 터치 스와이프 + 확대 보기 적용.
+ * =========================================================
+ */
+@media screen and (max-width: 800px) {
+  .post-detail-image {
+    touch-action: pan-y;
+    cursor: zoom-in;
+
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
+  .post-image-slide-button {
+    display: none;
+  }
+}
+
+/*
+ * 모바일 사진 확대 모달
+ * PC에서는 열리지 않도록 JSX에서도 모바일만 허용.
+ */
+.post-image-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding:
+    max(
+      18px,
+      env(safe-area-inset-top)
+    )
+    18px
+    max(
+      18px,
+      env(safe-area-inset-bottom)
+    );
+
+  background-color:
+    rgba(
+      0,
+      0,
+      0,
+      0.56
+    );
+}
+
+.post-image-modal-content {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: min(92vw, 560px);
+  max-height: 74vh;
+
+  padding: 12px;
+
+  border-radius: 18px;
+
+  background-color: #ffffff;
+
+  box-shadow:
+    0
+    18px
+    45px
+    rgba(
+      0,
+      0,
+      0,
+      0.22
+    );
+}
+
+.post-image-modal-image {
+  display: block;
+
+  width: 100%;
+  max-height: calc(74vh - 24px);
+
+  border-radius: 12px;
+
+  object-fit: contain;
+}
+
+.post-image-modal-close {
+  position: absolute;
+
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+
+  display: grid;
+  place-items: center;
+
+  width: 34px;
+  height: 34px;
+
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  background-color:
+    rgba(
+      25,
+      25,
+      25,
+      0.72
+    );
+
+  color: #ffffff;
+
+  cursor: pointer;
+}
+
+.post-image-modal-close svg {
+  width: 19px;
+  height: 19px;
+
+  stroke-width: 2.2;
+}
+
+
 /* PC 화면 */
 @media screen and (min-width: 801px) {
   .post-detail-inner {

@@ -65,10 +65,10 @@ body {
 }
 
 /*
- * ========================================
- * 모바일 전용 폰트 보정
- * PC에는 적용되지 않음
- * ========================================
+ * =========================================================
+ * 모바일 전용 사용자 입력/작성 텍스트 영문 폰트 보정
+ * PC에는 적용하지 않음
+ * =========================================================
  */
 
 @media screen and (max-width: 800px) {
@@ -121,5 +121,216 @@ body {
       "Apple SD Gothic Neo",
       "Noto Sans KR",
       sans-serif;
+  }
+}
+
+/*
+ * =========================================================
+ * 발자국 모바일 상단 고정 영역 통일
+ * =========================================================
+ */
+
+@media screen and (max-width: 800px) {
+
+  /*
+   * 기본 모바일 상단 고정 영역
+   */
+  .post-list-header,
+  .post-write-header,
+  .post-detail-header,
+
+  .community-header,
+  .community-write-header,
+  .community-detail-header,
+
+  .notifications-header,
+
+  .notice-list-header,
+  .notice-detail-header,
+
+  .inquiry-header,
+
+  .my-posts-header,
+  .user-profile-header,
+  .withdraw-header,
+  .similar-footprints-header,
+
+  .admin-notices-header,
+  .admin-notice-write-header,
+  .admin-notice-detail-header,
+  .admin-inquiries-header,
+  .admin-inquiry-detail-header,
+  .admin-reports-header,
+  .admin-report-detail-header {
+    height: 108px !important;
+  }
+
+  /*
+   * bottom 기준 뒤로가기
+   */
+  .community-back-button,
+  .community-write-back-button,
+  .community-detail-back-button,
+
+  .notifications-back-button,
+
+  .notice-list-back-button,
+
+  .my-posts-back-button,
+  .user-profile-back-button,
+  .withdraw-back-button,
+
+  .admin-notices-back-button,
+  .admin-notice-write-header > button,
+  .admin-notice-detail-header > button,
+  .admin-inquiries-back-button,
+  .admin-inquiry-detail-back-button,
+  .admin-reports-back-button,
+  .admin-report-detail-header > button {
+    bottom: 12px !important;
+  }
+
+  /*
+   * top 기준 뒤로가기
+   */
+  .post-list-back-button,
+  .post-write-back-button,
+  .post-detail-back-button,
+  .notice-detail-back-button,
+  .inquiry-back-button {
+    top: 47px !important;
+  }
+
+  /*
+   * 가운데 제목
+   */
+  .community-title,
+  .community-write-header-title,
+  .community-detail-header h1,
+
+  .notifications-title,
+
+  .notice-list-page-title,
+
+  .my-posts-title,
+  .user-profile-title,
+  .withdraw-title,
+
+  .admin-notices-header h1,
+  .admin-notice-write-header h1,
+  .admin-notice-detail-header h1,
+  .admin-inquiries-header h1,
+  .admin-reports-header h1,
+  .admin-report-detail-header h1 {
+    bottom: 20px !important;
+  }
+
+  .notice-detail-page-title,
+  .post-list-title {
+    top: 55px !important;
+  }
+
+  /*
+   * 로고형 헤더
+   */
+  .post-write-logo {
+    top: 44px !important;
+  }
+
+  .post-detail-logo {
+    top: 41px !important;
+  }
+
+  .post-list-logo {
+    top: 39px !important;
+  }
+
+  /*
+   * 알림 버튼
+   */
+  .community-notification-button {
+    bottom: 12px !important;
+  }
+
+  .post-list-notification-button,
+  .post-detail-notification-button {
+    top: 42px !important;
+  }
+
+  /*
+   * 관리자 공지 + 버튼
+   */
+  .admin-notices-create-button {
+    bottom: 12px !important;
+  }
+
+  /*
+   * 관리자 문의 상세 본문 시작 위치
+   */
+  .admin-inquiry-detail-content {
+    top: 108px !important;
+  }
+
+  .admin-inquiry-detail-header {
+    padding-bottom: 12px !important;
+  }
+
+  /*
+   * =====================================================
+   * 닮은 발자국
+   *
+   * 화살표는 현재 위치 그대로 유지.
+   * 제목 + 설명 두 줄 영역만 훨씬 위로 올림.
+   * =====================================================
+   */
+
+  .similar-footprints-title-area {
+    position: relative !important;
+    top: 30px !important;
+  }
+
+  /*
+   * =====================================================
+   * 관리자 메인
+   *
+   * 관리자 메인 화면만 훨씬 더 짧게.
+   * 하위 관리자 화면은 기존 108px 유지.
+   * =====================================================
+   */
+
+  .admin-page-header {
+    height: 60px !important;
+    min-height: 60px !important;
+  }
+
+  .admin-page-header h1 {
+    bottom: 8px !important;
+  }
+
+  .admin-page-back-button {
+    bottom: 2px !important;
+  }
+}
+
+/*
+ * 매우 좁은 모바일 좌우 안전 여백
+ */
+@media screen and (max-width: 359px) {
+  .community-back-button,
+  .community-write-back-button,
+  .community-detail-back-button,
+  .notifications-back-button,
+  .notice-list-back-button,
+  .notice-detail-back-button,
+  .post-write-back-button,
+  .post-detail-back-button,
+  .my-posts-back-button,
+  .user-profile-back-button,
+  .withdraw-back-button,
+  .similar-footprints-back-button,
+  .admin-notices-back-button,
+  .admin-inquiries-back-button,
+  .admin-inquiry-detail-back-button {
+    left: 16px !important;
   }
 }

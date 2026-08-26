@@ -1,10 +1,14 @@
-import { useState } from 'react'
+import {
+  useRef,
+  useState,
+} from 'react'
 import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
   Send,
   Trash2,
+  X,
 } from 'lucide-react'
 
 import './PostDetail.css'
@@ -83,6 +87,17 @@ function PostDetail({
     setCurrentImageIndex,
   ] = useState(0)
 
+  const [
+    isImageModalOpen,
+    setIsImageModalOpen,
+  ] = useState(false)
+
+  const imageTouchStartXRef =
+    useRef(null)
+
+  const imageSwipeDetectedRef =
+    useRef(false)
+
   const postImages =
     Array.isArray(post.images) &&
     post.images.length > 0
@@ -118,6 +133,89 @@ function PostDetail({
           ? 0
           : previousIndex + 1
     )
+  }
+
+  const handleImageTouchStart = (
+    event
+  ) => {
+    if (
+      event.touches.length !== 1
+    ) {
+      return
+    }
+
+    imageTouchStartXRef.current =
+      event.touches[0].clientX
+
+    imageSwipeDetectedRef.current =
+      false
+  }
+
+  const handleImageTouchEnd = (
+    event
+  ) => {
+    if (
+      imageTouchStartXRef.current ===
+        null ||
+      event.changedTouches.length !==
+        1
+    ) {
+      imageTouchStartXRef.current =
+        null
+
+      return
+    }
+
+    const touchEndX =
+      event.changedTouches[0].clientX
+
+    const difference =
+      touchEndX -
+      imageTouchStartXRef.current
+
+    imageTouchStartXRef.current =
+      null
+
+    if (
+      Math.abs(difference) < 45 ||
+      !hasMultipleImages
+    ) {
+      return
+    }
+
+    imageSwipeDetectedRef.current =
+      true
+
+    if (difference < 0) {
+      handleNextImage()
+    } else {
+      handlePreviousImage()
+    }
+  }
+
+  const handleImageClick = () => {
+    if (
+      imageSwipeDetectedRef.current
+    ) {
+      imageSwipeDetectedRef.current =
+        false
+
+      return
+    }
+
+    if (
+      typeof window !==
+        'undefined' &&
+      window.matchMedia(
+        '(max-width: 800px)'
+      ).matches
+    ) {
+      setIsImageModalOpen(true)
+    }
+  }
+
+  const handleImageModalClose = () => {
+    setIsImageModalOpen(false)
   }
 
   const handleCommentSubmit = (
@@ -220,6 +318,15 @@ function PostDetail({
                       currentImageIndex +
                       1
                     }`}
+                    onTouchStart={
+                      handleImageTouchStart
+                    }
+                    onTouchEnd={
+                      handleImageTouchEnd
+                    }
+                    onClick={
+                      handleImageClick
+                    }
                   />
 
                   {hasMultipleImages && (
@@ -636,6 +743,53 @@ function PostDetail({
             </button>
           </div>
         </form>
+
+        {isImageModalOpen &&
+          postImages.length > 0 && (
+            <div
+              className="post-image-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-label="사진 크게 보기"
+              onClick={
+                handleImageModalClose
+              }
+            >
+              <div
+                className="post-image-modal-content"
+                onClick={(event) =>
+                  event.stopPropagation()
+                }
+              >
+                <button
+                  className="post-image-modal-close"
+                  type="button"
+                  onClick={
+                    handleImageModalClose
+                  }
+                  aria-label="사진 크게 보기 닫기"
+                >
+                  <X />
+                </button>
+
+                <img
+                  className="post-image-modal-image"
+                  src={resolveMediaUrl(
+                    postImages[
+                      currentImageIndex
+                    ]
+                  )}
+                  alt={`${
+                    post.breed ||
+                    '동물'
+                  } 사진 ${
+                    currentImageIndex +
+                    1
+                  } 크게 보기`}
+                />
+              </div>
+            </div>
+          )}
       </div>
     </div>
   )
