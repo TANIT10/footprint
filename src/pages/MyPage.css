@@ -655,3 +655,197 @@
     font-size: 16px;
   }
 }
+
+/* ==========================================
+ * 닉네임 변경 모달
+ * 기존 마이페이지 색상/모서리/간격에 맞춤
+ * ========================================== */
+.nickname-modal-background {
+  position: fixed;
+
+  inset: 0;
+  z-index: 1200;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background-color:
+    rgba(0, 0, 0, 0.38);
+}
+
+.nickname-modal-card {
+  width: 100%;
+  max-width: 390px;
+
+  padding: 24px 20px 18px;
+
+  border-radius: 18px;
+
+  background-color: #ffffff;
+
+  box-shadow:
+    0 12px 34px
+    rgba(0, 0, 0, 0.14);
+}
+
+.nickname-modal-card h2 {
+  margin: 0;
+
+  color: #191919;
+
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.nickname-modal-card p {
+  margin: 9px 0 0;
+
+  color: #777777;
+
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.nickname-change-input {
+  width: 100%;
+  height: 50px;
+
+  margin-top: 20px;
+  padding: 0 14px;
+
+  border: 1px solid #dddddd;
+  border-radius: 12px;
+
+  outline: none;
+
+  background-color: #ffffff;
+  color: #191919;
+
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.nickname-change-input:focus {
+  border-color: #b98b67;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(185, 139, 103, 0.10);
+}
+
+.nickname-change-input:disabled {
+  background-color: #f7f7f7;
+  color: #999999;
+}
+
+.nickname-change-guide {
+  display: block;
+
+  margin-top: 8px;
+
+  color: #aaaaaa;
+
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.nickname-modal-buttons {
+  display: grid;
+
+  width: 100%;
+
+  margin-top: 22px;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+  gap: 8px;
+}
+
+.nickname-modal-buttons button {
+  height: 48px;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 12px;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+.nickname-modal-buttons button:disabled {
+  opacity: 0.55;
+
+  cursor: default;
+}
+
+.nickname-modal-cancel-button {
+  background-color: #f4f4f4;
+  color: #777777;
+}
+
+.nickname-modal-primary-button {
+  background-color: #b98b67;
+  color: #ffffff;
+}
+
+.nickname-confirm-card {
+  text-align: center;
+}
+
+.nickname-confirm-card h2 {
+  text-align: center;
+}
+
+.nickname-confirm-card p {
+  text-align: center;
+}
+
+.nickname-confirm-name {
+  display: block;
+
+  margin-top: 16px;
+  padding: 12px 14px;
+
+  overflow: hidden;
+
+  border-radius: 12px;
+
+  background-color: #faf7f4;
+  color: #9a5f35;
+
+  font-size: 16px;
+  font-weight: 800;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media screen and (max-width: 359px) {
+  .nickname-modal-background {
+    padding: 18px;
+  }
+
+  .nickname-modal-card {
+    padding:
+      21px
+      17px
+      16px;
+  }
+
+  .nickname-modal-card h2 {
+    font-size: 19px;
+  }
+}

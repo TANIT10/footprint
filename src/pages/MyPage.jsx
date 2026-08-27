@@ -189,6 +189,7 @@ function MyPage({
   onAdmin,
   onWithdraw,
   onProfileImageChange,
+  onNicknameChange,
 }) {
   const fileInputRef =
     useRef(null)
@@ -220,6 +221,28 @@ function MyPage({
   const [
     isProfileImageProcessing,
     setIsProfileImageProcessing,
+  ] = useState(false)
+
+  const [
+    isNicknameEditOpen,
+    setIsNicknameEditOpen,
+  ] = useState(false)
+
+  const [
+    isNicknameConfirmOpen,
+    setIsNicknameConfirmOpen,
+  ] = useState(false)
+
+  const [
+    nicknameInput,
+    setNicknameInput,
+  ] = useState(
+    nickname || ''
+  )
+
+  const [
+    isNicknameSaving,
+    setIsNicknameSaving,
   ] = useState(false)
 
   useEffect(() => {
@@ -404,6 +427,145 @@ function MyPage({
       }
 
       fileInputRef.current?.click()
+    }
+
+  const handleNicknameMenuOpen =
+    () => {
+      setIsProfileMenuOpen(
+        false
+      )
+
+      setNicknameInput(
+        nickname || ''
+      )
+
+      setIsNicknameEditOpen(
+        true
+      )
+    }
+
+  const handleNicknameEditClose =
+    () => {
+      if (isNicknameSaving) {
+        return
+      }
+
+      setIsNicknameEditOpen(
+        false
+      )
+    }
+
+  const handleNicknameNext =
+    (event) => {
+      event.preventDefault()
+
+      if (isNicknameSaving) {
+        return
+      }
+
+      const normalizedNickname =
+        nicknameInput.trim()
+
+      if (!normalizedNickname) {
+        window.alert(
+          '닉네임을 입력해주세요.'
+        )
+
+        return
+      }
+
+      if (
+        !/^[가-힣a-zA-Z0-9]{1,10}$/.test(
+          normalizedNickname
+        )
+      ) {
+        window.alert(
+          '닉네임은 한글, 영문, 숫자만 사용하여 10자 이내로 입력해주세요.'
+        )
+
+        return
+      }
+
+      if (
+        normalizedNickname ===
+        (nickname || '').trim()
+      ) {
+        window.alert(
+          '현재 사용 중인 닉네임과 같아요.'
+        )
+
+        return
+      }
+
+      setNicknameInput(
+        normalizedNickname
+      )
+
+      setIsNicknameEditOpen(
+        false
+      )
+
+      setIsNicknameConfirmOpen(
+        true
+      )
+    }
+
+  const handleNicknameConfirmClose =
+    () => {
+      if (isNicknameSaving) {
+        return
+      }
+
+      setIsNicknameConfirmOpen(
+        false
+      )
+    }
+
+  const handleNicknameConfirm =
+    async () => {
+      if (isNicknameSaving) {
+        return
+      }
+
+      if (!onNicknameChange) {
+        window.alert(
+          '닉네임 변경 기능을 사용할 수 없어요.'
+        )
+
+        return
+      }
+
+      setIsNicknameSaving(
+        true
+      )
+
+      try {
+        await onNicknameChange(
+          nicknameInput.trim()
+        )
+
+        setIsNicknameConfirmOpen(
+          false
+        )
+
+        window.alert(
+          '닉네임이 변경됐어요.'
+        )
+      } catch (error) {
+        console.error(
+          '닉네임 변경 실패:',
+          error
+        )
+
+        window.alert(
+          error.message ||
+            '닉네임을 변경하지 못했어요.'
+        )
+      } finally {
+        setIsNicknameSaving(
+          false
+        )
+      }
     }
 
   const handleProfileReset =
@@ -783,6 +945,18 @@ function MyPage({
                   : '프로필 사진 변경'}
               </button>
 
+              <button
+                type="button"
+                onClick={
+                  handleNicknameMenuOpen
+                }
+                disabled={
+                  isProfileImageProcessing
+                }
+              >
+                닉네임 변경
+              </button>
+
               {profileImage && (
                 <button
                   type="button"
@@ -811,6 +985,147 @@ function MyPage({
               >
                 취소
               </button>
+            </section>
+          </div>
+        )}
+
+        {isNicknameEditOpen && (
+          <div
+            className="nickname-modal-background"
+            onClick={
+              handleNicknameEditClose
+            }
+          >
+            <form
+              className="nickname-modal-card"
+              onSubmit={
+                handleNicknameNext
+              }
+              onClick={(
+                event
+              ) =>
+                event.stopPropagation()
+              }
+            >
+              <h2>
+                닉네임 변경
+              </h2>
+
+              <p>
+                새로운 닉네임을 입력해 주세요.
+              </p>
+
+              <input
+                className="nickname-change-input"
+                type="text"
+                maxLength={10}
+                value={
+                  nicknameInput
+                }
+                onChange={(
+                  event
+                ) =>
+                  setNicknameInput(
+                    event.target.value
+                  )
+                }
+                placeholder="닉네임"
+                autoFocus
+                disabled={
+                  isNicknameSaving
+                }
+              />
+
+              <span className="nickname-change-guide">
+                한글, 영문, 숫자 사용 · 최대 10자
+              </span>
+
+              <div className="nickname-modal-buttons">
+                <button
+                  className="nickname-modal-cancel-button"
+                  type="button"
+                  onClick={
+                    handleNicknameEditClose
+                  }
+                  disabled={
+                    isNicknameSaving
+                  }
+                >
+                  취소
+                </button>
+
+                <button
+                  className="nickname-modal-primary-button"
+                  type="submit"
+                  disabled={
+                    isNicknameSaving
+                  }
+                >
+                  다음
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {isNicknameConfirmOpen && (
+          <div
+            className="nickname-modal-background"
+            onClick={
+              handleNicknameConfirmClose
+            }
+          >
+            <section
+              className="nickname-modal-card nickname-confirm-card"
+              onClick={(
+                event
+              ) =>
+                event.stopPropagation()
+              }
+            >
+              <h2>
+                닉네임을 변경할까요?
+              </h2>
+
+              <p>
+                닉네임은 14일에 한 번 변경할 수 있습니다.
+                <br />
+                변경하시겠습니까?
+              </p>
+
+              <strong className="nickname-confirm-name">
+                {nicknameInput}
+              </strong>
+
+              <div className="nickname-modal-buttons">
+                <button
+                  className="nickname-modal-cancel-button"
+                  type="button"
+                  onClick={
+                    handleNicknameConfirmClose
+                  }
+                  disabled={
+                    isNicknameSaving
+                  }
+                >
+                  취소
+                </button>
+
+                <button
+                  className="nickname-modal-primary-button"
+                  type="button"
+                  onClick={
+                    handleNicknameConfirm
+                  }
+                  disabled={
+                    isNicknameSaving
+                  }
+                >
+                  {isNicknameSaving
+                    ? '변경 중...'
+                    : '변경'}
+                </button>
+              </div>
             </section>
           </div>
         )}

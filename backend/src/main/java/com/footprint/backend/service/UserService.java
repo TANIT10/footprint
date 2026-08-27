@@ -421,8 +421,45 @@ public class UserService {
                         user.getNickname()
                 );
 
+        /*
+         * 현재 닉네임과 동일한 경우에는
+         * 실제 변경이 아니므로 14일 제한을 적용하지 않습니다.
+         */
+        if (!nicknameChanged) {
+            return user;
+        }
+
+        /*
+         * ==========================================
+         * 닉네임 변경 14일 제한
+         * ==========================================
+         *
+         * nicknameChangedAt == null:
+         * 아직 닉네임을 변경한 적이 없으므로 즉시 변경 가능
+         *
+         * 값이 있는 경우:
+         * 마지막 변경 시각으로부터 정확히 14일이 지난 뒤
+         * 다시 변경할 수 있습니다.
+         */
+        LocalDateTime now =
+                LocalDateTime.now();
+
+        LocalDateTime nicknameChangedAt =
+                user.getNicknameChangedAt();
+
         if (
-                nicknameChanged &&
+                nicknameChangedAt != null &&
+                now.isBefore(
+                        nicknameChangedAt
+                                .plusDays(14)
+                )
+        ) {
+            throw new IllegalArgumentException(
+                    "닉네임은 14일에 한 번 변경할 수 있습니다."
+            );
+        }
+
+        if (
                 userRepository
                         .existsByNickname(
                                 nickname
@@ -434,8 +471,16 @@ public class UserService {
             );
         }
 
+        /*
+         * 닉네임과 마지막 변경 시각은
+         * 실제 변경이 성공하는 경우에만 함께 갱신합니다.
+         */
         user.setNickname(
                 nickname
+        );
+
+        user.setNicknameChangedAt(
+                now
         );
 
         return user;

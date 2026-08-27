@@ -1211,6 +1211,86 @@ function App() {
         !notification.isRead
     )
 
+  const handleNicknameChange =
+    useCallback(
+      async (
+        newNickname
+      ) => {
+        const token =
+          localStorage.getItem(
+            'token'
+          )
+
+        if (!token) {
+          throw new Error(
+            '로그인 정보를 찾을 수 없습니다. 다시 로그인해 주세요.'
+          )
+        }
+
+        const response =
+          await fetch(
+            `${API_BASE_URL}/api/users/me`,
+            {
+              method: 'PATCH',
+
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+
+                'Content-Type':
+                  'application/json',
+              },
+
+              body:
+                JSON.stringify({
+                  nickname:
+                    newNickname,
+                }),
+            }
+          )
+
+        if (
+          response.status ===
+            401 ||
+          response.status ===
+            403
+        ) {
+          throw new Error(
+            '로그인 정보를 확인할 수 없습니다. 다시 로그인해 주세요.'
+          )
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            await readErrorMessage(
+              response,
+              '닉네임을 변경하지 못했습니다.'
+            )
+          )
+        }
+
+        const updatedProfile =
+          await response.json()
+
+        const updatedNickname =
+          updatedProfile
+            .nickname ||
+          newNickname
+
+        setCurrentNickname(
+          updatedNickname
+        )
+
+        localStorage.setItem(
+          CURRENT_NICKNAME_KEY,
+          updatedNickname
+        )
+
+        return updatedProfile
+      },
+      []
+    )
+
   const handleProfileImageChange =
     useCallback(
       (
@@ -3522,6 +3602,10 @@ function App() {
         onProfileImageChange={
           handleProfileImageChange
         }
+
+        onNicknameChange={
+          handleNicknameChange
+        }
       />
     )
   }
@@ -3622,6 +3706,10 @@ function App() {
 
           onProfileImageChange={
             handleProfileImageChange
+          }
+
+          onNicknameChange={
+            handleNicknameChange
           }
         />
       )

@@ -40,6 +40,25 @@ public class User {
     private String nickname;
 
     /*
+     * ==========================================
+     * 닉네임 마지막 변경 시각
+     * ==========================================
+     *
+     * null:
+     * 아직 닉네임을 변경한 적이 없는 회원
+     *
+     * 값이 있는 경우:
+     * 마지막 닉네임 변경 시각
+     *
+     * 기존 회원 데이터와의 호환성을 위해
+     * null을 허용합니다.
+     */
+    @Column(
+            name = "nickname_changed_at"
+    )
+    private LocalDateTime nicknameChangedAt;
+
+    /*
      * 기존 회원 데이터와의 호환성을 위해
      * null을 허용합니다.
      *
@@ -139,6 +158,20 @@ public class User {
     ) {
         this.nickname =
                 nickname;
+    }
+
+    public LocalDateTime
+    getNicknameChangedAt() {
+
+        return nicknameChangedAt;
+    }
+
+    public void setNicknameChangedAt(
+            LocalDateTime nicknameChangedAt
+    ) {
+
+        this.nicknameChangedAt =
+                nicknameChangedAt;
     }
 
     public UserRole getRole() {
