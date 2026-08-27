@@ -12,6 +12,7 @@ import PostWrite from './pages/PostWrite'
 import PostDetail from './pages/PostDetail'
 import MyPage from './pages/MyPage'
 import MyPosts from './pages/MyPosts'
+import BlockedUsers from './pages/BlockedUsers'
 import Notifications from './pages/Notifications'
 import NoticeList from './pages/NoticeList'
 import NoticeDetail from './pages/NoticeDetail'
@@ -3450,6 +3451,12 @@ function App() {
           )
         }
 
+        onBlockedUsers={() =>
+          setPage(
+            'blockedUsers'
+          )
+        }
+
         onSimilarFootprints={
           handleSimilarFootprintsOpen
         }
@@ -3520,6 +3527,20 @@ function App() {
   }
 
   if (
+    page === 'blockedUsers'
+  ) {
+    return (
+      <BlockedUsers
+        onBack={() =>
+          setPage(
+            'myPage'
+          )
+        }
+      />
+    )
+  }
+
+  if (
     page === 'admin'
   ) {
     if (!isAdmin) {
@@ -3542,6 +3563,12 @@ function App() {
           onMyPosts={() =>
             setPage(
               'myPosts'
+            )
+          }
+
+          onBlockedUsers={() =>
+            setPage(
+              'blockedUsers'
             )
           }
 

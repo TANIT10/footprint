@@ -176,6 +176,7 @@ function MyPage({
   username,
   onBack,
   onMyPosts,
+  onBlockedUsers,
   onSimilarFootprints,
   hasNewSimilarFootprints = false,
   similarFootprintNewCount = 0,
@@ -571,6 +572,22 @@ function MyPage({
             >
               <span>
                 내가 작성한 게시글
+              </span>
+
+              <span className="menu-arrow">
+                ›
+              </span>
+            </button>
+
+            <button
+              className="my-page-menu-button"
+              type="button"
+              onClick={
+                onBlockedUsers
+              }
+            >
+              <span>
+                차단한 사용자 관리
               </span>
 
               <span className="menu-arrow">
