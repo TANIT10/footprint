@@ -30,4 +30,8 @@ public interface CommunityPostLikeRepository
     void deleteByCommunityPostId(
             Long communityPostId
     );
+
+    void deleteByUserId(
+            Long userId
+    );
 }

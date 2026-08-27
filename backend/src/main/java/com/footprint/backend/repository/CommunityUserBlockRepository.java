@@ -39,4 +39,20 @@ public interface CommunityUserBlockRepository
             findAllByBlockerUsernameOrderByCreatedAtDesc(
                     String blockerUsername
             );
+
+            /*
+     * 회원 탈퇴 전용
+     * 내가 다른 사용자를 차단한 기록 전체 삭제
+     */
+    void deleteByBlockerId(
+            Long blockerId
+    );
+
+    /*
+     * 회원 탈퇴 전용
+     * 다른 사용자가 나를 차단한 기록 전체 삭제
+     */
+    void deleteByBlockedUserId(
+            Long blockedUserId
+    );
 }

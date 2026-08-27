@@ -51,4 +51,12 @@ public interface InquiryRepository
     Page<Long> findConversationUserIds(
             Pageable pageable
     );
+
+        /*
+     * 회원 탈퇴 전용
+     * 해당 사용자의 문의 내역 전체 삭제
+     */
+    void deleteByUserId(
+            Long userId
+    );
 }

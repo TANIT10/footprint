@@ -77,10 +77,29 @@ public interface NotificationRepository
             Long communityPostId
     );
 
+        /*
+     * 일반 게시글 삭제 시
+     * 해당 게시글을 가리키는 알림 전체 삭제
+     *
+     * 댓글 알림 / AI 매칭 알림 등
+     * postId가 같은 알림을 정리합니다.
+     */
+    void deleteByPostId(
+            Long postId
+    );
+
     /*
      * 생성 후 14일이 지난 알림 자동 삭제용
      */
     void deleteByCreatedAtBefore(
             LocalDateTime cutoff
     );
-}
+
+        /*
+     * 회원 탈퇴 전용
+     * 해당 사용자가 받은 모든 알림 삭제
+     */
+    void deleteByRecipientId(
+            Long recipientId
+    );
+}       

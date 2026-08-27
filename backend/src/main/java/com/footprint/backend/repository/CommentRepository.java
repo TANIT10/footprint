@@ -15,4 +15,12 @@ public interface CommentRepository
             );
 
     void deleteByPostId(Long postId);
+
+        /*
+        * 회원 탈퇴 전용
+        * 사용자가 작성한 일반 게시글 댓글 전체 삭제
+        */
+        void deleteByAuthorId(
+                Long authorId
+        );
 }

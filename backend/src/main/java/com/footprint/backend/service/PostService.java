@@ -25,11 +25,14 @@ import com.footprint.backend.dto.PostUpdateRequest;
 import com.footprint.backend.entity.Gender;
 import com.footprint.backend.entity.Post;
 import com.footprint.backend.entity.PostImage;
+import com.footprint.backend.entity.ReportTargetType;
 import com.footprint.backend.entity.User;
 import com.footprint.backend.entity.UserRole;
 import com.footprint.backend.repository.CommentRepository;
+import com.footprint.backend.repository.NotificationRepository;
 import com.footprint.backend.repository.PostImageRepository;
 import com.footprint.backend.repository.PostRepository;
+import com.footprint.backend.repository.ReportRepository;
 import com.footprint.backend.repository.UserRepository;
 
 @Service
@@ -45,6 +48,12 @@ public class PostService {
 
     private final CommentRepository
             commentRepository;
+
+    private final NotificationRepository
+            notificationRepository;
+
+    private final ReportRepository
+            reportRepository;
 
     private final UserRepository
             userRepository;
@@ -63,6 +72,8 @@ public class PostService {
             PostRepository postRepository,
             PostImageRepository postImageRepository,
             CommentRepository commentRepository,
+            NotificationRepository notificationRepository,
+            ReportRepository reportRepository,
             UserRepository userRepository,
             PostImageService postImageService,
             AiMatchAsyncService aiMatchAsyncService
@@ -76,6 +87,12 @@ public class PostService {
 
         this.commentRepository =
                 commentRepository;
+
+        this.notificationRepository =
+                notificationRepository;
+
+        this.reportRepository =
+                reportRepository;
 
         this.userRepository =
                 userRepository;
@@ -485,10 +502,17 @@ public class PostService {
                         postId
                 );
 
+        /*
+         * 실제 이미지 파일은
+         * DB 트랜잭션 COMMIT이 성공한 뒤 삭제합니다.
+         */
         registerDeleteImageCleanup(
                 imageUrls
         );
 
+        /*
+         * 게시글 댓글 삭제
+         */
         commentRepository
                 .deleteByPostId(
                         postId
@@ -497,6 +521,37 @@ public class PostService {
         commentRepository
                 .flush();
 
+        /*
+         * 삭제되는 일반 게시글을 가리키는
+         * 알림 전체 삭제
+         *
+         * 일반 알림 / AI 매칭 알림 등
+         * 같은 postId를 가진 알림을 정리합니다.
+         */
+        notificationRepository
+                .deleteByPostId(
+                        postId
+                );
+
+        notificationRepository
+                .flush();
+
+        /*
+         * 삭제되는 일반 게시글을 대상으로 한
+         * 신고 기록 전체 삭제
+         */
+        reportRepository
+                .deleteByTargetTypeAndTargetId(
+                        ReportTargetType.POST,
+                        postId
+                );
+
+        reportRepository
+                .flush();
+
+        /*
+         * 게시글 이미지 DB 정보 삭제
+         */
         postImageRepository
                 .deleteByPostId(
                         postId
@@ -505,6 +560,9 @@ public class PostService {
         postImageRepository
                 .flush();
 
+        /*
+         * 게시글 본체 삭제
+         */
         postRepository
                 .delete(
                         post

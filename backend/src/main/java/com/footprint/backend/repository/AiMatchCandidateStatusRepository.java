@@ -36,4 +36,12 @@ public interface AiMatchCandidateStatusRepository
             String username,
             Long missingPostId
     );
+
+        /*
+     * 회원 탈퇴 전용
+     * 해당 사용자의 AI 매칭 후보 상태 전체 삭제
+     */
+    void deleteByUsername(
+            String username
+    );
 }

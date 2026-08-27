@@ -1,16 +1,35 @@
 package com.footprint.backend.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.footprint.backend.dto.AdminCommunityUserResponse;
+import com.footprint.backend.entity.CommunityPost;
+import com.footprint.backend.entity.Post;
+import com.footprint.backend.entity.ReportTargetType;
 import com.footprint.backend.entity.User;
 import com.footprint.backend.entity.UserRole;
 import com.footprint.backend.exception.LoginFailedException;
+import com.footprint.backend.repository.AiMatchCandidateStatusRepository;
+import com.footprint.backend.repository.CommentRepository;
+import com.footprint.backend.repository.CommunityCommentRepository;
+import com.footprint.backend.repository.CommunityPostLikeRepository;
+import com.footprint.backend.repository.CommunityPostRepository;
+import com.footprint.backend.repository.CommunityReportRepository;
+import com.footprint.backend.repository.CommunityUserBlockRepository;
+import com.footprint.backend.repository.InquiryRepository;
+import com.footprint.backend.repository.NotificationRepository;
+import com.footprint.backend.repository.PostRepository;
+import com.footprint.backend.repository.ReportRepository;
 import com.footprint.backend.repository.UserRepository;
 
 @Service
@@ -20,76 +39,207 @@ public class UserService {
             "^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*])"
             + "[a-zA-Z0-9!@#$%^&*]{8,20}$";
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final UserRepository
+            userRepository;
+
+    private final PasswordEncoder
+            passwordEncoder;
+
     private final ProfileImageService
             profileImageService;
 
     private final NotificationService
             notificationService;
 
+    /*
+     * ==========================================
+     * 회원 탈퇴 관련
+     * ==========================================
+     */
+    private final PostRepository
+            postRepository;
+
+    private final PostService
+            postService;
+
+    private final CommunityPostRepository
+            communityPostRepository;
+
+    private final CommunityPostService
+            communityPostService;
+
+    private final CommentRepository
+            commentRepository;
+
+    private final CommunityCommentRepository
+            communityCommentRepository;
+
+    private final CommunityPostLikeRepository
+            communityPostLikeRepository;
+
+    private final CommunityReportRepository
+            communityReportRepository;
+
+    private final CommunityUserBlockRepository
+            communityUserBlockRepository;
+
+    private final InquiryRepository
+            inquiryRepository;
+
+    private final NotificationRepository
+            notificationRepository;
+
+    private final ReportRepository
+            reportRepository;
+
+    private final AiMatchCandidateStatusRepository
+            aiMatchCandidateStatusRepository;
+
     public UserService(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
-            ProfileImageService
-                    profileImageService,
-            NotificationService
-                    notificationService) {
+            ProfileImageService profileImageService,
+            NotificationService notificationService,
+            PostRepository postRepository,
+            PostService postService,
+            CommunityPostRepository communityPostRepository,
+            CommunityPostService communityPostService,
+            CommentRepository commentRepository,
+            CommunityCommentRepository communityCommentRepository,
+            CommunityPostLikeRepository communityPostLikeRepository,
+            CommunityReportRepository communityReportRepository,
+            CommunityUserBlockRepository communityUserBlockRepository,
+            InquiryRepository inquiryRepository,
+            NotificationRepository notificationRepository,
+            ReportRepository reportRepository,
+            AiMatchCandidateStatusRepository
+                    aiMatchCandidateStatusRepository
+    ) {
 
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.userRepository =
+                userRepository;
+
+        this.passwordEncoder =
+                passwordEncoder;
+
         this.profileImageService =
                 profileImageService;
+
         this.notificationService =
                 notificationService;
+
+        this.postRepository =
+                postRepository;
+
+        this.postService =
+                postService;
+
+        this.communityPostRepository =
+                communityPostRepository;
+
+        this.communityPostService =
+                communityPostService;
+
+        this.commentRepository =
+                commentRepository;
+
+        this.communityCommentRepository =
+                communityCommentRepository;
+
+        this.communityPostLikeRepository =
+                communityPostLikeRepository;
+
+        this.communityReportRepository =
+                communityReportRepository;
+
+        this.communityUserBlockRepository =
+                communityUserBlockRepository;
+
+        this.inquiryRepository =
+                inquiryRepository;
+
+        this.notificationRepository =
+                notificationRepository;
+
+        this.reportRepository =
+                reportRepository;
+
+        this.aiMatchCandidateStatusRepository =
+                aiMatchCandidateStatusRepository;
     }
 
+    /*
+     * ==========================================
+     * 회원가입
+     * ==========================================
+     */
     @Transactional
     public User signup(
             String username,
             String password,
-            String nickname) {
+            String nickname
+    ) {
 
-        if (username == null || username.isBlank()) {
+        if (
+                username == null ||
+                username.isBlank()
+        ) {
             throw new IllegalArgumentException(
                     "아이디를 입력해주세요."
             );
         }
 
-        if (password == null || password.isBlank()) {
+        if (
+                password == null ||
+                password.isBlank()
+        ) {
             throw new IllegalArgumentException(
                     "비밀번호를 입력해주세요."
             );
         }
 
-        if (nickname == null || nickname.isBlank()) {
+        if (
+                nickname == null ||
+                nickname.isBlank()
+        ) {
             throw new IllegalArgumentException(
                     "닉네임을 입력해주세요."
             );
         }
 
-        username = username.trim();
-        nickname = nickname.trim();
+        username =
+                username.trim();
 
-        if (!username.matches(
-                "^[a-zA-Z0-9]{1,10}$"
-        )) {
+        nickname =
+                nickname.trim();
+
+        if (
+                !username.matches(
+                        "^[a-zA-Z0-9]{1,10}$"
+                )
+        ) {
             throw new IllegalArgumentException(
                     "아이디는 영문과 숫자만 사용하여 "
                     + "10자 이내로 입력해주세요."
             );
         }
 
-        if (!nickname.matches(
-                "^[가-힣a-zA-Z0-9]{1,10}$"
-        )) {
+        if (
+                !nickname.matches(
+                        "^[가-힣a-zA-Z0-9]{1,10}$"
+                )
+        ) {
             throw new IllegalArgumentException(
                     "닉네임은 한글, 영문, 숫자만 사용하여 "
                     + "10자 이내로 입력해주세요."
             );
         }
 
-        if (!password.matches(PASSWORD_PATTERN)) {
+        if (
+                !password.matches(
+                        PASSWORD_PATTERN
+                )
+        ) {
             throw new IllegalArgumentException(
                     "비밀번호는 영문, 숫자, 특수문자를 "
                     + "각각 포함하여 8~20자로 입력해주세요. "
@@ -97,47 +247,84 @@ public class UserService {
             );
         }
 
-        if (userRepository.existsByUsername(username)) {
+        if (
+                userRepository.existsByUsername(
+                        username
+                )
+        ) {
             throw new IllegalArgumentException(
                     "이미 사용 중인 아이디입니다."
             );
         }
 
-        if (userRepository.existsByNickname(nickname)) {
+        if (
+                userRepository.existsByNickname(
+                        nickname
+                )
+        ) {
             throw new IllegalArgumentException(
                     "이미 사용 중인 닉네임입니다."
             );
         }
 
         String encodedPassword =
-                passwordEncoder.encode(password);
+                passwordEncoder.encode(
+                        password
+                );
 
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(encodedPassword);
-        user.setNickname(nickname);
-        user.setRole(UserRole.USER);
+        User user =
+                new User();
 
-        return userRepository.save(user);
+        user.setUsername(
+                username
+        );
+
+        user.setPassword(
+                encodedPassword
+        );
+
+        user.setNickname(
+                nickname
+        );
+
+        user.setRole(
+                UserRole.USER
+        );
+
+        return userRepository.save(
+                user
+        );
     }
 
+    /*
+     * ==========================================
+     * 로그인
+     * ==========================================
+     */
     @Transactional(readOnly = true)
     public User login(
             String username,
-            String password) {
+            String password
+    ) {
 
-        User user = userRepository
-                .findByUsername(username)
-                .orElseThrow(() ->
-                        new LoginFailedException(
-                                "아이디 또는 비밀번호가 "
-                                + "올바르지 않습니다."
+        User user =
+                userRepository
+                        .findByUsername(
+                                username
                         )
-                );
+                        .orElseThrow(() ->
+                                new LoginFailedException(
+                                        "아이디 또는 비밀번호가 "
+                                        + "올바르지 않습니다."
+                                )
+                        );
 
-        if (!passwordEncoder.matches(
-                password,
-                user.getPassword())) {
+        if (
+                !passwordEncoder.matches(
+                        password,
+                        user.getPassword()
+                )
+        ) {
 
             throw new LoginFailedException(
                     "아이디 또는 비밀번호가 "
@@ -148,16 +335,30 @@ public class UserService {
         return user;
     }
 
+    /*
+     * ==========================================
+     * 내 프로필
+     * ==========================================
+     */
     @Transactional(readOnly = true)
     public User getMyProfile(
-            String username) {
+            String username
+    ) {
 
-        return findUserByUsername(username);
+        return findUserByUsername(
+                username
+        );
     }
 
+    /*
+     * ==========================================
+     * 공개 프로필
+     * ==========================================
+     */
     @Transactional(readOnly = true)
     public User getPublicProfile(
-            Long userId) {
+            Long userId
+    ) {
 
         if (userId == null) {
             throw new IllegalArgumentException(
@@ -166,7 +367,9 @@ public class UserService {
         }
 
         return userRepository
-                .findById(userId)
+                .findById(
+                        userId
+                )
                 .orElseThrow(() ->
                         new IllegalArgumentException(
                                 "회원 정보를 찾을 수 없습니다."
@@ -174,22 +377,34 @@ public class UserService {
                 );
     }
 
+    /*
+     * ==========================================
+     * 프로필 수정
+     * ==========================================
+     */
     @Transactional
     public User updateProfile(
             String username,
-            String nickname) {
+            String nickname
+    ) {
 
-        if (nickname == null || nickname.isBlank()) {
+        if (
+                nickname == null ||
+                nickname.isBlank()
+        ) {
             throw new IllegalArgumentException(
                     "닉네임을 입력해주세요."
             );
         }
 
-        nickname = nickname.trim();
+        nickname =
+                nickname.trim();
 
-        if (!nickname.matches(
-                "^[가-힣a-zA-Z0-9]{1,10}$"
-        )) {
+        if (
+                !nickname.matches(
+                        "^[가-힣a-zA-Z0-9]{1,10}$"
+                )
+        ) {
             throw new IllegalArgumentException(
                     "닉네임은 한글, 영문, 숫자만 사용하여 "
                     + "10자 이내로 입력해주세요."
@@ -197,40 +412,58 @@ public class UserService {
         }
 
         User user =
-                findUserByUsername(username);
+                findUserByUsername(
+                        username
+                );
 
         boolean nicknameChanged =
                 !nickname.equals(
                         user.getNickname()
                 );
 
-        if (nicknameChanged
-                && userRepository
-                        .existsByNickname(nickname)) {
+        if (
+                nicknameChanged &&
+                userRepository
+                        .existsByNickname(
+                                nickname
+                        )
+        ) {
 
             throw new IllegalArgumentException(
                     "이미 사용 중인 닉네임입니다."
             );
         }
 
-        user.setNickname(nickname);
+        user.setNickname(
+                nickname
+        );
 
         return user;
     }
 
+    /*
+     * ==========================================
+     * 프로필 이미지 수정
+     * ==========================================
+     */
     @Transactional
     public User updateProfileImage(
             String username,
-            MultipartFile image) {
+            MultipartFile image
+    ) {
 
         User user =
-                findUserByUsername(username);
+                findUserByUsername(
+                        username
+                );
 
         String previousImageUrl =
                 user.getProfileImageUrl();
 
         String newImageUrl =
-                profileImageService.save(image);
+                profileImageService.save(
+                        image
+                );
 
         user.setProfileImageUrl(
                 newImageUrl
@@ -243,17 +476,27 @@ public class UserService {
         return user;
     }
 
+    /*
+     * ==========================================
+     * 프로필 이미지 삭제
+     * ==========================================
+     */
     @Transactional
     public User deleteProfileImage(
-            String username) {
+            String username
+    ) {
 
         User user =
-                findUserByUsername(username);
+                findUserByUsername(
+                        username
+                );
 
         String previousImageUrl =
                 user.getProfileImageUrl();
 
-        user.setProfileImageUrl(null);
+        user.setProfileImageUrl(
+                null
+        );
 
         profileImageService.delete(
                 previousImageUrl
@@ -262,86 +505,476 @@ public class UserService {
         return user;
     }
 
+    /*
+     * ==========================================
+     * 회원 탈퇴
+     * ==========================================
+     *
+     * 삭제 순서가 매우 중요합니다.
+     *
+     * 1. 비밀번호 확인
+     * 2. 관리자 계정 탈퇴 차단
+     * 3. 사용자가 작성한 게시글 삭제
+     * 4. 사용자와 직접 연결된 각종 데이터 삭제
+     * 5. users 행 삭제
+     * 6. DB COMMIT 성공 후 프로필 이미지 파일 삭제
+     */
     @Transactional
     public void withdraw(
             String username,
-            String password) {
+            String password
+    ) {
 
-        if (password == null || password.isBlank()) {
+        if (
+                password == null ||
+                password.isBlank()
+        ) {
             throw new IllegalArgumentException(
                     "비밀번호를 입력해주세요."
             );
         }
 
         User user =
-                findUserByUsername(username);
+                findUserByUsername(
+                        username
+                );
 
-        if (!passwordEncoder.matches(
-                password,
-                user.getPassword())) {
+        if (
+                !passwordEncoder.matches(
+                        password,
+                        user.getPassword()
+                )
+        ) {
 
             throw new LoginFailedException(
                     "비밀번호가 올바르지 않습니다."
             );
         }
 
-        profileImageService.delete(
-                user.getProfileImageUrl()
+        /*
+         * 관리자 계정은 회원탈퇴 기능을 사용하지 않습니다.
+         *
+         * notices.author_id,
+         * reports.handled_by 등
+         * 관리자 전용 데이터 보호 목적도 있습니다.
+         */
+        if (
+                user.getRole()
+                        == UserRole.ADMIN
+        ) {
+            throw new IllegalArgumentException(
+                    "관리자 계정은 탈퇴할 수 없습니다."
+            );
+        }
+
+        Long userId =
+                user.getId();
+
+        String normalizedUsername =
+                user.getUsername();
+
+        String profileImageUrl =
+                user.getProfileImageUrl();
+
+        /*
+         * ==========================================
+         * 1. 작성한 일반 게시글 전체 삭제
+         * ==========================================
+         *
+         * 항상 첫 페이지를 다시 조회합니다.
+         * 게시글을 삭제하면 목록 크기가 줄어들기 때문에
+         * 페이지 번호를 증가시키면 일부 글을 건너뛸 수 있습니다.
+         */
+        while (true) {
+
+            Page<Post> postPage =
+                    postRepository
+                            .findByAuthorIdOrderByCreatedAtDesc(
+                                    userId,
+                                    PageRequest.of(
+                                            0,
+                                            50
+                                    )
+                            );
+
+            List<Post> posts =
+                    postPage.getContent();
+
+            if (
+                    posts.isEmpty()
+            ) {
+                break;
+            }
+
+            List<Long> postIds =
+                    posts.stream()
+                            .map(
+                                    Post::getId
+                            )
+                            .toList();
+
+            for (
+                    Long postId
+                    : postIds
+            ) {
+
+                postService.deletePost(
+                        normalizedUsername,
+                        postId
+                );
+            }
+        }
+
+        /*
+         * ==========================================
+         * 2. 작성한 커뮤니티 게시글 전체 삭제
+         * ==========================================
+         *
+         * 기존 CommunityPostService의 삭제 로직을 사용하여
+         * 댓글 / 좋아요 / 이미지 / 신고 / 알림까지
+         * 게시글 단위로 안전하게 정리합니다.
+         */
+        while (true) {
+
+            Page<CommunityPost>
+                    communityPostPage =
+                    communityPostRepository
+                            .findByAuthorUsernameOrderByCreatedAtDesc(
+                                    normalizedUsername,
+                                    PageRequest.of(
+                                            0,
+                                            20
+                                    )
+                            );
+
+            List<CommunityPost>
+                    communityPosts =
+                    communityPostPage
+                            .getContent();
+
+            if (
+                    communityPosts.isEmpty()
+            ) {
+                break;
+            }
+
+            List<Long> communityPostIds =
+                    communityPosts.stream()
+                            .map(
+                                    CommunityPost::getId
+                            )
+                            .toList();
+
+            for (
+                    Long communityPostId
+                    : communityPostIds
+            ) {
+
+                communityPostService
+                        .deletePost(
+                                normalizedUsername,
+                                communityPostId
+                        );
+            }
+        }
+
+        /*
+         * ==========================================
+         * 3. 다른 사람 글에 작성한 일반 댓글 삭제
+         * ==========================================
+         */
+        commentRepository
+                .deleteByAuthorId(
+                        userId
+                );
+
+        commentRepository
+                .flush();
+
+        /*
+         * ==========================================
+         * 4. 다른 사람 커뮤니티 글에 작성한 댓글 삭제
+         * ==========================================
+         */
+        communityCommentRepository
+                .deleteByAuthorId(
+                        userId
+                );
+
+        communityCommentRepository
+                .flush();
+
+        /*
+         * ==========================================
+         * 5. 다른 커뮤니티 글에 누른 좋아요 삭제
+         * ==========================================
+         */
+        communityPostLikeRepository
+                .deleteByUserId(
+                        userId
+                );
+
+        communityPostLikeRepository
+                .flush();
+
+        /*
+         * ==========================================
+         * 6. 커뮤니티 신고 기록 삭제
+         * ==========================================
+         *
+         * 내가 신고한 기록과
+         * 내가 신고당한 기록 모두 삭제합니다.
+         */
+        communityReportRepository
+                .deleteByReporterId(
+                        userId
+                );
+
+        communityReportRepository
+                .deleteByReportedUserId(
+                        userId
+                );
+
+        communityReportRepository
+                .flush();
+
+        /*
+         * ==========================================
+         * 7. 차단 관계 전체 삭제
+         * ==========================================
+         *
+         * 내가 차단한 기록 +
+         * 다른 사람이 나를 차단한 기록
+         */
+        communityUserBlockRepository
+                .deleteByBlockerId(
+                        userId
+                );
+
+        communityUserBlockRepository
+                .deleteByBlockedUserId(
+                        userId
+                );
+
+        communityUserBlockRepository
+                .flush();
+
+        /*
+         * ==========================================
+         * 8. 문의 내역 삭제
+         * ==========================================
+         */
+        inquiryRepository
+                .deleteByUserId(
+                        userId
+                );
+
+        inquiryRepository
+                .flush();
+
+        /*
+         * ==========================================
+         * 9. 일반 신고 데이터 삭제
+         * ==========================================
+         *
+         * 내가 작성한 신고 +
+         * 나 자신을 대상으로 한 USER 신고
+         */
+        reportRepository
+                .deleteByReporterId(
+                        userId
+                );
+
+        reportRepository
+                .deleteByTargetTypeAndTargetId(
+                        ReportTargetType.USER,
+                        userId
+                );
+
+        reportRepository
+                .flush();
+
+        /*
+         * ==========================================
+         * 10. 받은 알림 전체 삭제
+         * ==========================================
+         */
+        notificationRepository
+                .deleteByRecipientId(
+                        userId
+                );
+
+        notificationRepository
+                .flush();
+
+        /*
+         * ==========================================
+         * 11. AI 매칭 후보 확인 상태 삭제
+         * ==========================================
+         *
+         * 이 테이블은 users FK는 아니지만
+         * username 문자열로 사용자를 구분하므로
+         * 탈퇴 시 같이 정리합니다.
+         */
+        aiMatchCandidateStatusRepository
+                .deleteByUsername(
+                        normalizedUsername
+                );
+
+        aiMatchCandidateStatusRepository
+                .flush();
+
+        /*
+         * ==========================================
+         * 12. 사용자 본체 삭제
+         * ==========================================
+         */
+        userRepository.delete(
+                user
         );
 
-        userRepository.delete(user);
+        userRepository.flush();
+
+        /*
+         * ==========================================
+         * 13. DB COMMIT 성공 후 프로필 사진 삭제
+         * ==========================================
+         *
+         * 예전처럼 DB보다 파일을 먼저 삭제하면
+         * 회원탈퇴 DB 처리 실패 시
+         * 프로필 사진만 사라질 수 있습니다.
+         *
+         * 따라서 DB 트랜잭션이 성공한 경우에만
+         * 실제 프로필 이미지 파일을 지웁니다.
+         */
+        registerProfileImageDeleteAfterCommit(
+                profileImageUrl
+        );
     }
 
+    /*
+     * ==========================================
+     * 회원 탈퇴 후 프로필 실제 파일 삭제
+     * ==========================================
+     */
+    private void registerProfileImageDeleteAfterCommit(
+            String profileImageUrl
+    ) {
+
+        if (
+                profileImageUrl == null ||
+                profileImageUrl.isBlank()
+        ) {
+            return;
+        }
+
+        if (
+                TransactionSynchronizationManager
+                        .isSynchronizationActive()
+        ) {
+
+            TransactionSynchronizationManager
+                    .registerSynchronization(
+                            new TransactionSynchronization() {
+
+                                @Override
+                                public void afterCommit() {
+
+                                    profileImageService
+                                            .delete(
+                                                    profileImageUrl
+                                            );
+                                }
+                            }
+                    );
+
+            return;
+        }
+
+        /*
+         * 혹시 트랜잭션 없이 호출되는 예외적인 경우
+         */
+        profileImageService.delete(
+                profileImageUrl
+        );
+    }
+
+    /*
+     * ==========================================
+     * 아이디 중복 확인
+     * ==========================================
+     */
     @Transactional(readOnly = true)
     public boolean isUsernameDuplicated(
-            String username) {
+            String username
+    ) {
 
-        if (username == null || username.isBlank()) {
+        if (
+                username == null ||
+                username.isBlank()
+        ) {
             throw new IllegalArgumentException(
                     "아이디를 입력해주세요."
             );
         }
 
-        username = username.trim();
+        username =
+                username.trim();
 
-        if (!username.matches(
-                "^[a-zA-Z0-9]{1,10}$"
-        )) {
+        if (
+                !username.matches(
+                        "^[a-zA-Z0-9]{1,10}$"
+                )
+        ) {
             throw new IllegalArgumentException(
                     "아이디는 영문과 숫자만 사용하여 "
                     + "10자 이내로 입력해주세요."
             );
         }
 
-        return userRepository.existsByUsername(
-                username
-        );
+        return userRepository
+                .existsByUsername(
+                        username
+                );
     }
 
+    /*
+     * ==========================================
+     * 닉네임 중복 확인
+     * ==========================================
+     */
     @Transactional(readOnly = true)
     public boolean isNicknameDuplicated(
-            String nickname) {
+            String nickname
+    ) {
 
-        if (nickname == null || nickname.isBlank()) {
+        if (
+                nickname == null ||
+                nickname.isBlank()
+        ) {
             throw new IllegalArgumentException(
                     "닉네임을 입력해주세요."
             );
         }
 
-        nickname = nickname.trim();
+        nickname =
+                nickname.trim();
 
-        if (!nickname.matches(
-                "^[가-힣a-zA-Z0-9]{1,10}$"
-        )) {
+        if (
+                !nickname.matches(
+                        "^[가-힣a-zA-Z0-9]{1,10}$"
+                )
+        ) {
             throw new IllegalArgumentException(
                     "닉네임은 한글, 영문, 숫자만 사용하여 "
                     + "10자 이내로 입력해주세요."
             );
         }
 
-        return userRepository.existsByNickname(
-                nickname
-        );
+        return userRepository
+                .existsByNickname(
+                        nickname
+                );
     }
 
     /*
@@ -439,11 +1072,6 @@ public class UserService {
                 user
         );
 
-        /*
-         * 이미 정지 중이라면
-         * 현재 정지 종료 시각부터 기간을 더하지 않고,
-         * 관리자 조치 시점 기준으로 새 종료 시각을 설정합니다.
-         */
         user.setCommunitySuspendedUntil(
                 LocalDateTime
                         .now()
@@ -511,17 +1139,14 @@ public class UserService {
      * ==========================================
      * 관리자 제재 대상 검증
      * ==========================================
-     *
-     * 관리자 계정을 실수로 정지/경고하지 않도록
-     * ADMIN 계정은 대상에서 제외합니다.
      */
     private void validateSanctionTarget(
             User user
     ) {
 
         if (
-                user.getRole() ==
-                UserRole.ADMIN
+                user.getRole()
+                        == UserRole.ADMIN
         ) {
             throw new IllegalArgumentException(
                     "관리자 계정에는 커뮤니티 제재를 적용할 수 없습니다."
@@ -579,17 +1204,28 @@ public class UserService {
         );
     }
 
+    /*
+     * ==========================================
+     * 사용자 조회 공통
+     * ==========================================
+     */
     private User findUserByUsername(
-            String username) {
+            String username
+    ) {
 
-        if (username == null || username.isBlank()) {
+        if (
+                username == null ||
+                username.isBlank()
+        ) {
             throw new LoginFailedException(
                     "로그인 정보를 확인할 수 없습니다."
             );
         }
 
         return userRepository
-                .findByUsername(username)
+                .findByUsername(
+                        username
+                )
                 .orElseThrow(() ->
                         new IllegalArgumentException(
                                 "회원 정보를 찾을 수 없습니다."

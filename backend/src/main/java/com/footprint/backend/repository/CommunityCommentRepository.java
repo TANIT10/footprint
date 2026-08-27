@@ -62,4 +62,12 @@ public interface CommunityCommentRepository
             @Param("username")
             String username
     );
+
+        /*
+        * 회원 탈퇴 전용
+        * 사용자가 작성한 모든 커뮤니티 댓글 삭제
+        */
+        void deleteByAuthorId(
+                Long authorId
+    );
 }

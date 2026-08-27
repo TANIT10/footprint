@@ -49,4 +49,20 @@ public interface CommunityReportRepository
     void deleteByCommunityPostId(
             Long communityPostId
     );
+
+        /*
+     * 회원 탈퇴 전용
+     * 사용자가 직접 신고한 기록 전체 삭제
+     */
+    void deleteByReporterId(
+            Long reporterId
+    );
+
+    /*
+     * 회원 탈퇴 전용
+     * 사용자가 신고당한 기록 전체 삭제
+     */
+    void deleteByReportedUserId(
+            Long reportedUserId
+    );
 }
