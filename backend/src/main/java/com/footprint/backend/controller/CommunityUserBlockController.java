@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.footprint.backend.dto.BlockedUserResponse;
 import com.footprint.backend.service.CommunityUserBlockService;
 
 @RestController
@@ -149,13 +150,19 @@ public class CommunityUserBlockController {
      *
      * 응답 예:
      * [
-     *   "test01",
-     *   "test03"
+     *   {
+     *     "username": "test01",
+     *     "nickname": "콩이엄마"
+     *   },
+     *   {
+     *     "username": "test03",
+     *     "nickname": "두부아빠"
+     *   }
      * ]
      */
     @GetMapping
     public ResponseEntity<
-            List<String>
+            List<BlockedUserResponse>
     > getBlockedUsers(
             Principal principal
     ) {
@@ -166,9 +173,9 @@ public class CommunityUserBlockController {
                     .build();
         }
 
-        List<String> blockedUsers =
+        List<BlockedUserResponse> blockedUsers =
                 communityUserBlockService
-                        .getBlockedUsernames(
+                        .getBlockedUsers(
                                 principal
                                         .getName()
                         );

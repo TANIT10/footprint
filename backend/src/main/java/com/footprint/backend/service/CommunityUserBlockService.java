@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.footprint.backend.dto.BlockedUserResponse;
 import com.footprint.backend.entity.CommunityUserBlock;
 import com.footprint.backend.entity.User;
 import com.footprint.backend.repository.CommunityUserBlockRepository;
@@ -161,8 +162,9 @@ public class CommunityUserBlockService {
      * 내가 차단한 username 목록
      * ==========================================
      *
-     * 나중에 게시글/댓글 목록에서
-     * 차단 사용자를 제외할 때 사용합니다.
+     * 게시글/댓글 목록에서
+     * 차단 사용자를 제외할 때 사용하는
+     * 내부 기능입니다.
      */
     @Transactional(readOnly = true)
     public List<String> getBlockedUsernames(
@@ -186,6 +188,48 @@ public class CommunityUserBlockService {
                                 block
                                         .getBlockedUser()
                                         .getUsername()
+                )
+                .toList();
+    }
+
+    /*
+     * ==========================================
+     * 내가 차단한 사용자 목록
+     * 화면 표시용
+     * ==========================================
+     *
+     * 화면에는 nickname을 보여주고,
+     * 실제 차단 해제 요청에는 username을
+     * 계속 사용할 수 있도록 둘 다 내려줍니다.
+     */
+    @Transactional(readOnly = true)
+    public List<BlockedUserResponse> getBlockedUsers(
+            String blockerUsername
+    ) {
+
+        if (
+                blockerUsername == null ||
+                blockerUsername.isBlank()
+        ) {
+            return List.of();
+        }
+
+        return communityUserBlockRepository
+                .findAllByBlockerUsernameOrderByCreatedAtDesc(
+                        blockerUsername
+                )
+                .stream()
+                .map(
+                        block -> {
+
+                            User blockedUser =
+                                    block.getBlockedUser();
+
+                            return new BlockedUserResponse(
+                                    blockedUser.getUsername(),
+                                    blockedUser.getNickname()
+                            );
+                        }
                 )
                 .toList();
     }

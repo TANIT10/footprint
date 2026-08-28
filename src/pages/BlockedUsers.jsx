@@ -101,7 +101,7 @@ function BlockedUsers({
 
   const handleUnblock =
     async (
-      blockedUsername
+      blockedUser
     ) => {
       if (
         processingUsername
@@ -109,9 +109,16 @@ function BlockedUsers({
         return
       }
 
+      const blockedUsername =
+        blockedUser.username
+
+      const blockedNickname =
+        blockedUser.nickname ||
+        blockedUser.username
+
       const confirmed =
         window.confirm(
-          `${blockedUsername}님의 차단을 해제하시겠습니까?`
+          `${blockedNickname}님의 차단을 해제하시겠습니까?`
         )
 
       if (!confirmed) {
@@ -164,9 +171,9 @@ function BlockedUsers({
           ) =>
             previousUsers.filter(
               (
-                username
+                user
               ) =>
-                username !==
+                user.username !==
                 blockedUsername
             )
         )
@@ -208,7 +215,6 @@ function BlockedUsers({
             <h1>
               차단한 사용자 관리
             </h1>
-            
           </div>
         </header>
 
@@ -226,18 +232,18 @@ function BlockedUsers({
             <ul className="blocked-users-list">
               {blockedUsers.map(
                 (
-                  blockedUsername
+                  blockedUser
                 ) => (
                   <li
                     className="blocked-users-item"
                     key={
-                      blockedUsername
+                      blockedUser.username
                     }
                   >
                     <span className="blocked-users-username">
-                      @
                       {
-                        blockedUsername
+                        blockedUser.nickname ||
+                        blockedUser.username
                       }
                     </span>
 
@@ -246,16 +252,16 @@ function BlockedUsers({
                       type="button"
                       onClick={() =>
                         handleUnblock(
-                          blockedUsername
+                          blockedUser
                         )
                       }
                       disabled={
                         processingUsername ===
-                        blockedUsername
+                        blockedUser.username
                       }
                     >
                       {processingUsername ===
-                      blockedUsername
+                      blockedUser.username
                         ? '해제 중...'
                         : '차단 해제'}
                     </button>
