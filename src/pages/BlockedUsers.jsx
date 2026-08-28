@@ -10,8 +10,6 @@ import {
 
 import './BlockedUsers.css'
 
-const API_BASE_URL = ''
-
 function BlockedUsers({
   onBack,
 }) {
@@ -31,104 +29,92 @@ function BlockedUsers({
   ] = useState('')
 
   const loadBlockedUsers =
-    useCallback(async () => {
-      const token =
-        localStorage.getItem(
-          'token'
-        )
-
-      if (!token) {
-        window.alert(
-          '로그인 정보를 찾을 수 없어요. 다시 로그인해 주세요.'
-        )
-
-        setBlockedUsers([])
-        setIsLoading(false)
-
-        return
-      }
-
-      setIsLoading(true)
-
-      try {
-        const response =
-          await fetch(
-            `${API_BASE_URL}/api/community/blocks`,
-            {
-              method: 'GET',
-
-              headers: {
-                Authorization:
-                  `Bearer ${token}`,
-              },
-            }
+    useCallback(
+      async () => {
+        const token =
+          localStorage.getItem(
+            'token'
           )
 
-        if (
-          response.status === 401 ||
-          response.status === 403
-        ) {
-          throw new Error(
-            '로그인 시간이 만료됐습니다. 다시 로그인해 주세요.'
-          )
+        if (!token) {
+          setBlockedUsers([])
+          setIsLoading(false)
+
+          return
         }
 
-        if (!response.ok) {
-          throw new Error(
-            '차단한 사용자 목록을 불러오지 못했습니다.'
+        setIsLoading(true)
+
+        try {
+          const response =
+            await fetch(
+              '/api/community/blocks',
+              {
+                headers: {
+                  Authorization:
+                    `Bearer ${token}`,
+                },
+              }
+            )
+
+          if (!response.ok) {
+            throw new Error(
+              '차단한 사용자 목록을 불러오지 못했어요.'
+            )
+          }
+
+          const data =
+            await response.json()
+
+          setBlockedUsers(
+            Array.isArray(data)
+              ? data
+              : []
           )
+        } catch (error) {
+          console.error(
+            '차단한 사용자 목록 조회 실패:',
+            error
+          )
+
+          setBlockedUsers([])
+
+          window.alert(
+            error.message ||
+              '차단한 사용자 목록을 불러오지 못했어요.'
+          )
+        } finally {
+          setIsLoading(false)
         }
+      },
+      []
+    )
 
-        const responseBody =
-          await response.json()
-
-        setBlockedUsers(
-          Array.isArray(
-            responseBody
-          )
-            ? responseBody
-            : []
-        )
-      } catch (error) {
-        console.error(
-          '차단 사용자 목록 조회 실패:',
-          error
-        )
-
-        window.alert(
-          error.message ||
-            '차단한 사용자 목록을 불러오지 못했어요.'
-        )
-
-        setBlockedUsers([])
-      } finally {
-        setIsLoading(false)
-      }
-    }, [])
-
-  useEffect(() => {
-    loadBlockedUsers()
-  }, [
-    loadBlockedUsers,
-  ])
+  useEffect(
+    () => {
+      loadBlockedUsers()
+    },
+    [
+      loadBlockedUsers,
+    ]
+  )
 
   const handleUnblock =
     async (
       blockedUsername
     ) => {
       if (
-        !blockedUsername ||
         processingUsername
       ) {
         return
       }
 
-      const shouldUnblock =
+      const confirmed =
         window.confirm(
           `${blockedUsername}님의 차단을 해제하시겠습니까?`
         )
 
-      if (!shouldUnblock) {
+      if (!confirmed) {
         return
       }
 
@@ -139,7 +125,7 @@ function BlockedUsers({
 
       if (!token) {
         window.alert(
-          '로그인 정보를 찾을 수 없어요. 다시 로그인해 주세요.'
+          '로그인 정보를 찾을 수 없어요.'
         )
 
         return
@@ -152,7 +138,7 @@ function BlockedUsers({
       try {
         const response =
           await fetch(
-            `${API_BASE_URL}/api/community/blocks/${encodeURIComponent(
+            `/api/community/blocks/${encodeURIComponent(
               blockedUsername
             )}`,
             {
@@ -166,30 +152,21 @@ function BlockedUsers({
             }
           )
 
-        if (
-          response.status === 401 ||
-          response.status === 403
-        ) {
-          throw new Error(
-            '로그인 시간이 만료됐습니다. 다시 로그인해 주세요.'
-          )
-        }
-
         if (!response.ok) {
           throw new Error(
-            '차단을 해제하지 못했습니다.'
+            '차단을 해제하지 못했어요.'
           )
         }
 
         setBlockedUsers(
           (
-            previousBlockedUsers
+            previousUsers
           ) =>
-            previousBlockedUsers.filter(
+            previousUsers.filter(
               (
-                savedUsername
+                username
               ) =>
-                savedUsername !==
+                username !==
                 blockedUsername
             )
         )
@@ -221,71 +198,63 @@ function BlockedUsers({
           <button
             className="blocked-users-back-button"
             type="button"
-            onClick={
-              onBack
-            }
+            onClick={onBack}
             aria-label="마이페이지로 돌아가기"
           >
             <ArrowLeft />
           </button>
-        </header>
 
-        <main className="blocked-users-content">
-          <section className="blocked-users-title-section">
+          <div className="blocked-users-title-area">
             <h1>
               차단한 사용자 관리
             </h1>
 
             <p>
-              차단한 사용자를 확인하고
-              차단을 해제할 수 있어요.
+              차단한 사용자를 확인하고 차단을 해제할 수 있어요.
             </p>
-          </section>
+          </div>
+        </header>
 
-          <div className="blocked-users-divider" />
-
+        <main className="blocked-users-content">
           {isLoading ? (
-            <div className="blocked-users-state">
+            <p className="blocked-users-state">
               불러오는 중...
-            </div>
+            </p>
           ) : blockedUsers.length ===
             0 ? (
-            <div className="blocked-users-empty">
+            <p className="blocked-users-state">
               차단한 사용자가 없어요.
-            </div>
+            </p>
           ) : (
-            <div className="blocked-users-list">
+            <ul className="blocked-users-list">
               {blockedUsers.map(
                 (
                   blockedUsername
                 ) => (
-                  <div
-                    className="blocked-user-item"
+                  <li
+                    className="blocked-users-item"
                     key={
                       blockedUsername
                     }
                   >
-                    <div className="blocked-user-information">
-                      <strong>
-                        @
-                        {
-                          blockedUsername
-                        }
-                      </strong>
-                    </div>
+                    <span className="blocked-users-username">
+                      @
+                      {
+                        blockedUsername
+                      }
+                    </span>
 
                     <button
-                      className="blocked-user-unblock-button"
+                      className="blocked-users-unblock-button"
                       type="button"
-                      disabled={
-                        Boolean(
-                          processingUsername
-                        )
-                      }
                       onClick={() =>
                         handleUnblock(
                           blockedUsername
                         )
+                      }
+                      disabled={
+                        processingUsername ===
+                        blockedUsername
                       }
                     >
                       {processingUsername ===
@@ -293,10 +262,10 @@ function BlockedUsers({
                         ? '해제 중...'
                         : '차단 해제'}
                     </button>
-                  </div>
+                  </li>
                 )
               )}
-            </div>
+            </ul>
           )}
         </main>
       </div>

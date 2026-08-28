@@ -9,7 +9,6 @@
   background-color: #ffffff;
   color: #191919;
 
-  scroll-behavior: smooth;
   overscroll-behavior-x: none;
 }
 
@@ -30,8 +29,13 @@
 }
 
 /*
- * 마이페이지와 동일한
+ * ==========================================
  * 상단 고정 헤더
+ *
+ * 닮은 발자국 화면처럼
+ * 뒤로가기 + 가운데 제목 + 설명을
+ * 한 헤더 안에 배치합니다.
+ * ==========================================
  */
 .blocked-users-header {
   position: sticky;
@@ -52,10 +56,7 @@
     rgba(0, 0, 0, 0.035);
 }
 
-/*
- * 마이페이지와 동일한
- * 뒤로가기 버튼
- */
+/* 뒤로가기 버튼 */
 .blocked-users-back-button {
   position: absolute;
 
@@ -88,95 +89,91 @@
 }
 
 /*
+ * 제목 + 상세설명
+ * 뒤로가기 버튼과 같은 헤더 안에서 가운데 정렬
+ */
+.blocked-users-title-area {
+  position: absolute;
+
+  left: 74px;
+  right: 74px;
+  bottom: 22px;
+
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  min-width: 0;
+
+  text-align: center;
+
+  gap: 5px;
+}
+
+.blocked-users-title-area h1 {
+  width: 100%;
+
+  margin: 0;
+
+  overflow: hidden;
+
+  color: #191919;
+
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.blocked-users-title-area p {
+  width: 100%;
+
+  margin: 0;
+
+  overflow: hidden;
+
+  color: #9b9b9b;
+
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * ==========================================
  * 본문
+ * 제목/설명은 헤더로 올라갔으므로
+ * 목록만 시작합니다.
+ * ==========================================
  */
 .blocked-users-content {
+  position: relative;
+  z-index: 1;
+
   width: calc(100% - 36px);
   max-width: 520px;
 
   margin: 0 auto;
 
-  padding-top: 24px;
-  padding-bottom: 70px;
+  padding-top: 28px;
+  padding-bottom: 120px;
 }
 
-/*
- * 제목 영역
- */
-.blocked-users-title-section {
-  padding: 2px 4px 20px;
-}
-
-.blocked-users-title-section h1 {
-  margin: 0 0 9px;
-
-  color: #111111;
-
-  font-size: 22px;
-  font-weight: 800;
-}
-
-.blocked-users-title-section p {
-  margin: 0;
-
-  color: #999999;
-
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.55;
-}
-
-/*
- * 마이페이지 구분선과
- * 동일한 포인트 색
- */
-.blocked-users-divider {
-  width: 100%;
-  height: 3px;
-
-  margin-bottom: 18px;
-
-  border-radius: 999px;
-
-  background-color: #b9855f;
-}
-
-/*
- * 로딩 / 빈 목록
- */
-.blocked-users-state,
-.blocked-users-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  min-height: 170px;
-
-  padding: 30px 12px;
-
-  color: #999999;
-
-  font-size: 15px;
-  font-weight: 500;
-
-  text-align: center;
-}
-
-/*
- * 차단 사용자 목록
- */
 .blocked-users-list {
-  display: flex;
-  flex-direction: column;
-
   width: 100%;
+
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
 }
 
-/*
- * 개별 사용자
- * 마이페이지 메뉴 구분선 느낌 유지
- */
-.blocked-user-item {
+.blocked-users-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -184,37 +181,29 @@
   width: 100%;
   min-height: 68px;
 
-  padding: 0 6px;
+  padding: 0 4px;
 
   border-bottom: 1px solid #eeeeee;
 
   gap: 16px;
 }
 
-.blocked-user-information {
-  display: flex;
+.blocked-users-username {
   min-width: 0;
   flex: 1;
-  align-items: center;
-}
 
-.blocked-user-information strong {
   overflow: hidden;
 
-  color: #555555;
+  color: #444444;
 
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
 
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/*
- * 차단 해제 버튼
- * 기존 발자국 포인트 컬러 사용
- */
-.blocked-user-unblock-button {
+.blocked-users-unblock-button {
   flex: 0 0 auto;
 
   min-width: 82px;
@@ -226,7 +215,7 @@
   border-radius: 999px;
 
   background-color: #ffffff;
-  color: #9a6846;
+  color: #9a6844;
 
   font-size: 13px;
   font-weight: 700;
@@ -234,53 +223,51 @@
   cursor: pointer;
 }
 
-.blocked-user-unblock-button:active {
-  background-color: #faf6f3;
+.blocked-users-unblock-button:active {
+  background-color: #faf7f4;
 }
 
-.blocked-user-unblock-button:disabled {
+.blocked-users-unblock-button:disabled {
   opacity: 0.55;
 
   cursor: default;
 }
 
-/*
- * 매우 좁은 휴대폰
- */
+.blocked-users-state {
+  margin: 80px 0 0;
+
+  color: #aaaaaa;
+
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* 매우 좁은 휴대폰 */
 @media screen and (max-width: 359px) {
   .blocked-users-back-button {
     left: 16px;
   }
 
-  .blocked-users-content {
-    width: calc(100% - 28px);
+  .blocked-users-title-area {
+    left: 66px;
+    right: 16px;
   }
 
-  .blocked-users-title-section h1 {
+  .blocked-users-title-area h1 {
     font-size: 20px;
   }
 
-  .blocked-user-item {
-    gap: 10px;
+  .blocked-users-title-area p {
+    font-size: 11px;
   }
 
-  .blocked-user-information strong {
-    font-size: 15px;
-  }
-
-  .blocked-user-unblock-button {
-    min-width: 76px;
-
-    padding: 0 11px;
-
-    font-size: 12px;
+  .blocked-users-content {
+    width: calc(100% - 28px);
   }
 }
 
-/*
- * PC 화면
- * 마이페이지 PC 헤더와 동일
- */
+/* PC */
 @media screen and (min-width: 801px) {
   .blocked-users-inner {
     max-width: 1126px;
@@ -305,11 +292,21 @@
     height: 31px;
   }
 
-  .blocked-users-content {
-    padding-top: 32px;
+  .blocked-users-title-area {
+    left: 160px;
+    right: 160px;
+    bottom: 30px;
   }
 
-  .blocked-users-title-section h1 {
+  .blocked-users-title-area h1 {
     font-size: 25px;
+  }
+
+  .blocked-users-title-area p {
+    font-size: 14px;
+  }
+
+  .blocked-users-content {
+    padding-top: 34px;
   }
 }
