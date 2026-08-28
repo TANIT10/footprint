@@ -208,10 +208,7 @@ function BlockedUsers({
             <h1>
               차단한 사용자 관리
             </h1>
-
-            <p>
-              차단한 사용자를 확인하고 차단을 해제할 수 있어요.
-            </p>
+            
           </div>
         </header>
 

@@ -127,23 +127,6 @@
   white-space: nowrap;
 }
 
-.blocked-users-title-area p {
-  width: 100%;
-
-  margin: 0;
-
-  overflow: hidden;
-
-  color: #9b9b9b;
-
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.35;
-
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 /*
  * ==========================================
  * 본문
@@ -258,10 +241,6 @@
     font-size: 20px;
   }
 
-  .blocked-users-title-area p {
-    font-size: 11px;
-  }
-
   .blocked-users-content {
     width: calc(100% - 28px);
   }
@@ -295,7 +274,7 @@
   .blocked-users-title-area {
     left: 160px;
     right: 160px;
-    bottom: 30px;
+    bottom: 50px;
   }
 
   .blocked-users-title-area h1 {
