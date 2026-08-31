@@ -314,7 +314,8 @@ body {
    */
 
   .post-list-logo {
-    top: 33px !important;
+    top: 25px !important;
+    width: 116px !important;
   }
 
   /*
