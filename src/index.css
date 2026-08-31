@@ -371,12 +371,16 @@ body {
   .similar-footprints-title-area {
     position: absolute !important;
 
-    top: 46px !important;
+    top: 45px !important;
     left: calc(50% + 4px) !important;
 
     bottom: auto !important;
 
     transform: translateX(-50%) !important;
+  }
+
+  .similar-footprints-title-paw {
+  transform: translateY(-2px) !important;
   }
 
   /*
