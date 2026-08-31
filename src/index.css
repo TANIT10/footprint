@@ -354,6 +354,10 @@ body {
     bottom: auto !important;
   }
 
+  .blocked-users-title-area h1 {
+    font-size: 20px !important;
+  }
+
   /*
    * =====================================================
    * 8. 닮은 발자국 제목 영역
@@ -367,7 +371,7 @@ body {
   .similar-footprints-title-area {
     position: absolute !important;
 
-    top: 47px !important;
+    top: 46px !important;
     left: calc(50% + 4px) !important;
 
     bottom: auto !important;
