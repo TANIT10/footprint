@@ -5,6 +5,7 @@ import {
 } from 'react'
 
 import {
+  ArrowLeft,
   ArrowUp,
   Heart,
   MessageCircle,
@@ -178,6 +179,7 @@ function Community({
             setLoadError(
               '로그인 정보를 찾을 수 없어요.'
             )
+
             return
           }
 
@@ -200,6 +202,7 @@ function Community({
                 `${API_BASE_URL}/api/community/posts${queryString}`,
                 {
                   method: 'GET',
+
                   headers: {
                     Authorization:
                       `Bearer ${token}`,
@@ -334,6 +337,7 @@ function Community({
                     `${API_BASE_URL}/api/community/posts${queryString}`,
                     {
                       method: 'GET',
+
                       headers: {
                         Authorization:
                           `Bearer ${token}`,
@@ -378,6 +382,7 @@ function Community({
 
                     return [
                       ...previousPosts,
+
                       ...nextPosts.filter(
                         (post) =>
                           !existingIds.has(
@@ -567,7 +572,9 @@ function Community({
             onClick={onBack}
             aria-label="뒤로가기"
           >
-            ←
+            <ArrowLeft
+              aria-hidden="true"
+            />
           </button>
 
           <h1 className="community-title">
@@ -771,6 +778,7 @@ function Community({
                   )
                 }
               )}
+
               <div
                 className="community-load-more-trigger"
                 ref={loadMoreTriggerRef}

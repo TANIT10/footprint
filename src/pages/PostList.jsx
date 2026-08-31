@@ -279,7 +279,7 @@ function PostList({
           />
 
           <button
-            className="notification-button"
+            className="notification-button post-list-notification-button"
             type="button"
             onClick={onNotifications}
             aria-label={
@@ -342,6 +342,7 @@ function PostList({
               </span>
             </section>
           )}
+
           {posts.length > 0 ? (
             <>
               <div className="post-grid">
