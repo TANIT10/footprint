@@ -128,16 +128,8 @@ body {
  * =========================================================
  * 발자국 모바일 상단 고정 영역 통일
  *
- * 기준:
- * 게시글 목록 모바일 상단바
- *
- * - 헤더 높이: 108px
- * - 왼쪽 버튼: top 39px
- * - 오른쪽 알림: top 39px
- * - 가운데 제목: top 50px
- * - 메인 로고: top 36px
- *
- * PC 디자인에는 적용하지 않음.
+ * 모바일 전용
+ * PC 디자인은 변경하지 않음
  * =========================================================
  */
 
@@ -145,7 +137,7 @@ body {
 
   /*
    * =====================================================
-   * 1. 모바일 상단바 높이
+   * 1. 모바일 헤더 높이 통일
    * =====================================================
    */
 
@@ -164,13 +156,14 @@ body {
 
   .inquiry-header,
 
+  .my-page-header,
   .my-posts-header,
   .user-profile-header,
   .withdraw-header,
   .similar-footprints-header,
-
   .blocked-users-header,
 
+  .admin-header,
   .admin-notices-header,
   .admin-notice-write-header,
   .admin-notice-detail-header,
@@ -183,14 +176,19 @@ body {
   }
 
   /*
+   * 문의하기는 flex-basis가 따로 145px로 잡혀 있어서
+   * 높이뿐 아니라 flex-basis도 같이 변경해야 함.
+   */
+  .inquiry-header {
+    flex-basis: 108px !important;
+  }
+
+  /*
    * =====================================================
    * 2. 뒤로가기 버튼
    *
-   * 기존에는 어떤 페이지는 top,
-   * 어떤 페이지는 bottom을 사용하고 있었음.
-   *
-   * 모바일에서는 모두 게시글 목록 상단바와
-   * 같은 세로 기준으로 통일.
+   * 직전 위치 39px에서
+   * 요청대로 3px 더 위 → 36px
    * =====================================================
    */
 
@@ -209,13 +207,14 @@ body {
 
   .inquiry-back-button,
 
+  .my-page-back-button,
   .my-posts-back-button,
   .user-profile-back-button,
   .withdraw-back-button,
   .similar-footprints-back-button,
-
   .blocked-users-back-button,
 
+  .admin-back-button,
   .admin-notices-back-button,
   .admin-notice-write-header > button,
   .admin-notice-detail-header > button,
@@ -223,16 +222,16 @@ body {
   .admin-inquiry-detail-back-button,
   .admin-reports-back-button,
   .admin-report-detail-header > button {
-    top: 39px !important;
+    top: 36px !important;
     bottom: auto !important;
   }
 
   /*
-   * 뒤로가기 SVG 아이콘 크기도 통일.
-   *
-   * 문자 화살표가 아니라 lucide ArrowLeft를
-   * 사용하는 페이지 기준.
+   * =====================================================
+   * 3. 뒤로가기 아이콘 크기 통일
+   * =====================================================
    */
+
   .post-list-back-button svg,
   .post-write-back-button svg,
   .post-detail-back-button svg,
@@ -248,13 +247,14 @@ body {
 
   .inquiry-back-button svg,
 
+  .my-page-back-button svg,
   .my-posts-back-button svg,
   .user-profile-back-button svg,
   .withdraw-back-button svg,
   .similar-footprints-back-button svg,
-
   .blocked-users-back-button svg,
 
+  .admin-back-button svg,
   .admin-notices-back-button svg,
   .admin-notice-write-header > button svg,
   .admin-notice-detail-header > button svg,
@@ -270,7 +270,10 @@ body {
 
   /*
    * =====================================================
-   * 3. 가운데 제목
+   * 4. 가운데 제목
+   *
+   * 직전 50px에서
+   * 요청대로 3px 더 위 → 47px
    * =====================================================
    */
 
@@ -280,87 +283,112 @@ body {
 
   .notifications-title,
 
-  .notice-list-page-title,
+  .notice-list-title,
   .notice-detail-page-title,
 
   .post-list-title,
+
+  .inquiry-title,
 
   .my-posts-title,
   .user-profile-title,
   .withdraw-title,
 
-  .blocked-users-title,
-
+  .admin-header h1,
   .admin-notices-header h1,
   .admin-notice-write-header h1,
   .admin-notice-detail-header h1,
   .admin-inquiries-header h1,
   .admin-reports-header h1,
   .admin-report-detail-header h1 {
-    top: 50px !important;
+    top: 47px !important;
     bottom: auto !important;
   }
 
   /*
    * =====================================================
-   * 4. 메인 게시글 목록 로고
+   * 5. 게시글 목록 로고
    *
-   * 기존 모바일 index.css:
-   * top: 39px
-   *
-   * 요청대로 3px 위로 이동.
+   * 직전 36px → 33px
    * =====================================================
    */
 
   .post-list-logo {
-    top: 36px !important;
+    top: 33px !important;
   }
 
   /*
-   * 게시글 작성/상세 로고는
-   * 각 화면 디자인은 유지하면서
-   * 상단바 안에서 기준을 맞춤.
+   * 작성/상세 로고도 동일하게 3px 위
    */
-  .post-write-logo {
-    top: 36px !important;
-  }
-
+  .post-write-logo,
   .post-detail-logo {
-    top: 36px !important;
+    top: 33px !important;
   }
 
   /*
    * =====================================================
-   * 5. 알림 버튼
+   * 6. 알림 종
    *
-   * 게시글 목록 bell.png:
-   * 기존 모바일 보정 42px → 39px
-   *
-   * 커뮤니티도 같은 top 기준 사용.
+   * 직전 39px → 36px
    * =====================================================
    */
 
   .post-list-notification-button,
   .post-detail-notification-button,
-  .community-notification-button {
-    top: 39px !important;
+  .community-notification-button,
+  .my-page-notification-button {
+    top: 36px !important;
     bottom: auto !important;
   }
 
   /*
    * =====================================================
-   * 6. 관리자 공지 + 버튼
+   * 7. 차단한 사용자 관리 제목
+   *
+   * 일반 h1이 아니라 title-area 구조라 따로 처리
+   * =====================================================
+   */
+
+  .blocked-users-title-area {
+    top: 47px !important;
+    bottom: auto !important;
+  }
+
+  /*
+   * =====================================================
+   * 8. 닮은 발자국 제목 영역
+   *
+   * 별도 제목 + 발자국 + 설명 구조.
+   * 현재 위치에서 오른쪽으로 4px만 이동.
+   * 세로도 전체 기준에 맞춰 살짝 위로.
+   * =====================================================
+   */
+
+  .similar-footprints-title-area {
+    position: absolute !important;
+
+    top: 47px !important;
+    left: calc(50% + 4px) !important;
+
+    bottom: auto !important;
+
+    transform: translateX(-50%) !important;
+  }
+
+  /*
+   * =====================================================
+   * 9. 관리자 공지 작성 버튼
    * =====================================================
    */
 
   .admin-notices-create-button {
-    top: 39px !important;
+    top: 36px !important;
     bottom: auto !important;
   }
 
   /*
    * =====================================================
-   * 7. 관리자 문의 상세
+   * 10. 관리자 문의 상세
    * =====================================================
    */
 
@@ -370,63 +398,6 @@ body {
 
   .admin-inquiry-detail-header {
     padding-bottom: 0 !important;
-  }
-
-  /*
-   * =====================================================
-   * 8. 닮은 발자국
-   *
-   * 이 화면은 제목 + 설명이 함께 있는
-   * 별도 2줄 구조이므로 기존 특수 배치를 유지.
-   *
-   * 뒤로가기 버튼만 위 공통 규칙을 따름.
-   * =====================================================
-   */
-
-  .similar-footprints-title-area {
-    position: relative !important;
-
-    top: 30px !important;
-  }
-
-  /*
-   * =====================================================
-   * 9. 차단한 사용자 관리
-   *
-   * title-area 방식일 경우 기존 구조를 유지하되
-   * 상단바 안쪽에 배치.
-   * =====================================================
-   */
-
-  .blocked-users-title-area {
-    position: relative !important;
-
-    top: 50px !important;
-    bottom: auto !important;
-  }
-
-  /*
-   * =====================================================
-   * 10. 관리자 메인
-   *
-   * 관리자 메인만 원래대로 짧은 헤더 유지.
-   * 하위 관리자 화면은 108px.
-   * =====================================================
-   */
-
-  .admin-page-header {
-    height: 60px !important;
-    min-height: 60px !important;
-  }
-
-  .admin-page-header h1 {
-    top: auto !important;
-    bottom: 8px !important;
-  }
-
-  .admin-page-back-button {
-    top: auto !important;
-    bottom: 2px !important;
   }
 }
 
@@ -452,13 +423,14 @@ body {
 
   .inquiry-back-button,
 
+  .my-page-back-button,
   .my-posts-back-button,
   .user-profile-back-button,
   .withdraw-back-button,
   .similar-footprints-back-button,
-
   .blocked-users-back-button,
 
+  .admin-back-button,
   .admin-notices-back-button,
   .admin-inquiries-back-button,
   .admin-inquiry-detail-back-button {
