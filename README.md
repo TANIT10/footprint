@@ -1,16 +1,57 @@
-# React + Vite
+# 발자국 (Footprint)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> 실종 반려동물과 목격 정보를 연결하는 커뮤니티 기반 서비스
 
-Currently, two official plugins are available:
+발자국은 실종 게시글과 목격 게시글을 한곳에 모으고, 이미지 유사도 분석을 통해 서로 관련될 가능성이 있는 정보를 빠르게 확인할 수 있도록 만든 프로젝트입니다. AI 매칭만 구현한 것이 아니라 게시글·댓글·알림·프로필을 포함한 커뮤니티 사용 흐름 전반을 설계하고 기능을 확장했습니다.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 주요 기능
 
-## React Compiler
+- 실종·목격·귀가 완료 상태별 게시글 조회
+- 게시글 작성, 상세 조회, 수정 및 삭제
+- 이미지 첨부와 게시글 상태 관리
+- 댓글 작성·삭제 및 작성자 알림
+- 읽지 않은 알림 표시와 전체 읽음 처리
+- 사용자 프로필 조회와 프로필 이미지 변경
+- 내가 작성한 게시글 관리
+- 공지사항, 문의, 회원 탈퇴 흐름
+- AI 이미지 유사도 분석 결과 알림 연계
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 담당 범위
 
-## Expanding the ESLint configuration
+**Full-stack / 서비스 전반 구현**
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- 커뮤니티 화면과 핵심 사용자 흐름 설계 및 구현
+- 게시글 CRUD, 댓글, 알림, 프로필, 마이페이지 기능 개발
+- 기존 화면과 기능의 오류 수정 및 사용성 개선
+- 필요한 기능을 추가하고 화면 간 상태 및 데이터 흐름 정리
+- 실종·목격 게시글을 연결하는 AI 매칭 기능 설계 및 연동
+- 별도 FastAPI 기반 이미지 유사도 분석 서버 구현
+
+## 기술 스택
+
+- Frontend: React 19, Vite, JavaScript, CSS
+- UI: Lucide React
+- AI Service: FastAPI, DINOv2
+- Storage: 현재 프론트엔드 프로토타입은 LocalStorage 기반
+
+## 저장소 구성
+
+- 이 저장소: 발자국 커뮤니티 서비스 UI 및 사용자 기능
+- [AI 매칭 서버](https://github.com/TANIT10/footprint-match-ai): 이미지 임베딩과 유사도 분석 API
+
+## 실행 방법
+
+```bash
+npm install
+npm run dev
+```
+
+프로덕션 빌드:
+
+```bash
+npm run build
+```
+
+---
+
+이 프로젝트는 단순한 AI 데모가 아니라, 실종 반려동물 정보를 실제 사용자가 등록하고 소통하며 연결할 수 있도록 커뮤니티 기능과 AI 분석 흐름을 함께 구현한 서비스입니다.
